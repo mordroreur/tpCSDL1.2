@@ -1,5 +1,5 @@
 CC=gcc
-LDFLAG=$(shell sdl-config --cflags --libs) -lpthread -D_REENTRANT
+LDFLAG=$(shell sdl-config --cflags --libs) -lpthread -D_REENTRANT -lSDL_ttf -lSDL_image -lSDL_gfx
 CFLAG=-Wall $(shell sdl-config --cflags --libs) 
 EXEC=res
 SRC=$(wildcard *.c)
@@ -24,5 +24,5 @@ mrproper: clean
 
 
 clangd: clean
-	bear make
+	bear -- make
 

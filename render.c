@@ -1,4 +1,5 @@
 #include "render.h"
+#include "RenderUtilities.h"
 
 
 
@@ -21,6 +22,7 @@ extern SDL_Event event; /* Les events que l'on récupèrera via SDL. */
 
 extern int DEBUG; /* 1 : affiche le debug */
 
+extern TTF_Font *RobotoFont; /* Font utilise pour ecrire dans le programme */
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -53,11 +55,11 @@ int BouclePrincipaleDuJeu(){
 
   
   
-  
-
-
+  /*************Initailisation de la fenetre***********/
   create_Win();
+  InitImage();
 
+  
   /************Initialisation des variables de temps**************/
   LastFrame = getTime();
   TimeCount = getTime();
@@ -79,22 +81,18 @@ int BouclePrincipaleDuJeu(){
     /* Gestion de l'affichage écran */
     if (NowTime - LastFrame > timeForNewFrame) {
 
-      SDL_Surface *rectangle = NULL;
-      rectangle = SDL_CreateRGBSurface(SDL_HWSURFACE, 1,1, 32,0,0,0,0);
-
-      SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 0,0,0));
-      SDL_FillRect(rectangle, NULL, SDL_MapRGB(rectangle->format,25,26*4,4*4));
+      SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 255,255,255));
 
 
+      DrawImage(0, 25, 25, 10, 'n', 0, 0.25, 0);      
 
-
-      /*
+      
       if(DEBUG){
 	char affichageFrameDebug[5];
 	sprintf(affichageFrameDebug, "%d", LastFpsCount);
 	DrawString(affichageFrameDebug, 0, 0, 6, 'n', 0, 0, 0);
 	sprintf(affichageFrameDebug, "%d", LastTickCount);
-	DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);}*/
+	DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);}
       
       SDL_Flip(renderer);
 
@@ -172,6 +170,11 @@ void end_sdl(char ok, char const * msg) {
   char msg_formated[255];
   int l;
 
+  if(RobotoFont != NULL){
+    TTF_CloseFont(RobotoFont);
+  }
+  freeImageMalloc();
+  
   if (!ok){
     strncpy(msg_formated, msg, 250);
     l = strlen(msg_formated);
@@ -194,16 +197,21 @@ void end_sdl(char ok, char const * msg) {
 
 
 void create_Win() {
+
+  /* Pour mettre un icon au jeu : */
+  //SDL_WM_SetIcon(IMG_Load("caisse.jpg"), NULL); // Si utilisé pas oublié #include sdl image
+
+  
   /* Initialisation de la SDL  + gestion de l'échec possible */
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
     end_sdl(0, "ERROR SDL INIT");
 
   /* Recuperation de la 'meilleur' taille de fenetre. */
-  const SDL_VideoInfo* info = SDL_GetVideoInfo();
-  TailleEcranLong = info->current_w;
-  TailleEcranHaut = info->current_h;
-  printf("Taille de l'écran\n\tw : %d\n\th : %d\n", TailleEcranLong,
-	 TailleEcranHaut);
+  //  const SDL_VideoInfo* info = SDL_GetVideoInfo();
+  //  TailleEcranLong = info->current_w;
+  //  TailleEcranHaut = info->current_h;
+  //  printf("Taille de l'écran\n\tw : %d\n\th : %d\n", TailleEcranLong,
+  //	 TailleEcranHaut);
 
   /* Creation de la fenetre de jeu. */
   if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,8,
@@ -220,18 +228,25 @@ void create_Win() {
   
 
   // écrire (lettre chiffre) dans le render, grace à la bibliothèque TTF
-  /*  if (TTF_Init() == -1)
+  if (TTF_Init() == -1)
   {
     printf("TTF_Init: %s\n", TTF_GetError());
     exit(2);
-    }*/
-
-  /* Taille de écran fournit par SDL */
-  //SDL_GetWindowSize(window, &TailleEcranLong, &TailleEcranHaut);
+  }
 
   
-  //RobotoFont = TTF_OpenFont("Res/Roboto-Black.ttf", 50);
+  /* Recuperation de la taille de la fenetre. */
+  const SDL_VideoInfo* info = SDL_GetVideoInfo();
+  TailleEcranLong = info->current_w;
+  TailleEcranHaut = info->current_h;
+
   
+  
+  RobotoFont = TTF_OpenFont("Res/Roboto-Black.ttf", 50);
+
+
+  
+
 }
 
 

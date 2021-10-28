@@ -18,6 +18,7 @@ SDL_Event event; /* Les events que l'on récupèrera via SDL. */
 
 int DEBUG = 1; /* 1 : affiche le debug*/
 
+TTF_Font *RobotoFont = NULL; /* Font utilise pour ecrire dans le programme */
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
