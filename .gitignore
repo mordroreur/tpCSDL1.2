@@ -1,3 +1,4 @@
 *.o
 res
-.clangd
+.clang*
+.cach*

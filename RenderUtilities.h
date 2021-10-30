@@ -17,6 +17,6 @@ void InitImage();
 
 void freeImageMalloc();
 
-void DrawImage(int imagenb, int x, int y, int size, char center, int nbImage, float TimebeforeNext, int flip);
+void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle);
 
 #endif /* RENDERUTILLITIES_HEADER_ */

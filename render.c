@@ -1,5 +1,7 @@
 #include "render.h"
 #include "RenderUtilities.h"
+#include <SDL/SDL_timer.h>
+#include <SDL/SDL_video.h>
 
 
 
@@ -35,10 +37,11 @@ extern TTF_Font *RobotoFont; /* Font utilise pour ecrire dans le programme */
 
 
 
-
+static int otherX;
+static int otherY;
 
 static int tickCount = 0;
-
+static int resizingTime = 0;
 
 
 int BouclePrincipaleDuJeu(){
@@ -72,7 +75,8 @@ int BouclePrincipaleDuJeu(){
     if(RetourDuThreadDesTicks){
       return 1;
     }
-    
+
+
   
   /************Début de la boucle frames**************************/
   while (EtapeActuelleDuJeu) {
@@ -80,22 +84,30 @@ int BouclePrincipaleDuJeu(){
 
     /* Gestion de l'affichage écran */
     if (NowTime - LastFrame > timeForNewFrame) {
+      if(resizingTime == 0){
 
-      SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 255,255,255));
-
-
-      DrawImage(0, 25, 25, 10, 'n', 0, 0.25, 0);      
-
+	
+	SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 255,255,255));
       
-      if(DEBUG){
+	for(int i = 0; i < 10; i++){
+	  DrawImage(0, 0, 10*i, 0, 10, 'n', 0, 0, 0, 0);      
+	}
+
 	char affichageFrameDebug[5];
-	sprintf(affichageFrameDebug, "%d", LastFpsCount);
-	DrawString(affichageFrameDebug, 0, 0, 6, 'n', 0, 0, 0);
-	sprintf(affichageFrameDebug, "%d", LastTickCount);
-	DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);}
+	sprintf(affichageFrameDebug, "%d", TailleEcranLong);
+	DrawString(affichageFrameDebug, 50, 50, 6, 'c', 0, 0, 0);
+	
+	if(DEBUG){
+	  char affichageFrameDebug[5];
+	  sprintf(affichageFrameDebug, "%d", LastFpsCount);
+	  DrawString(affichageFrameDebug, 0, 0, 6, 'n', 0, 0, 0);
+	  sprintf(affichageFrameDebug, "%d", LastTickCount);
+	  DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);}
       
-      SDL_Flip(renderer);
+	SDL_Flip(renderer);
 
+      
+      }
       LastFrame += timeForNewFrame;
       fpsCount++;
     }else{
@@ -108,41 +120,6 @@ int BouclePrincipaleDuJeu(){
       SDL_Delay(SleepForCPU);
     }
     
-
-    /* Gestion des imputs clavier */
-    while (SDL_PollEvent(&event))
-    {
-      switch (event.type)
-      {
-      case SDL_KEYDOWN:
-        break; // KeyDown(&event.key);break;
-      case SDL_KEYUP:
-        keyUp(&event.key);
-        break;
-	/*      case SDL_MOUSEWHEEL:
-        // if (event.wheel.y > 0) {
-	// } else if (event.wheel.y < 0) {
-	// }
-        break;*/
-      case SDL_MOUSEBUTTONDOWN:
-        // if (event.button.button == SDL_BUTTON_LEFT) {
-        // } else if (event.button.button == SDL_BUTTON_RIGHT) {
-	// }
-        break;
-      case SDL_QUIT:
-        EtapeActuelleDuJeu = 0;
-        break;
-	/*      case SDL_WINDOWEVENT:
-	if(event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
-	  TailleEcranHaut = event.window.data2;
-	  TailleEcranLong = event.window.data1;
-	}
-	break;*/
-      default:
-        break;
-      }
-    }
-
 
     /* Gestion du debugage */
     if (NowTime > TimeCount)
@@ -207,15 +184,15 @@ void create_Win() {
     end_sdl(0, "ERROR SDL INIT");
 
   /* Recuperation de la 'meilleur' taille de fenetre. */
-  //  const SDL_VideoInfo* info = SDL_GetVideoInfo();
-  //  TailleEcranLong = info->current_w;
-  //  TailleEcranHaut = info->current_h;
+  const SDL_VideoInfo* info = SDL_GetVideoInfo();
+  otherX = info->current_w;
+  otherY = info->current_h;
   //  printf("Taille de l'écran\n\tw : %d\n\th : %d\n", TailleEcranLong,
   //	 TailleEcranHaut);
 
   /* Creation de la fenetre de jeu. */
-  if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,8,
-				  SDL_HWSURFACE | SDL_RESIZABLE /*| SDL_DOUBLEBUF */))==NULL){
+  if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
+				  SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF ))==NULL){
     end_sdl(0, "ERROR SDL VIDEOMODE");
   }
   
@@ -236,7 +213,7 @@ void create_Win() {
 
   
   /* Recuperation de la taille de la fenetre. */
-  const SDL_VideoInfo* info = SDL_GetVideoInfo();
+  info = SDL_GetVideoInfo();
   TailleEcranLong = info->current_w;
   TailleEcranHaut = info->current_h;
 
@@ -254,6 +231,20 @@ void keyUp(SDL_KeyboardEvent *key){
   //printf("%c\n", key->keysym.sym);
   switch(key->keysym.sym){
   case SDLK_ESCAPE:EtapeActuelleDuJeu = 0;break;
+  case SDLK_F11: resizingTime = SDL_GetTicks();
+    SDL_Delay(10);
+    int x = otherX;
+    int y = otherY;
+    otherX = TailleEcranLong;
+    otherY = TailleEcranHaut;
+    if(renderer->flags == 16){
+      renderer = SDL_SetVideoMode(x,y,32, SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF );
+    }else{
+      renderer = SDL_SetVideoMode(x,y,32, SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF );
+    }
+    TailleEcranLong = x;
+    TailleEcranHaut = y;
+    break;
   default:break;
   }
 }
@@ -279,6 +270,49 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
     /* Gestion des verif gameplay */
     if (NowTime - LastTick > timeForNewTick) {
       
+
+      if(resizingTime != 0){
+	if(resizingTime+500 < SDL_GetTicks()){
+	  resizingTime = 0;
+	}
+      }
+
+      
+      /* Gestion des imputs clavier */
+      while (SDL_PollEvent(&event))
+	{
+	  switch (event.type)
+	    {
+	    case SDL_KEYDOWN:
+	      break; // KeyDown(&event.key);break;
+	    case SDL_KEYUP:
+	      keyUp(&event.key);
+	      break;
+	      /*      case SDL_MOUSEWHEEL:
+	      // if (event.wheel.y > 0) {
+	      // } else if (event.wheel.y < 0) {
+	      // }
+	      break;*/
+	    case SDL_MOUSEBUTTONDOWN:
+	      // if (event.button.button == SDL_BUTTON_LEFT) {
+	      // } else if (event.button.button == SDL_BUTTON_RIGHT) {
+	      // }
+	      break;
+	    case SDL_QUIT:
+	      EtapeActuelleDuJeu = 0;
+	      break;
+	    case SDL_VIDEORESIZE:
+	      resizingTime = SDL_GetTicks();
+	      SDL_Delay(100);
+	      TailleEcranHaut = event.resize.h;
+	      TailleEcranLong = event.resize.w;
+	      renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
+					  SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF );
+	      break;
+	    default:
+	      break;
+	    }
+	}
 
 
       

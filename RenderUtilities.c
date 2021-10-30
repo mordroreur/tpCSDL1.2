@@ -3,6 +3,7 @@
 #include "SDL_rotozoom.h"
 #include "SDL_timer.h"
 #include "SDL_video.h"
+#include <stdio.h>
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -68,7 +69,7 @@ void DrawString(char *s, int x, int y, int size, char center, int R, int G, int 
     Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
     break;
   case 'e':
-    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size * n); 
+    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size * (n+1)); 
     Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
     Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
     Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
@@ -121,13 +122,13 @@ void InitImage(){
   TotalImagenb = (int *)malloc(sizeof(int) * nbImage);
 
   
-  fileImage[0] = IMG_Load("Res/nyanCat.jpg");PixelXnb[0] = 16; PixelYnb[0] = 16;XImagenb[0] = 4; YImagenb[0] = 1; TotalImagenb[0] = 1;
+  fileImage[0] = IMG_Load("Res/nyanCat.jpg");PixelXnb[0] = 301; PixelYnb[0] = 167;XImagenb[0] = 1; YImagenb[0] = 1; TotalImagenb[0] = 1;
 
   
 }
 
 
-void DrawImage(int imagenb, int x, int y, int size, char center, int etatPremier, float TimebeforeNext, int flip){
+void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle){
 
 
   SDL_Rect Image_rect;
@@ -141,20 +142,20 @@ void DrawImage(int imagenb, int x, int y, int size, char center, int etatPremier
     Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
     break;
   case 'e':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size); 
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * sizeX); 
     Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
     break;
   case 's':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * size);
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * sizeX); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * sizeY);
     break;
   case 'w':
     Image_rect.x = (int)((float)(TailleEcranLong)/100 * x);
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * size);
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * sizeY);
     break;
   case 'c':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - ((float)(TailleEcranLong)/400 * size)/2); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - ((float)(TailleEcranHaut)/100 * size)/2);
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - ((float)(TailleEcranLong)/400 * sizeX)/2); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - ((float)(TailleEcranHaut)/100 * sizeY)/2);
     break;
   default:
     Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
@@ -168,21 +169,48 @@ void DrawImage(int imagenb, int x, int y, int size, char center, int etatPremier
     imageVoulu = (etatPremier + ((int)((SDL_GetTicks()/((float)1000*TimebeforeNext)))%TotalImagenb[imagenb]))%TotalImagenb[imagenb];
   }
 
-  size = (TailleEcranHaut/100 * size)/PixelYnb[imagenb];
-  printf("%d\n", size);
+  float resx;
+  float resy;
+  
+  if(sizeY == 0 && sizeX != 0){
+    resx = ((float)TailleEcranLong * (float)sizeX/100)/PixelXnb[imagenb];
+    resy = resx;
+  }else if(sizeX == 0 && sizeY != 0){
+    resy = ((float)TailleEcranHaut * (float)sizeY/100)/PixelYnb[imagenb];
+    resx = resy;
+  }else if(sizeX != 0 && sizeY != 0){
+    resx = ((float)TailleEcranLong * (float)sizeX/100)/PixelXnb[imagenb];
+    resy = ((float)TailleEcranHaut * (float)sizeY/100)/PixelYnb[imagenb];
+  }else{
+    resx = 1;
+    resy = 1;
+  }
+
   
   if(TotalImagenb[imagenb] != 1){
     int col = imageVoulu / XImagenb[imagenb];
     int line = imageVoulu % XImagenb[imagenb];
-    keepImage.x = line*PixelXnb[imagenb]*size;
-    keepImage.y = col*PixelYnb[imagenb]*size;
-    keepImage.w = PixelXnb[imagenb]*size;
-    keepImage.h = PixelYnb[imagenb]*size;
-    SDL_BlitSurface(rotozoomSurface(fileImage[imagenb], 1.0, size, 0), &keepImage, renderer, &Image_rect);
+    keepImage.x = line*PixelXnb[imagenb]*resx;
+    keepImage.y = col*PixelYnb[imagenb]*resy;
+    keepImage.w = PixelXnb[imagenb]*resx;
+    keepImage.h = PixelYnb[imagenb]*resy;
   }else {
-    SDL_BlitSurface(rotozoomSurface(fileImage[imagenb], 0.0, size, 0), NULL, renderer, &Image_rect);
+    keepImage.x = 0;
+    keepImage.y = 0;
+    keepImage.w = (float)PixelXnb[imagenb]*resx;
+    keepImage.h = (float)PixelYnb[imagenb]*resy;
   }
 
+  if(flip == 1){
+    resx = -resx;
+  }else if(flip == 2){
+    resy = -resy;
+  }else if(flip == 3){
+    resy = -resy;
+    resx = -resx;
+  }
+
+  SDL_BlitSurface(rotozoomSurfaceXY(fileImage[imagenb], 0.0, resx, resy, 0), &keepImage, renderer, &Image_rect);
 
   
   
@@ -192,3 +220,4 @@ void DrawImage(int imagenb, int x, int y, int size, char center, int etatPremier
   
 }
 
+////////SOKOBAN
