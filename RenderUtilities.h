@@ -13,7 +13,7 @@ void DrawString(char *s, int x, int y, int size, char center, int R, int G, int 
 
 long int getTime();
 
-void InitImage();
+void *InitImage(void *CeciEstUneVariableVide);
 
 void freeImageMalloc();
 

@@ -1,7 +1,4 @@
 #include "render.h"
-#include "RenderUtilities.h"
-#include <SDL/SDL_timer.h>
-#include <SDL/SDL_video.h>
 
 
 
@@ -60,7 +57,6 @@ int BouclePrincipaleDuJeu(){
   
   /*************Initailisation de la fenetre***********/
   create_Win();
-  InitImage();
 
   
   /************Initialisation des variables de temps**************/
@@ -70,13 +66,19 @@ int BouclePrincipaleDuJeu(){
 
 
   /************Début de la boucle des ticks***********************/
-    pthread_t threadBoucleDesTicks;
-    int RetourDuThreadDesTicks = pthread_create(&threadBoucleDesTicks, NULL, BouclePrincipaleDesTicks,  NULL);
-    if(RetourDuThreadDesTicks){
-      return 1;
-    }
+  pthread_t threadBoucleDesTicks;
+  int RetourDuThreadDesTicks = pthread_create(&threadBoucleDesTicks, NULL, BouclePrincipaleDesTicks,  NULL);
+  if(RetourDuThreadDesTicks){
+    return 1;
+  }
 
 
+  /********************* Charegement des images en arrière plan********/
+  pthread_t threadLoadImages;
+  int RetourDuThreadDesImages = pthread_create(&threadLoadImages, NULL, InitImage,  NULL);
+  if(RetourDuThreadDesImages){
+    return 1;
+  }
   
   /************Début de la boucle frames**************************/
   while (EtapeActuelleDuJeu) {
@@ -87,15 +89,11 @@ int BouclePrincipaleDuJeu(){
       if(resizingTime == 0){
 
 	
-	SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 255,255,255));
-      
-	for(int i = 0; i < 10; i++){
-	  DrawImage(0, 0, 10*i, 0, 10, 'n', 0, 0, 0, 0);      
+	switch (EtapeActuelleDuJeu) {
+	case 1: LoadingScreen();break;
+	case 2: DrawMenu();break;
+	default: end_sdl(1, "Etape du jeu inconnue...");break;
 	}
-
-	char affichageFrameDebug[5];
-	sprintf(affichageFrameDebug, "%d", TailleEcranLong);
-	DrawString(affichageFrameDebug, 50, 50, 6, 'c', 0, 0, 0);
 	
 	if(DEBUG){
 	  char affichageFrameDebug[5];
@@ -123,14 +121,14 @@ int BouclePrincipaleDuJeu(){
 
     /* Gestion du debugage */
     if (NowTime > TimeCount)
-    {
-      TimeCount += 1000000;
-      LastFpsCount = fpsCount;
-      LastTickCount = tickCount;
-      //printf("%d images cette seconde et %d ticks\n", fpsCount, tickCount);
-      fpsCount = 0;
-      tickCount = 0;
-    }
+      {
+	TimeCount += 1000000;
+	LastFpsCount = fpsCount;
+	LastTickCount = tickCount;
+	//printf("%d images cette seconde et %d ticks\n", fpsCount, tickCount);
+	fpsCount = 0;
+	tickCount = 0;
+      }
   }
 
   
@@ -211,10 +209,10 @@ void create_Win() {
 
   // écrire (lettre chiffre) dans le render, grace à la bibliothèque TTF
   if (TTF_Init() == -1)
-  {
-    printf("TTF_Init: %s\n", TTF_GetError());
-    exit(2);
-  }
+    {
+      printf("TTF_Init: %s\n", TTF_GetError());
+      exit(2);
+    }
 
   
   /* Recuperation de la taille de la fenetre. */
@@ -319,7 +317,6 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	    case SDL_VIDEORESIZE:
 	      resizingTime = SDL_GetTicks();
 	      SDL_Delay(100);
-	      printf("on resize\n");
 	      TailleEcranHaut = event.resize.h;
 	      TailleEcranLong = event.resize.w;
 	      break;

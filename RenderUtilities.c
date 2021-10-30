@@ -112,7 +112,7 @@ void freeImageMalloc(){
   free(fileImage);
 }
 
-void InitImage(){
+void *InitImage(void *CeciEstUneVariableVide){
   int nbImage = 1;
   fileImage = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * nbImage);
   PixelXnb = (int *)malloc(sizeof(int) * nbImage);
@@ -124,7 +124,9 @@ void InitImage(){
   
   fileImage[0] = IMG_Load("Res/nyanCat.jpg");PixelXnb[0] = 301; PixelYnb[0] = 167;XImagenb[0] = 1; YImagenb[0] = 1; TotalImagenb[0] = 1;
 
-  
+
+  EtapeActuelleDuJeu = 1;
+  return NULL;
 }
 
 
