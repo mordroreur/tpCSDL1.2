@@ -304,6 +304,7 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	    case SDL_VIDEORESIZE:
 	      resizingTime = SDL_GetTicks();
 	      SDL_Delay(100);
+	      printf("on resize\n");
 	      TailleEcranHaut = event.resize.h;
 	      TailleEcranLong = event.resize.w;
 	      renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
