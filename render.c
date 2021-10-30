@@ -187,6 +187,11 @@ void create_Win() {
   const SDL_VideoInfo* info = SDL_GetVideoInfo();
   otherX = info->current_w;
   otherY = info->current_h;
+  if(otherX > otherY*2){
+    otherX = otherX/2;
+  }
+
+  
   //  printf("Taille de l'écran\n\tw : %d\n\th : %d\n", TailleEcranLong,
   //	 TailleEcranHaut);
 
@@ -232,14 +237,16 @@ void keyUp(SDL_KeyboardEvent *key){
   switch(key->keysym.sym){
   case SDLK_ESCAPE:EtapeActuelleDuJeu = 0;break;
   case SDLK_F11: resizingTime = SDL_GetTicks();
-    SDL_Delay(10);
+    SDL_Delay(100);
     int x = otherX;
     int y = otherY;
     otherX = TailleEcranLong;
     otherY = TailleEcranHaut;
     if(renderer->flags == 16){
+      SDL_FreeSurface(renderer);
       renderer = SDL_SetVideoMode(x,y,32, SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF );
     }else{
+      SDL_FreeSurface(renderer);
       renderer = SDL_SetVideoMode(x,y,32, SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF );
     }
     TailleEcranLong = x;
@@ -273,9 +280,17 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 
       if(resizingTime != 0){
 	if(resizingTime+500 < SDL_GetTicks()){
+	  if(otherY > TailleEcranHaut){
+	    SDL_FreeSurface(renderer);
+	    if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
+					    SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF )) == NULL){
+	      end_sdl(0, "ERROR SDL VIDEOMODE");
+	    }
+	  }
 	  resizingTime = 0;
 	}
       }
+      //printf("%d %d\n", renderer->w, renderer->h);
 
       
       /* Gestion des imputs clavier */
@@ -307,8 +322,6 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	      printf("on resize\n");
 	      TailleEcranHaut = event.resize.h;
 	      TailleEcranLong = event.resize.w;
-	      renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
-					  SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF );
 	      break;
 	    default:
 	      break;
