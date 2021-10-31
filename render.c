@@ -92,7 +92,9 @@ int BouclePrincipaleDuJeu(){
 	switch (EtapeActuelleDuJeu) {
 	case 1: LoadingScreen();break;
 	case 2: DrawMenu();break;
-	default: end_sdl(1, "Etape du jeu inconnue...");break;
+	case 3: DrawMenu();DrawExit();break;
+	case 41: DrawCreaLVL();break;
+	default: EtapeActuelleDuJeu = 0;break;
 	}
 	
 	if(DEBUG){
@@ -233,7 +235,7 @@ void create_Win() {
 void keyUp(SDL_KeyboardEvent *key){
   //printf("%c\n", key->keysym.sym);
   switch(key->keysym.sym){
-  case SDLK_ESCAPE:EtapeActuelleDuJeu = 0;break;
+  case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3){EtapeActuelleDuJeu--;}break;
   case SDLK_F11: resizingTime = SDL_GetTicks();
     SDL_Delay(100);
     int x = otherX;
@@ -264,6 +266,11 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
   long int LastTick;
   long int timeForNewTick = 1000000 / TICK_TO_GET;
   long int NowTime;
+
+  int mousX;
+  int mousY;
+
+  
   NowTime = getTime();
   LastTick = getTime();
 
@@ -307,12 +314,28 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	      // }
 	      break;*/
 	    case SDL_MOUSEBUTTONDOWN:
-	      // if (event.button.button == SDL_BUTTON_LEFT) {
-	      // } else if (event.button.button == SDL_BUTTON_RIGHT) {
-	      // }
+	      SDL_GetMouseState(&mousX, &mousY);
+	      if (event.button.button == SDL_BUTTON_LEFT) {
+		if(EtapeActuelleDuJeu == 2){
+		  if((mousX < TailleEcranLong/100 *75 && mousX > TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*25 + TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *25)){
+		    EtapeActuelleDuJeu = 41;
+		  }
+		}else if(EtapeActuelleDuJeu == 3){
+		    if((mousX < TailleEcranLong/100 *70.5 && mousX > TailleEcranLong/100 * 54.9) && (mousY < (float)TailleEcranHaut/100*54.1 + TailleEcranLong/600*44.8 && mousY > (float)TailleEcranHaut/100 *54.1)){
+		      EtapeActuelleDuJeu = 0;
+		    }else if((mousX < TailleEcranLong/100 *45.5 && mousX > TailleEcranLong/100 * 29.6) && (mousY < (float)TailleEcranHaut/100*54.1 + TailleEcranLong/400*44.8 && mousY > (float)TailleEcranHaut/100 *54.1)){
+		      EtapeActuelleDuJeu--;
+		    }
+		}
+	      } else if (event.button.button == SDL_BUTTON_RIGHT) {
+	      }
 	      break;
 	    case SDL_QUIT:
-	      EtapeActuelleDuJeu = 0;
+	      if(EtapeActuelleDuJeu == 2){
+		EtapeActuelleDuJeu++;
+	      }else {
+		EtapeActuelleDuJeu = 0;
+	      }
 	      break;
 	    case SDL_VIDEORESIZE:
 	      resizingTime = SDL_GetTicks();

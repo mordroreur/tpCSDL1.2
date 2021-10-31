@@ -20,9 +20,7 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
-	rm -rf compile_commands.json
 
 
-clangd: clean
-	bear -- make
+
 

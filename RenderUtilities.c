@@ -3,6 +3,7 @@
 #include "SDL_rotozoom.h"
 #include "SDL_timer.h"
 #include "SDL_video.h"
+#include <SDL/SDL_video.h>
 #include <stdio.h>
 
 /////////////////////////////////////////////////////////////
@@ -52,55 +53,40 @@ long int getTime(){
 
 
 void DrawString(char *s, int x, int y, int size, char center, int R, int G, int B){
-  int n = 0;
-  while(s[n] != '\0'){
-    n++;
-  }
-  
-  
   SDL_Color Color = {R, G, B};
-  SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, s, Color); 
+  SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, s, Color);
   SDL_Rect Message_rect;
+  float res = ((float)TailleEcranHaut * (float)size/100)/surfaceMessage->h;
   switch (center) {
   case 'n':
     Message_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
     Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
     break;
   case 'e':
-    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size * (n+1)); 
+    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - surfaceMessage->w*res); 
     Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
     break;
   case 's':
-    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * size * n); 
-    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * size);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
+    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - surfaceMessage->w*res); 
+    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - surfaceMessage->h*res);
     break;
   case 'w':
     Message_rect.x = (int)((float)(TailleEcranLong)/100 * x);
-    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * size);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
+    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - surfaceMessage->h*res);
     break;
   case 'c':
-    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - ((float)(TailleEcranLong)/400 * size * n)/2); 
-    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - ((float)(TailleEcranHaut)/100 * size)/2);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
+    Message_rect.x = (int)((float)(TailleEcranLong)/100 * x - surfaceMessage->w*(res/2)); 
+    Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y - surfaceMessage->h*(res/2));
     break;
   default:
     Message_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
     Message_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    Message_rect.w = (int)((float)(TailleEcranLong)/400 * size * n);
-    Message_rect.h = (int)((float)(TailleEcranHaut)/100 * size);
     break;
   }
 
-  SDL_BlitSurface(surfaceMessage, NULL, renderer, &Message_rect);
+  SDL_Surface *tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+  SDL_BlitSurface(tmp, NULL, renderer, &Message_rect);
+  SDL_FreeSurface(tmp);
   SDL_FreeSurface(surfaceMessage);
 
 
@@ -113,7 +99,7 @@ void freeImageMalloc(){
 }
 
 void *InitImage(void *CeciEstUneVariableVide){
-  int nbImage = 1;
+  int nbImage = 4;
   fileImage = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * nbImage);
   PixelXnb = (int *)malloc(sizeof(int) * nbImage);
   PixelYnb = (int *)malloc(sizeof(int) * nbImage);
@@ -122,10 +108,13 @@ void *InitImage(void *CeciEstUneVariableVide){
   TotalImagenb = (int *)malloc(sizeof(int) * nbImage);
 
   
-  fileImage[0] = IMG_Load("Res/nyanCat.jpg");PixelXnb[0] = 301; PixelYnb[0] = 167;XImagenb[0] = 1; YImagenb[0] = 1; TotalImagenb[0] = 1;
+  fileImage[0] = IMG_Load("Res/Image/Menu/Play.png");PixelXnb[0] = 64; PixelYnb[0] = 16;XImagenb[0] = 1; YImagenb[0] = 4; TotalImagenb[0] = 4;
+  fileImage[1] = IMG_Load("Res/Image/Menu/quitter.png");PixelXnb[1] = 64; PixelYnb[1] = 32;XImagenb[1] = 1; YImagenb[1] = 1; TotalImagenb[1] = 1;
+  fileImage[2] = IMG_Load("Res/Image/Menu/quitterNo.png");PixelXnb[2] = 64; PixelYnb[2] = 32;XImagenb[2] = 1; YImagenb[2] = 1; TotalImagenb[2] = 1;
+  fileImage[3] = IMG_Load("Res/Image/Menu/quitterYes.png");PixelXnb[3] = 64; PixelYnb[3] = 32;XImagenb[3] = 1; YImagenb[3] = 1; TotalImagenb[3] = 1;
 
 
-  EtapeActuelleDuJeu = 1;
+  EtapeActuelleDuJeu = 2;
   return NULL;
 }
 
@@ -136,40 +125,6 @@ void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int
   SDL_Rect Image_rect;
   SDL_Rect keepImage;
   int imageVoulu = 0;
-
-  
-  switch (center) {
-  case 'n':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    break;
-  case 'e':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * sizeX); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    break;
-  case 's':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(TailleEcranLong)/400 * sizeX); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * sizeY);
-    break;
-  case 'w':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x);
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(TailleEcranHaut)/100 * sizeY);
-    break;
-  case 'c':
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - ((float)(TailleEcranLong)/400 * sizeX)/2); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - ((float)(TailleEcranHaut)/100 * sizeY)/2);
-    break;
-  default:
-    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
-    break;
-  }
-
-  if(TimebeforeNext == 0){
-    imageVoulu = etatPremier;
-  }else{
-    imageVoulu = (etatPremier + ((int)((SDL_GetTicks()/((float)1000*TimebeforeNext)))%TotalImagenb[imagenb]))%TotalImagenb[imagenb];
-  }
 
   float resx;
   float resy;
@@ -187,6 +142,42 @@ void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int
     resx = 1;
     resy = 1;
   }
+
+  
+  switch (center) {
+  case 'n':
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
+    break;
+  case 'e':
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(PixelXnb[imagenb]) * resx); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
+    break;
+  case 's':
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(PixelXnb[imagenb]) * resx); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(PixelYnb[imagenb]) * resy);
+    break;
+  case 'w':
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x);
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(PixelYnb[imagenb]) * resy);
+    break;
+  case 'c':
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(PixelXnb[imagenb]) * resx/2); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - (float)(PixelYnb[imagenb]) * resy/2);
+    break;
+  default:
+    Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
+    break;
+  }
+
+  if(TimebeforeNext == 0){
+    imageVoulu = etatPremier;
+  }else{
+    imageVoulu = (etatPremier + ((int)((SDL_GetTicks()/((float)1000*TimebeforeNext)))%TotalImagenb[imagenb]))%TotalImagenb[imagenb];
+  }
+
+  
 
   
   if(TotalImagenb[imagenb] != 1){
@@ -211,8 +202,9 @@ void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int
     resy = -resy;
     resx = -resx;
   }
-
-  SDL_BlitSurface(rotozoomSurfaceXY(fileImage[imagenb], 0.0, resx, resy, 0), &keepImage, renderer, &Image_rect);
+  SDL_Surface *tmp = rotozoomSurfaceXY(fileImage[imagenb], 0.0, resx, resy, 0);
+  SDL_BlitSurface(tmp, &keepImage, renderer, &Image_rect);
+  SDL_FreeSurface(tmp);
 
   
   

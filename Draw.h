@@ -11,6 +11,8 @@ void LoadingScreen();
 
 void DrawMenu();
 
+void DrawExit();
 
+void DrawCreaLVL();
 
 #endif /* DRAW_HEADER_ */
