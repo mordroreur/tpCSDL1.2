@@ -2,6 +2,7 @@
 #define DRAW_HEADER_
 
 #include "SDL.h"
+#include "Jeu.h"
 #include "RenderUtilities.h"
 #include <SDL/SDL_ttf.h>
 #include <time.h>
@@ -15,4 +16,11 @@ void DrawExit();
 
 void DrawCreaLVL();
 
+void Draw1player();
+
+int getimage(cellule l);
+
+int getimageEnti(entite e);
+
+	       
 #endif /* DRAW_HEADER_ */

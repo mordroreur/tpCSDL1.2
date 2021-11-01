@@ -3,6 +3,7 @@
 
 #include "SDL.h"
 #include "RenderUtilities.h"
+#include "Jeu.h"
 #include "Draw.h"
 #include <SDL/SDL_ttf.h>
 #include <time.h>

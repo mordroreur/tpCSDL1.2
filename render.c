@@ -1,7 +1,6 @@
 #include "render.h"
 
 
-
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////      Recuperation des variables globale     ///////
@@ -23,14 +22,15 @@ extern int DEBUG; /* 1 : affiche le debug */
 
 extern TTF_Font *RobotoFont; /* Font utilise pour ecrire dans le programme */
 
+extern int unlockLVL; /* Dernier niveau debloque */
+
+extern int fullscreen; /* Si le niveau est en plein ecran au demarage */
+
+extern level Actulvl; /* Niveau actuelle sur lequel on joue */
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
-
-
-
-
-//TTF_Font *RobotoFont;
 
 
 
@@ -93,7 +93,8 @@ int BouclePrincipaleDuJeu(){
 	case 1: LoadingScreen();break;
 	case 2: DrawMenu();break;
 	case 3: DrawMenu();DrawExit();break;
-	case 41: DrawCreaLVL();break;
+	case 41: LoadingScreen();break;
+	case 42: Draw1player();break;
 	default: EtapeActuelleDuJeu = 0;break;
 	}
 	
@@ -190,17 +191,28 @@ void create_Win() {
   if(otherX > otherY*2){
     otherX = otherX/2;
   }
+  
 
   
   //  printf("Taille de l'écran\n\tw : %d\n\th : %d\n", TailleEcranLong,
   //	 TailleEcranHaut);
 
   /* Creation de la fenetre de jeu. */
-  if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
-				  SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF ))==NULL){
-    end_sdl(0, "ERROR SDL VIDEOMODE");
+  if(fullscreen == 0){
+    if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
+				    SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF ))==NULL){
+      end_sdl(0, "ERROR SDL VIDEOMODE");
+    }
+  }else if(fullscreen == 1){
+    if((renderer = SDL_SetVideoMode(otherX,otherY,32,
+				    SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF ))==NULL){
+      end_sdl(0, "ERROR SDL VIDEOMODE");
+    }
+    otherX = TailleEcranLong;
+    otherY = TailleEcranHaut;
+    TailleEcranLong = renderer->w;
+    TailleEcranHaut = renderer->h;
   }
-  
   /* Mise d'un titre a la fenetre. */
   SDL_WM_SetCaption("THIS IS A F****** WINDOWS",NULL) ;
 
@@ -224,7 +236,7 @@ void create_Win() {
 
   
   
-  RobotoFont = TTF_OpenFont("Res/Roboto-Black.ttf", 50);
+  RobotoFont = TTF_OpenFont("Res/Font/Roboto-Black.ttf", 50);
 
 
   
@@ -235,7 +247,7 @@ void create_Win() {
 void keyUp(SDL_KeyboardEvent *key){
   //printf("%c\n", key->keysym.sym);
   switch(key->keysym.sym){
-  case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3){EtapeActuelleDuJeu--;}break;
+  case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3){EtapeActuelleDuJeu--;}else{EtapeActuelleDuJeu = 0;}break;
   case SDLK_F11: resizingTime = SDL_GetTicks();
     SDL_Delay(100);
     int x = otherX;
@@ -285,13 +297,21 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 
       if(resizingTime != 0){
 	if(resizingTime+500 < SDL_GetTicks()){
+	  FILE *Save = fopen("Res/Sauvegarde", "r+");
+	  getc(Save); getc(Save);
 	  if(otherY > TailleEcranHaut){
+	    fprintf(Save, "n\n%d\n%d\n", TailleEcranLong, TailleEcranHaut);
+	    fflush(Save);
 	    SDL_FreeSurface(renderer);
 	    if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
 					    SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF )) == NULL){
 	      end_sdl(0, "ERROR SDL VIDEOMODE");
 	    }
+	  }else{
+	    fprintf(Save, "f\n%d\n%d\n", otherX, otherY);
+	    fflush(Save);
 	  }
+	  fclose(Save);
 	  resizingTime = 0;
 	}
       }
@@ -317,13 +337,21 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	      SDL_GetMouseState(&mousX, &mousY);
 	      if (event.button.button == SDL_BUTTON_LEFT) {
 		if(EtapeActuelleDuJeu == 2){
-		  if((mousX < TailleEcranLong/100 *75 && mousX > TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*25 + TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *25)){
+		  if((mousX < (float)TailleEcranLong/100 *75 && mousX > (float)TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*25 + (float)TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *25)){
 		    EtapeActuelleDuJeu = 41;
+		    Actulvl = initNextLVL();
+		    EtapeActuelleDuJeu = 42;
+		    /*for(int i = 0; i < Actulvl.TerX; i++){
+		      for(int j = 0; j < Actulvl.TerY; j++){
+			printf("%d", Actulvl.ter.cellule[i][j].type);
+		      }
+		      printf("\n");
+		      }*/
 		  }
 		}else if(EtapeActuelleDuJeu == 3){
-		    if((mousX < TailleEcranLong/100 *70.5 && mousX > TailleEcranLong/100 * 54.9) && (mousY < (float)TailleEcranHaut/100*54.1 + TailleEcranLong/600*44.8 && mousY > (float)TailleEcranHaut/100 *54.1)){
+		    if((mousX < (float)TailleEcranLong/100 *75 -((float)TailleEcranLong/2)/64 *6  && mousX > (float)TailleEcranLong/100 * 25 + ((float)TailleEcranLong/2)/64 *38) && (mousY < (float)TailleEcranHaut/100*(50-100/6) + ((float)TailleEcranLong/4)/32 * 28 && mousY > (float)TailleEcranHaut/100 *(50-100/6) + ((float)TailleEcranLong/4)/32 * 19)){
 		      EtapeActuelleDuJeu = 0;
-		    }else if((mousX < TailleEcranLong/100 *45.5 && mousX > TailleEcranLong/100 * 29.6) && (mousY < (float)TailleEcranHaut/100*54.1 + TailleEcranLong/400*44.8 && mousY > (float)TailleEcranHaut/100 *54.1)){
+		    }else if((mousX < (float)TailleEcranLong/100 *75 -((float)TailleEcranLong/2)/64 *38  && mousX > (float)TailleEcranLong/100 * 25 + ((float)TailleEcranLong/2)/64 *6) && (mousY < (float)TailleEcranHaut/100*(50-100/6) + ((float)TailleEcranLong/4)/32 * 28 && mousY > (float)TailleEcranHaut/100 *(50-100/6) + ((float)TailleEcranLong/4)/32 * 19)){
 		      EtapeActuelleDuJeu--;
 		    }
 		}

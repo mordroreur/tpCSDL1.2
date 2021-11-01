@@ -17,6 +17,6 @@ void *InitImage(void *CeciEstUneVariableVide);
 
 void freeImageMalloc();
 
-void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle);
+void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle);
 
 #endif /* RENDERUTILLITIES_HEADER_ */

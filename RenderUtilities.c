@@ -99,7 +99,7 @@ void freeImageMalloc(){
 }
 
 void *InitImage(void *CeciEstUneVariableVide){
-  int nbImage = 4;
+  int nbImage = 10;
   fileImage = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * nbImage);
   PixelXnb = (int *)malloc(sizeof(int) * nbImage);
   PixelYnb = (int *)malloc(sizeof(int) * nbImage);
@@ -113,13 +113,23 @@ void *InitImage(void *CeciEstUneVariableVide){
   fileImage[2] = IMG_Load("Res/Image/Menu/quitterNo.png");PixelXnb[2] = 64; PixelYnb[2] = 32;XImagenb[2] = 1; YImagenb[2] = 1; TotalImagenb[2] = 1;
   fileImage[3] = IMG_Load("Res/Image/Menu/quitterYes.png");PixelXnb[3] = 64; PixelYnb[3] = 32;XImagenb[3] = 1; YImagenb[3] = 1; TotalImagenb[3] = 1;
 
+  fileImage[4] = IMG_Load("Res/Image/CaseJeu/Sol.png");PixelXnb[4] = 16; PixelYnb[4] = 16;XImagenb[4] = 1; YImagenb[4] = 1; TotalImagenb[4] = 1;
+  fileImage[5] = IMG_Load("Res/Image/CaseJeu/SolLock.png");PixelXnb[5] = 16; PixelYnb[5] = 16;XImagenb[5] = 1; YImagenb[5] = 1; TotalImagenb[5] = 1;
+  fileImage[6] = IMG_Load("Res/Image/CaseJeu/mur.png");PixelXnb[6] = 16; PixelYnb[6] = 16;XImagenb[6] = 1; YImagenb[6] = 1; TotalImagenb[6] = 1;
+  
+  fileImage[7] = IMG_Load("Res/Image/CaseJeu/BoiteVide.png");PixelXnb[7] = 16; PixelYnb[7] = 16;XImagenb[7] = 1; YImagenb[7] = 1; TotalImagenb[7] = 1;
+  fileImage[8] = IMG_Load("Res/Image/CaseJeu/BoiteLock.png");PixelXnb[8] = 16; PixelYnb[8] = 16;XImagenb[8] = 1; YImagenb[8] = 1; TotalImagenb[8] = 1;
+
+  fileImage[9] = IMG_Load("Res/Image/VertAvant.png");PixelXnb[9] = 16; PixelYnb[9] = 16;XImagenb[9] = 4; YImagenb[9] = 1; TotalImagenb[9] = 4;
+  
+
 
   EtapeActuelleDuJeu = 2;
   return NULL;
 }
 
 
-void DrawImage(int imagenb, int x, int y, int sizeX, int sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle){
+void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle){
 
 
   SDL_Rect Image_rect;

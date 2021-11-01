@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <SDL.h>
 #include <time.h>
-
+#include "Jeu.h"
 #include "render.h"
 
 #define FPS_TO_GET 60
