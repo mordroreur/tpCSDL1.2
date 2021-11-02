@@ -28,6 +28,7 @@ typedef struct Entite{
 
 typedef struct Cellule{
   int type;
+  int isPassable;
 }cellule;
 
 typedef struct Terrain{
@@ -45,6 +46,8 @@ typedef struct Level{
 
 void addEntite(level *lev, int type, float longu, float larg);
 level initNextLVL();
-
+void Physique1play();
+void VerifWin();
+void AvanceGauche(int actuGest);
 
 #endif /* JEU_HEADER_ */

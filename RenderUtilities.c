@@ -43,6 +43,8 @@ static int *TotalImagenb;
 
 
 
+
+
 long int getTime(){
   struct timespec tms;
   if (clock_gettime(CLOCK_REALTIME,&tms)) {

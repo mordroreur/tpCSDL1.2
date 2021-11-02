@@ -123,12 +123,12 @@ void DrawCreaLVL(){
 
 
 
-static float camx = 8;
-static float camy = 4;
+static float camx = 11;
+static float camy = 2;
 
 void Draw1player(){
-  int nbBlockY = 8;
-  int nbBlockX = 16;
+  int nbBlockY = 12;
+  int nbBlockX = 24;
   for(int i = 0; i < nbBlockX; i++){
     for(int j = 0; j < nbBlockY; j++){
       int image;
@@ -137,13 +137,13 @@ void Draw1player(){
       }else {
 	image = 4;
       }
-      DrawImage(image, 100/8*i*((float)TailleEcranHaut/TailleEcranLong), (float)100/8 * j, 0, (float)100/8, 'n', 0, 0, 0, 0);
+      DrawImage(image, 100/nbBlockY*(i-((float)camx-(int)camx))*((float)TailleEcranHaut/TailleEcranLong), (float)100/nbBlockY * (j-((float)camy-(int)camy)), 0, (float)103/nbBlockY, 'n', 0, 0, 0, 0);
     }
   }
 
   int nb = 0;
   while(nb < Actulvl.maxEnti && Actulvl.enti[nb].type != -5){
-    DrawImage(getimageEnti(Actulvl.enti[nb]), 100/8*(Actulvl.enti[nb].x-camx+nbBlockX/2)*((float)TailleEcranHaut/TailleEcranLong), (float)100/8 * (Actulvl.enti[nb].y-camy+nbBlockY/2), 0, (float)100/8, 'n', 0, 0, 0, 0);
+    DrawImage(getimageEnti(Actulvl.enti[nb]), 100/nbBlockY*((float)Actulvl.enti[nb].x-camy+nbBlockY/2)*((float)TailleEcranHaut/TailleEcranLong), (float)100/nbBlockY * ((float)Actulvl.enti[nb].y-camx+nbBlockX/2), 0, (float)100/nbBlockY, 'n', 0, 0, 0, 0);
     nb++;
   }
 

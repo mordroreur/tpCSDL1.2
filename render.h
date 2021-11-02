@@ -28,6 +28,9 @@ void end_sdl(char ok, char const *msg);
 void keyUp(SDL_KeyboardEvent *key);
 
 
+void keyDown(SDL_KeyboardEvent *key);
+
+
 void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull);
 
 

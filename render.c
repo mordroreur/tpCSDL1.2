@@ -28,6 +28,10 @@ extern int fullscreen; /* Si le niveau est en plein ecran au demarage */
 
 extern level Actulvl; /* Niveau actuelle sur lequel on joue */
 
+extern int InputVal[2][4]; /* Valeur en int des inputs pour les action joueurs */
+
+extern int GetInput[2][6]; /* Valeur de si le joueur appuie */
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -245,7 +249,6 @@ void create_Win() {
 
 
 void keyUp(SDL_KeyboardEvent *key){
-  //printf("%c\n", key->keysym.sym);
   switch(key->keysym.sym){
   case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3){EtapeActuelleDuJeu--;}else{EtapeActuelleDuJeu = 0;}break;
   case SDLK_F11: resizingTime = SDL_GetTicks();
@@ -264,10 +267,29 @@ void keyUp(SDL_KeyboardEvent *key){
     TailleEcranLong = x;
     TailleEcranHaut = y;
     break;
-  default:break;
+  default:
+    for(int i = 0;i < 2; i++){
+      for(int j = 0; j < 6; j++){
+	if(key->keysym.sym == InputVal[i][j]){
+	  GetInput[i][j] = 0;
+	}
+      }
+    }
+    break;
   }
 }
 
+
+
+void keyDown(SDL_KeyboardEvent *key){
+  for(int i = 0;i < 2; i++){
+      for(int j = 0; j < 6; j++){
+	if(key->keysym.sym == InputVal[i][j]){
+	  GetInput[i][j] = 1;
+	}
+      }
+    }
+}
 
 
 
@@ -324,7 +346,8 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	  switch (event.type)
 	    {
 	    case SDL_KEYDOWN:
-	      break; // KeyDown(&event.key);break;
+	      keyDown(&event.key);break;
+	      break; 
 	    case SDL_KEYUP:
 	      keyUp(&event.key);
 	      break;
@@ -376,7 +399,9 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	    }
 	}
 
-
+      if(EtapeActuelleDuJeu == 42){
+	Physique1play();
+      }
       
       LastTick += timeForNewTick;
       tickCount++;
