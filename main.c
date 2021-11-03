@@ -16,7 +16,7 @@ SDL_Surface * renderer = NULL; /* Ecran sur lequel on dessine */
 
 SDL_Event event; /* Les events que l'on récupèrera via SDL. */
 
-int DEBUG = 1; /* 1 : affiche le debug*/
+int DEBUG = 0; /* 1 : affiche le debug*/
 
 TTF_Font *RobotoFont = NULL; /* Font utilise pour ecrire dans le programme */
 
@@ -44,14 +44,14 @@ int main()
   if(Save == NULL){
     FILE *Write;
     Write = fopen("Res/Sauvegarde", "w+");
-    fprintf(Write, "1\nn\n960\n540\n122\n100\n115\n113\n101\n102\n273\n275\n274\n276\n104\n105");
+    fprintf(Write, "1\nn\n960\n540\n122\n100\n115\n113\n13\n102\n273\n275\n274\n276\n104\n105");
     fflush(Write);
     fclose(Write);
     InputVal[0][0] = 122;
     InputVal[0][1] = 100;
     InputVal[0][2] = 115;
     InputVal[0][3] = 113;
-    InputVal[0][4] = 101;
+    InputVal[0][4] = 13;
     InputVal[0][5] = 102;
     InputVal[1][0] = 273;
     InputVal[1][1] = 275;

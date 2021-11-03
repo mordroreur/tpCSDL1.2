@@ -1,4 +1,5 @@
 #include "Jeu.h"
+#include <stdio.h>
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -24,6 +25,16 @@ extern int GetInput[2][6]; /* Valeur de si le joueur appuie */
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
+void DestroyLVL(){
+  free(Actulvl.enti);
+  Actulvl.maxEnti = 0;
+  for(int i = 0; i < Actulvl.TerX; i++){
+    free(Actulvl.ter.cellule[i]);
+  }
+  free(Actulvl.ter.cellule);
+  Actulvl.TerX = 0;
+  Actulvl.TerY = 0;
+}
 
 level initNextLVL(){
   level lev;
@@ -98,6 +109,9 @@ level initNextLVL(){
     } 
   }
   fclose(niv);
+
+  
+  
   return lev;
 }
 
@@ -118,12 +132,12 @@ void addEntite(level *lev, int type, float longu, float larg){
     lev->enti[nb].y = longu;
     lev->enti[nb].ySpeed = 0;
     lev->enti[nb].xSpeed = 0;
-    lev->enti[nb].xHitbox = 1;
-    lev->enti[nb].yHitbox = 1;
+    lev->enti[nb].xHitbox = 0.60;
+    lev->enti[nb].yHitbox = 0.75;
     lev->enti[nb].sizeX = 1;
     lev->enti[nb].sizeY = 1;
-    lev->enti[nb].xHitboxOffset = 0;
-    lev->enti[nb].yHitboxOffset = 0;
+    lev->enti[nb].xHitboxOffset = 0.1875;
+    lev->enti[nb].yHitboxOffset = 0.125;
     lev->enti[nb].type = 1;
     lev->enti[nb].direction = 0;
   } if(type == 5){
@@ -159,65 +173,59 @@ void addEntite(level *lev, int type, float longu, float larg){
 
 
 void Physique1play(){
-  int playernb = 0;
-  while(Actulvl.enti[playernb].type != 1){playernb++;}
-
-  if(GetInput[0][0] == 1){
-    Actulvl.enti[playernb].ySpeed = -1;
-  }else if(GetInput[0][2] == 1){
-    Actulvl.enti[playernb].ySpeed = 1;
-  }else{
-    Actulvl.enti[playernb].ySpeed = 0;
-  }
-
-  if(GetInput[0][3] == 1){
-    Actulvl.enti[playernb].xSpeed = -1;
-  }else if(GetInput[0][1] == 1){
-    Actulvl.enti[playernb].xSpeed = 1;
-  }else{
-    Actulvl.enti[playernb].xSpeed = 0;
-  }
-
   int actuGest = 0;
-  while(Actulvl.enti[actuGest].type != -5){
 
+  //Si touche recommence niveau n'est pas appuye
+  if(!GetInput[0][4]){
+ 
+    //pour toute les entites du tableau
+    while(Actulvl.enti[actuGest].type != -5){
 
+      //si c'est le joueur
+      if(Actulvl.enti[actuGest].type == 1){
 
-    if(Actulvl.enti[actuGest].xSpeed < 0){
-      AvanceGauche(actuGest);
-      
-
-
-
-      
-    }else if (Actulvl.enti[actuGest].xSpeed > 0){
-      if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].sizeY/10)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[playernb].sizeX)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].sizeY/10 *9)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[playernb].sizeX)].isPassable){
-	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
+	//recupreation des inputs
+	if(GetInput[0][0] == 1){
+	  if(Actulvl.enti[actuGest].ySpeed == 0){
+	    Actulvl.enti[actuGest].ySpeed = -1;
+	  }
+	}else if(GetInput[0][2] == 1){
+	  if(Actulvl.enti[actuGest].ySpeed == 0){
+	    Actulvl.enti[actuGest].ySpeed = 1;
+	  }
+	}
+	if(GetInput[0][3] == 1){
+	  if(Actulvl.enti[actuGest].xSpeed == 0){
+	    Actulvl.enti[actuGest].xSpeed = -1;
+	  }
+	}else if(GetInput[0][1] == 1){
+	  if(Actulvl.enti[actuGest].xSpeed == 0){
+	    Actulvl.enti[actuGest].xSpeed = 1;
+	  }
+	}
       }
-    }
 
 
-
-    //    printf("okay %f \n", Actulvl.enti[actuGest].ySpeed);
-
-    if(Actulvl.enti[actuGest].ySpeed < 0){
-      if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[actuGest].sizeX/10)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[actuGest].sizeY/10*9)].isPassable){
-	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+      //gestion des 4deplacement.
+      if(Actulvl.enti[actuGest].xSpeed < 0){
+	AvanceGauche(actuGest);
+      }else if (Actulvl.enti[actuGest].xSpeed > 0){
+	AvanceDroite(actuGest);
       }
-    }else if (Actulvl.enti[actuGest].ySpeed > 0){
-      if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].sizeY)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[actuGest].sizeX/10)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].sizeY)][(int)(Actulvl.enti[playernb].x + Actulvl.enti[actuGest].sizeY/10*9)].isPassable){
-	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+      if(Actulvl.enti[actuGest].ySpeed < 0){
+	AvanceHaut(actuGest);
+      }else if (Actulvl.enti[actuGest].ySpeed > 0){
+	AvanceBas(actuGest);
       }
-    }
 
     
 
-    actuGest++;
-  }
-  //  printf("%d %d\n", (int)Actulvl.enti[playernb].x, (int)Actulvl.enti[playernb].y);
-  //printf("%d\n", Actulvl.ter.cellule[(int)Actulvl.enti[playernb].y][(int)Actulvl.enti[playernb].x].type);
-
-  
+      actuGest++;
+    }
+  }else{
+    DestroyLVL();
+    Actulvl = initNextLVL();
+  }  
 }
 
 
@@ -232,9 +240,24 @@ void VerifWin(){
     nb++;
   }
   if(win){
-    EtapeActuelleDuJeu = 2;
+    EtapeActuelleDuJeu = 41;
+    DestroyLVL();
+    if(unlockLVL < 6){
+      unlockLVL++;
+      FILE *Save = fopen("Res/Sauvegarde", "r+");
+      fprintf(Save, "%d", unlockLVL);
+      fflush(Save);
+      fclose(Save);
+      Actulvl = initNextLVL();
+      EtapeActuelleDuJeu = 42;
+    }else{
+      EtapeActuelleDuJeu = 2;
+    }
   }
 }
+
+
+
 
 // La fonction fais avancer l'entite actuGest vers la gauche
 void AvanceGauche(int actuGest){
@@ -242,20 +265,28 @@ void AvanceGauche(int actuGest){
   int verif = 0;
   
   // Si il n'y a pas de mur a gauche
-  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].sizeY/10)][(int)Actulvl.enti[actuGest].x].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].sizeY/10 *9)][(int)Actulvl.enti[actuGest].x].isPassable){
+  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.001)][(int)(Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox - 0.001)][(int)(Actulvl.enti[actuGest].x +Actulvl.enti[actuGest].xHitboxOffset)].isPassable){
     //pour toute les autres entites
     while(Actulvl.enti[verif].type != -5){
       //si elles ont un y similaire
-      if(verif != actuGest && Actulvl.enti[verif].y < Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].sizeY && Actulvl.enti[verif].y+Actulvl.enti[verif].sizeY > Actulvl.enti[actuGest].y){
+      if(verif != actuGest && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset < Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitbox+Actulvl.enti[actuGest].yHitboxOffset - 0.05 && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitbox+Actulvl.enti[verif].yHitboxOffset > Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.05){
 	//si elles ont le meme x 
-	if(Actulvl.enti[verif].x < Actulvl.enti[actuGest].x && Actulvl.enti[verif].x+Actulvl.enti[verif].sizeX/100 *101 > Actulvl.enti[actuGest].x){
+	if(Actulvl.enti[verif].x + Actulvl.enti[verif].xHitboxOffset < Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset-0.001 && Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset + Actulvl.enti[verif].xHitbox > Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset - 0.001){
 	  avance = 0;
 
 	  // si tu peu pousser l'entite
-	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].sizeY/10)][(int)(Actulvl.enti[verif].x-0.5)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].sizeY/10*9)][(int)(Actulvl.enti[verif].x-0.5)].isPassable && Actulvl.enti[actuGest].type == 1){
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset+0.001)][(int)(Actulvl.enti[verif].x-Actulvl.enti[verif].sizeX)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].yHitbox+Actulvl.enti[verif].yHitboxOffset-0.001)][(int)(Actulvl.enti[verif].x-Actulvl.enti[verif].sizeX)].isPassable && Actulvl.enti[actuGest].type == 1){
 	    Actulvl.enti[verif].xSpeed = Actulvl.enti[actuGest].xSpeed;
+	    AvanceGauche(verif);
+	    if(Actulvl.enti[verif].xSpeed == 0){
+	      Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+	    }
 	  }else{
-	    Actulvl.enti[actuGest].xSpeed = 0;
+	    if(Actulvl.enti[actuGest].type == 1){
+	      Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+	    }else{
+	      Actulvl.enti[actuGest].xSpeed = 0;
+	    }
 	  }
 	      
 	}
@@ -266,6 +297,10 @@ void AvanceGauche(int actuGest){
     if(avance){
       if(Actulvl.enti[actuGest].type == 1){//cas joueur
 	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
+	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
+	  Actulvl.enti[actuGest].x = (int)(Actulvl.enti[actuGest].x);
+	  Actulvl.enti[actuGest].xSpeed = 0;
+	}
       }else if(Actulvl.enti[actuGest].type == 5){// cas boite
 	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
 	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
@@ -281,5 +316,189 @@ void AvanceGauche(int actuGest){
 	Actulvl.enti[actuGest].type = 5;
       }
     }
+  }else{
+    Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+  }
+}
+
+
+// La fonction fais avancer l'entite actuGest vers la droite
+void AvanceDroite(int actuGest){
+  int avance = 1;
+  int verif = 0;
+  // Si il n'y a pas de mur a droite
+  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitbox+ Actulvl.enti[actuGest].yHitboxOffset - 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable){
+    //pour toute les autres entites
+    while(Actulvl.enti[verif].type != -5){
+      //si elles ont un y similaire
+      if(verif != actuGest && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset < Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset +Actulvl.enti[actuGest].yHitbox - 0.05 && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset + Actulvl.enti[verif].yHitbox > Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.05){
+	//si elles ont le meme x 
+	if(Actulvl.enti[verif].x + Actulvl.enti[verif].xHitboxOffset < Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox + 0.01 && Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset + Actulvl.enti[verif].xHitbox  > Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox + 0.01){
+	  avance = 0;
+	  // si tu peu pousser l'entite
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset + 0.001)][(int)(Actulvl.enti[verif].x+Actulvl.enti[verif].sizeX)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset + Actulvl.enti[verif].yHitbox - 0.001)][(int)(Actulvl.enti[verif].x+Actulvl.enti[actuGest].sizeX)].isPassable && Actulvl.enti[actuGest].type == 1){
+	    Actulvl.enti[verif].xSpeed = Actulvl.enti[actuGest].xSpeed;
+	    AvanceDroite(verif);
+	    if(Actulvl.enti[verif].xSpeed == 0){
+	      Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+	    }
+	  }else{
+	    if(Actulvl.enti[actuGest].type == 1){
+	      Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+	    }else{
+	      Actulvl.enti[actuGest].xSpeed = 0;
+	    }
+	  }
+	      
+	}
+      }
+      verif++;
+    }
+    // si aucune entite t'empeche d'avancer
+    if(avance){
+      if(Actulvl.enti[actuGest].type == 1){//cas joueur
+	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
+	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
+	  Actulvl.enti[actuGest].x = (int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed);
+	  Actulvl.enti[actuGest].xSpeed = 0;
+	}
+      }else if(Actulvl.enti[actuGest].type == 5){// cas boite
+	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
+	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
+	  Actulvl.enti[actuGest].x = (int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed);
+	  Actulvl.enti[actuGest].xSpeed = 0;
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[actuGest].x)].type == 1){
+	    Actulvl.enti[actuGest].type = 6;
+	    VerifWin();
+	  }
+	}
+      }else if(Actulvl.enti[actuGest].type == 6){ // cas boite lock
+	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
+	Actulvl.enti[actuGest].type = 5;
+      }
+    }
+  }else{
+    Actulvl.enti[actuGest].xSpeed = -Actulvl.enti[actuGest].xSpeed;
+  }
+}
+
+void AvanceHaut(int actuGest){
+  int avance = 1;
+  int verif = 0;
+  // Si il n'y a pas de mur au dessus
+  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + 0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.001)].isPassable){
+    //pour toute les autres entites
+    while(Actulvl.enti[verif].type != -5){
+      //si elles ont un x similaire
+      if(verif != actuGest && Actulvl.enti[verif].x + Actulvl.enti[verif].xHitboxOffset < Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.05 && Actulvl.enti[verif].x+Actulvl.enti[verif].xHitbox + Actulvl.enti[verif].xHitboxOffset > Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset + 0.05){
+	//si elles ont le meme y
+	if(Actulvl.enti[verif].y < Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset - 0.001 && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset + Actulvl.enti[verif].yHitbox > Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset - 0.001){
+	  avance = 0;
+
+	  // si tu peu pousser l'entite
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y-Actulvl.enti[verif].sizeY)][(int)(Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset+0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y-Actulvl.enti[verif].sizeY)][(int)(Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset + Actulvl.enti[verif].xHitbox-0.001)].isPassable && Actulvl.enti[actuGest].type == 1){
+	    Actulvl.enti[verif].ySpeed = Actulvl.enti[actuGest].ySpeed;
+	    AvanceHaut(verif);
+	    if(Actulvl.enti[verif].ySpeed == 0){
+	      Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
+	    }
+	  }else{
+	    if(Actulvl.enti[actuGest].type == 1){
+	      Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
+	    }else{
+	      Actulvl.enti[actuGest].ySpeed = 0;
+	    }
+	  }
+	      
+	}
+      }
+      verif++;
+      }
+    // si aucune entite t'empeche d'avancer
+    if(avance){
+      if(Actulvl.enti[actuGest].type == 1){//cas joueur
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y);
+	  Actulvl.enti[actuGest].ySpeed = 0;
+	}
+      }else if(Actulvl.enti[actuGest].type == 5){// cas boite
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y);
+	  Actulvl.enti[actuGest].ySpeed = 0;
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[actuGest].x)].type == 1){
+	    Actulvl.enti[actuGest].type = 6;
+	    VerifWin();
+	  }
+	}
+      }else if(Actulvl.enti[actuGest].type == 6){ // cas boite lock
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	Actulvl.enti[actuGest].type = 5;
+      }
+    }
+  }else{
+    Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
+  }
+}
+
+
+void AvanceBas(int actuGest){
+  int avance = 1;
+  int verif = 0;
+  // Si il n'y a pas de mur a droite
+  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset+Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + 0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.001)].isPassable){
+    //pour toute les autres entites
+    while(Actulvl.enti[verif].type != -5){
+      //si elles ont un x similaire
+      if(verif != actuGest && Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset < Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.05 && Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset + Actulvl.enti[verif].xHitbox > Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset + 0.05){
+	//si elles ont le meme y
+	
+	if(Actulvl.enti[verif].y + Actulvl.enti[verif].yHitboxOffset < Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox + 0.001 && Actulvl.enti[verif].y+Actulvl.enti[verif].yHitboxOffset + Actulvl.enti[verif].yHitbox > Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox + 0.001){
+	  avance = 0;
+
+	  // si tu peu pousser l'entite
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].sizeY)][(int)(Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset+0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[verif].y+Actulvl.enti[verif].sizeY)][(int)(Actulvl.enti[verif].x+Actulvl.enti[verif].xHitboxOffset+Actulvl.enti[verif].xHitbox-0.001)].isPassable && Actulvl.enti[actuGest].type == 1){
+	    Actulvl.enti[verif].ySpeed = Actulvl.enti[actuGest].ySpeed;
+	    AvanceBas(verif);
+	    if(Actulvl.enti[verif].ySpeed == 0){
+	      Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
+	    }
+	  }else{
+	    if(Actulvl.enti[actuGest].type == 1){
+	      Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
+	    }else{
+	      Actulvl.enti[actuGest].ySpeed = 0;
+	    }
+	  }   
+	}
+      }
+      verif++;
+    }
+    // si aucune entite t'empeche d'avancer
+    if(avance){
+      if(Actulvl.enti[actuGest].type == 1){//cas joueur
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed);
+	  Actulvl.enti[actuGest].ySpeed = 0;
+	}
+      }else if(Actulvl.enti[actuGest].type == 5){// cas boite
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed);
+	  Actulvl.enti[actuGest].ySpeed = 0;
+	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[actuGest].x)].type == 1){
+	    Actulvl.enti[actuGest].type = 6;
+	    VerifWin();
+	  }
+	}
+      }else if(Actulvl.enti[actuGest].type == 6){ // cas boite lock
+	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
+	Actulvl.enti[actuGest].type = 5;
+      }
+    }
+  }else{
+    Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
   }
 }

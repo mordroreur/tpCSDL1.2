@@ -1,4 +1,5 @@
 #include "render.h"
+#include "Draw.h"
 
 
 /////////////////////////////////////////////////////////////
@@ -97,8 +98,10 @@ int BouclePrincipaleDuJeu(){
 	case 1: LoadingScreen();break;
 	case 2: DrawMenu();break;
 	case 3: DrawMenu();DrawExit();break;
+	  //case 40: DrawFirstCine();break;
 	case 41: LoadingScreen();break;
 	case 42: Draw1player();break;
+	case 43: Draw1player();DrawExit();break;
 	default: EtapeActuelleDuJeu = 0;break;
 	}
 	
@@ -107,7 +110,12 @@ int BouclePrincipaleDuJeu(){
 	  sprintf(affichageFrameDebug, "%d", LastFpsCount);
 	  DrawString(affichageFrameDebug, 0, 0, 6, 'n', 0, 0, 0);
 	  sprintf(affichageFrameDebug, "%d", LastTickCount);
-	  DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);}
+	  DrawString(affichageFrameDebug, 100, 0, 6, 'e', 0, 0, 0);
+	}else if(EtapeActuelleDuJeu == 42){
+	  char affichageLevelEncours[30];
+	  sprintf(affichageLevelEncours, "Niveau %d", unlockLVL);
+	  DrawString(affichageLevelEncours, 0, 0, 6, 'n', 255, 255, 255);
+	}
       
 	SDL_Flip(renderer);
 
@@ -249,8 +257,9 @@ void create_Win() {
 
 
 void keyUp(SDL_KeyboardEvent *key){
+  //  printf("%d\n", key->keysym.sym);
   switch(key->keysym.sym){
-  case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3){EtapeActuelleDuJeu--;}else{EtapeActuelleDuJeu = 0;}break;
+  case SDLK_ESCAPE:if(EtapeActuelleDuJeu%2 == 0){EtapeActuelleDuJeu++;}else if(EtapeActuelleDuJeu == 3 || EtapeActuelleDuJeu == 43){EtapeActuelleDuJeu--;}else{EtapeActuelleDuJeu = 0;}break;
   case SDLK_F11: resizingTime = SDL_GetTicks();
     SDL_Delay(100);
     int x = otherX;
@@ -322,7 +331,7 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	  FILE *Save = fopen("Res/Sauvegarde", "r+");
 	  getc(Save); getc(Save);
 	  if(otherY > TailleEcranHaut){
-	    fprintf(Save, "n\n%d\n%d\n", TailleEcranLong, TailleEcranHaut);
+	    fprintf(Save, "n\n%d\n%d", TailleEcranLong, TailleEcranHaut);
 	    fflush(Save);
 	    SDL_FreeSurface(renderer);
 	    if((renderer = SDL_SetVideoMode(TailleEcranLong,TailleEcranHaut,32,
@@ -330,7 +339,7 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	      end_sdl(0, "ERROR SDL VIDEOMODE");
 	    }
 	  }else{
-	    fprintf(Save, "f\n%d\n%d\n", otherX, otherY);
+	    fprintf(Save, "f\n%d\n%d", otherX, otherY);
 	    fflush(Save);
 	  }
 	  fclose(Save);
@@ -371,7 +380,7 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 		      printf("\n");
 		      }*/
 		  }
-		}else if(EtapeActuelleDuJeu == 3){
+		}else if(EtapeActuelleDuJeu == 3 || EtapeActuelleDuJeu == 43){
 		    if((mousX < (float)TailleEcranLong/100 *75 -((float)TailleEcranLong/2)/64 *6  && mousX > (float)TailleEcranLong/100 * 25 + ((float)TailleEcranLong/2)/64 *38) && (mousY < (float)TailleEcranHaut/100*(50-100/6) + ((float)TailleEcranLong/4)/32 * 28 && mousY > (float)TailleEcranHaut/100 *(50-100/6) + ((float)TailleEcranLong/4)/32 * 19)){
 		      EtapeActuelleDuJeu = 0;
 		    }else if((mousX < (float)TailleEcranLong/100 *75 -((float)TailleEcranLong/2)/64 *38  && mousX > (float)TailleEcranLong/100 * 25 + ((float)TailleEcranLong/2)/64 *6) && (mousY < (float)TailleEcranHaut/100*(50-100/6) + ((float)TailleEcranLong/4)/32 * 28 && mousY > (float)TailleEcranHaut/100 *(50-100/6) + ((float)TailleEcranLong/4)/32 * 19)){

@@ -122,7 +122,7 @@ void *InitImage(void *CeciEstUneVariableVide){
   fileImage[7] = IMG_Load("Res/Image/CaseJeu/BoiteVide.png");PixelXnb[7] = 16; PixelYnb[7] = 16;XImagenb[7] = 1; YImagenb[7] = 1; TotalImagenb[7] = 1;
   fileImage[8] = IMG_Load("Res/Image/CaseJeu/BoiteLock.png");PixelXnb[8] = 16; PixelYnb[8] = 16;XImagenb[8] = 1; YImagenb[8] = 1; TotalImagenb[8] = 1;
 
-  fileImage[9] = IMG_Load("Res/Image/VertAvant.png");PixelXnb[9] = 16; PixelYnb[9] = 16;XImagenb[9] = 4; YImagenb[9] = 1; TotalImagenb[9] = 4;
+  fileImage[9] = IMG_Load("Res/Image/Vert.png");PixelXnb[9] = 16; PixelYnb[9] = 16;XImagenb[9] = 4; YImagenb[9] = 1; TotalImagenb[9] = 4;
   
 
 

@@ -124,7 +124,7 @@ void DrawCreaLVL(){
 
 
 static float camx = 11;
-static float camy = 2;
+static float camy = 5;
 
 void Draw1player(){
   int nbBlockY = 12;
@@ -144,6 +144,7 @@ void Draw1player(){
   int nb = 0;
   while(nb < Actulvl.maxEnti && Actulvl.enti[nb].type != -5){
     DrawImage(getimageEnti(Actulvl.enti[nb]), 100/nbBlockY*((float)Actulvl.enti[nb].x-camy+nbBlockY/2)*((float)TailleEcranHaut/TailleEcranLong), (float)100/nbBlockY * ((float)Actulvl.enti[nb].y-camx+nbBlockX/2), 0, (float)100/nbBlockY, 'n', 0, 0, 0, 0);
+    
     nb++;
   }
 
