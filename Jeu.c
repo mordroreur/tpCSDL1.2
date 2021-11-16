@@ -245,13 +245,59 @@ void Physique1play(){
 
       actuGest++;
     }
-  }else{
+  }else if(EtapeActuelleDuJeu == 42){
     DestroyLVL();
     Actulvl = initNextLVL();
-  }  
+  }
+}
+
+char getcharTypeenti(int type ,int x, int y){
+  if(type == 5){
+    return '#';
+  }else if(type == -3){
+    return ' ';
+  }else{
+    int nb = 0;
+    while(Actulvl.enti[nb].type != -5){
+      if(Actulvl.enti[nb].x == x && Actulvl.enti[nb].y == y){
+	if(Actulvl.enti[nb].type == 1){
+	  if(type == 0){
+	    return '@';
+	  }else if(type == 1){
+	    return '+';
+	  }
+	}else if(Actulvl.enti[nb].type == 5){
+	  return '$';
+	}else{
+	  return '=';
+	}
+      }
+      nb++;
+    }
+    switch (type) {
+    case 0:return '_';
+    case 1:return '.';
+    }
+  }
+  return ' ';
 }
 
 
+void SaveActuLVL(char *name){
+  FILE *Save = fopen(name, "w+");
+  for(int i = 0; i < Actulvl.TerX; i++){
+    for(int j = 0; j < Actulvl.TerY; j++){
+      fprintf(Save, "%c", getcharTypeenti(Actulvl.ter.cellule[i][j].type, i, j));
+    }
+    fprintf(Save, "\n");
+  }
+  fflush(Save);
+  fclose(Save);
+
+
+
+  
+}
 
 void VerifWin(){
   int nb = 0;

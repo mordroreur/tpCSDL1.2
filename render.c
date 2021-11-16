@@ -292,8 +292,12 @@ void keyUp(SDL_KeyboardEvent *key){
       for(int j = 0; j < 6; j++){
 	if(key->keysym.sym == InputVal[i][j]){
 	  GetInput[i][j] = 0;
-	  if(i == 0 && j == 4){
+	  if(i == 0 && j == 4 && EtapeActuelleDuJeu == 52){
 	    EtapeActuelleDuJeu = 55;
+	    char tmp[70] = "CeciEstunFichierTempo";
+	    SaveActuLVL(tmp);
+	  }else if(i == 0 && j == 4 && EtapeActuelleDuJeu == 55){
+	    EtapeActuelleDuJeu = 52;
 	  }
 	}
       }
@@ -552,7 +556,7 @@ void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull){
 	    }
 	}
 
-      if(EtapeActuelleDuJeu == 42){
+      if(EtapeActuelleDuJeu == 42 || EtapeActuelleDuJeu == 55){
 	Physique1play();
       }
       

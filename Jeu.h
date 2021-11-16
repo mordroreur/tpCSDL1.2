@@ -47,6 +47,7 @@ typedef struct Level{
 void addEntite(level *lev, int type, float longu, float larg);
 level initNextLVL();
 level initVoidLVL();
+void SaveActuLVL(char *name);
 void DestroyLVL();
 void Physique1play();
 void VerifWin();
