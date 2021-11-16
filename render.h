@@ -33,6 +33,7 @@ void keyDown(SDL_KeyboardEvent *key);
 
 void *BouclePrincipaleDesTicks(void *CeciEstUneVaribleNull);
 
+void AddCase(int type, int x, int y);
 
 
 #endif /* RENDER_HEADER_ */

@@ -16,7 +16,7 @@ SDL_Surface * renderer = NULL; /* Ecran sur lequel on dessine */
 
 SDL_Event event; /* Les events que l'on récupèrera via SDL. */
 
-int DEBUG = 0; /* 1 : affiche le debug*/
+int DEBUG = 1; /* 1 : affiche le debug*/
 
 TTF_Font *RobotoFont = NULL; /* Font utilise pour ecrire dans le programme */
 
@@ -29,6 +29,15 @@ level Actulvl; /* Niveau actuelle sur lequel on joue */
 int InputVal[2][6]; /* Valeur en int des inputs pour les action joueurs */
 
 int GetInput[2][6]; /* Valeur de si le joueur appuie */
+
+int HaveType = -1; /* Valeur de la case sous le pointeur lors de la creation */
+
+float camx = 11; /* Décalage de la caméra en X */
+float camy = 5; /* Décalage de la caméra en Y */
+
+int nbBlockY = 12; /*Nb Blocks a afficher sur la hauteur de l'écran*/
+int nbBlockX = 24; /*Nb Blocks a afficher sur la longueur de l'écran*/
+
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////

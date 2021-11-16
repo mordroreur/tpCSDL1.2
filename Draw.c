@@ -1,5 +1,7 @@
 #include "Draw.h"
 #include "RenderUtilities.h"
+#include <SDL/SDL_video.h>
+#include <stdlib.h>
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -24,13 +26,22 @@ extern TTF_Font *RobotoFont; /* Font utilise pour ecrire dans le programme */
 
 extern level Actulvl; /* Niveau actuelle sur lequel on joue */
 
+extern int HaveType; /* Valeur de la case sous le pointeur lors de la creation */
+
+extern float camx; /* Décalage de la caméra en X */
+extern float camy; /* Décalage de la caméra en Y */
+
+extern int nbBlockY; /*Nb Blocks a afficher sur la hauteur de l'écran*/
+extern int nbBlockX; /*Nb Blocks a afficher sur la longueur de l'écran*/
+
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
 
-static inline int max(int a, int b){if(a < b){return b;}else{return a;}}
-static inline int min(int a, int b){if(a > b){return b;}else{return a;}}
+//static inline int max(int a, int b){if(a < b){return b;}else{return a;}}
+//static inline int min(int a, int b){if(a > b){return b;}else{return a;}}
 
 
 void LoadingScreen(){
@@ -57,6 +68,7 @@ void LoadingScreen(){
 void DrawMenu(){
   static int LastTick = 0;
   static int PlayStape = 0;
+  static int CreateStape = 0;
 
   int mousX;
   int mousY;
@@ -66,7 +78,7 @@ void DrawMenu(){
 
   if(LastTick < SDL_GetTicks()-250){
     LastTick = SDL_GetTicks();
-    if((mousX < (float)TailleEcranLong/100 *75 && mousX > (float)TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*25 + (float)TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *25)){
+    if((mousX < (float)TailleEcranLong/100 *75 && mousX > (float)TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*10 + (float)TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *10)){
       if(PlayStape != 3){
 	PlayStape++;
       }
@@ -75,10 +87,18 @@ void DrawMenu(){
 	PlayStape--;
       }
     }
-  } 
-  
-  
-  DrawImage(0, 25, 25, 50, 0, 'n', PlayStape, 0, 0, 0);
+    if((mousX < (float)TailleEcranLong/100 *75 && mousX > (float)TailleEcranLong/100 * 25) && (mousY < (float)TailleEcranHaut/100*35 + (float)TailleEcranLong/400*50 && mousY > (float)TailleEcranHaut/100 *35)){
+      if(CreateStape != 3){
+	CreateStape++;
+      }
+    }else{
+      if(CreateStape != 0){
+	CreateStape--;
+      }
+    }
+  }   
+  DrawImage(0, 25, 10, 50, 0, 'n', PlayStape, 0, 0, 0);   
+  DrawImage(0, 25, 35, 50, 0, 'n', CreateStape, 0, 0, 0);
 }
 
 void DrawExit(){
@@ -106,52 +126,132 @@ void DrawExit(){
 
   
   SDL_FreeSurface(tmp);
-  
-
-  
 }
+
+int compareEntitiYlvl(const void *nb1, const void *nb2){
+  return (Actulvl.enti[*(int *)nb1].y - Actulvl.enti[*(int *)nb2].y<0)?-1:1;
+}
+
 
 void DrawCreaLVL(){
   int mousX;
   int mousY;
   SDL_GetMouseState(&mousX, &mousY);
 
+  int* Whereenti;
+  int actuEntiDes = 0;
+  int nb = 0;
+
   
-  SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 0, 0, 0));
+   Whereenti = (int *)malloc(Actulvl.maxEnti*sizeof(int));
+
+
+  while(nb < Actulvl.maxEnti && Actulvl.enti[nb].type != -5){
+    if(Actulvl.enti[nb].type != -1){
+      Whereenti[actuEntiDes++] = nb;
+    }
+    nb++;
+  }
+
+  Whereenti[actuEntiDes] = -1;
+  qsort(Whereenti, actuEntiDes, sizeof(int), compareEntitiYlvl);
+
+  actuEntiDes = 0;
+  
+  SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 50, 50, 50));
+
+  for(int j = 0; j < nbBlockY-2; j++){
+    for(int i = 0; i < nbBlockX; i++){
+      int image;
+      if((camx-nbBlockX/2 +j >= 0 && camx-nbBlockX/2 +j < Actulvl.TerX) && (camy-nbBlockY/2 +i >= 0 && camy-nbBlockY/2 +i < Actulvl.TerY) && Actulvl.ter.cellule[(int)camx-nbBlockX/2+j][(int)camy-nbBlockY/2+i].type != -3){
+	image = getimage(Actulvl.ter.cellule[(int)camx-nbBlockX/2+j][(int)camy-nbBlockY/2+i]);
+	DrawImage(image, 100.0/nbBlockY*(i-((float)camx-(int)camx))*((float)TailleEcranHaut/TailleEcranLong),
+		  100.0/nbBlockY * (j-((float)camy-(int)camy)), 100.1/nbBlockY * ((float)TailleEcranHaut/TailleEcranLong), 0, 'n', 0, 0, 0, 0);
+      }
+    }
+    
+    while(Whereenti[actuEntiDes] != -1 && Actulvl.enti[Whereenti[actuEntiDes]].y < j-0.85 - 11 + camx){
+      nb = Whereenti[actuEntiDes];
+      DrawImage(getimageEnti(Actulvl.enti[nb]), 100.0/nbBlockY*((float)Actulvl.enti[nb].x-camy+nbBlockY/2.0)*((float)TailleEcranHaut/TailleEcranLong),
+	      100.0/nbBlockY * ((float)Actulvl.enti[nb].y-camx+nbBlockX/2), 100.0/nbBlockY * ((float)TailleEcranHaut/TailleEcranLong), 0, 'n', 0, 0, 0, 0);
+      actuEntiDes++;
+      }
+  }
+
+
+   if(HaveType != -1 && mousY < TailleEcranHaut - 200.0/nbBlockY*TailleEcranHaut/100.0){
+    DrawImage(HaveType, 100.0/nbBlockY*((int)(mousX/((float)TailleEcranHaut/nbBlockY))-((float)camx-(int)camx))*((float)TailleEcranHaut/TailleEcranLong),
+	      (float)100/nbBlockY * ((int)((mousY)/((float)TailleEcranHaut/nbBlockY)) -((float)camy-(int)camy)), 100.0/nbBlockY * ((float)TailleEcranHaut/TailleEcranLong), 0, 'n', 0, 0, 0, 0);
+    }
+  
+  SDL_Rect re;
+  re.x = 0;
+  re.w = TailleEcranLong;
+  re.y = (100 - (float)200/nbBlockY)*((float)(TailleEcranHaut)/100);
+  re.h = TailleEcranLong-re.y;
+  SDL_FillRect(renderer, &re, SDL_MapRGB(renderer->format, 150, 150, 150));
+
+  for(int i = 0; i < 3; i++){
+    DrawImage(i+4, (float)200/nbBlockY * (i+0.5) * ((float)TailleEcranHaut/TailleEcranLong), 100 - (float)100/nbBlockY, (float)100/(nbBlockY) * ((float)TailleEcranHaut/TailleEcranLong), 0, 'c', 0, 0, 0, 0);
+  }
+
+  for(int i = 0; i < 2; i++){
+    DrawImage(4, (float)200/nbBlockY * (i+3.5) * ((float)TailleEcranHaut/TailleEcranLong), 100 - (float)100/nbBlockY, (float)100/(nbBlockY) * ((float)TailleEcranHaut/TailleEcranLong), 0, 'c', 0, 0, 0, 0);
+    DrawImage((i*2)+7, (float)200/nbBlockY * (i+3.5) * ((float)TailleEcranHaut/TailleEcranLong), 100 - (float)100/nbBlockY, (float)100/(nbBlockY) * ((float)TailleEcranHaut/TailleEcranLong), 0, 'c', 0, 0, 0, 0);
+  }
+
+
+  
+ 
   
 }
 
 
 
-static float camx = 11;
-static float camy = 5;
+
 
 void Draw1player(){
-  int nbBlockY = 12;
-  int nbBlockX = 24;
-  for(int i = 0; i < nbBlockX; i++){
-    for(int j = 0; j < nbBlockY; j++){
-      int image;
-      if((camx-nbBlockX/2 +j >= 0 && camx-nbBlockX/2 +j < Actulvl.TerX) && (camy-nbBlockY/2 +i >= 0 && camy-nbBlockY/2 +i < Actulvl.TerY)){
-	image = getimage(Actulvl.ter.cellule[(int)camx-nbBlockX/2+j][(int)camy-nbBlockY/2+i]);
-      }else {
-	image = 4;
-      }
-      DrawImage(image, 100/nbBlockY*(i-((float)camx-(int)camx))*((float)TailleEcranHaut/TailleEcranLong), (float)100/nbBlockY * (j-((float)camy-(int)camy)), 0, (float)103/nbBlockY, 'n', 0, 0, 0, 0);
-    }
-  }
-
+  int* Whereenti;
+  int actuEntiDes = 0;
   int nb = 0;
+
+  
+  Whereenti = (int *)malloc(Actulvl.maxEnti*sizeof(int));
+
+
   while(nb < Actulvl.maxEnti && Actulvl.enti[nb].type != -5){
-    DrawImage(getimageEnti(Actulvl.enti[nb]), 100/nbBlockY*((float)Actulvl.enti[nb].x-camy+nbBlockY/2)*((float)TailleEcranHaut/TailleEcranLong), (float)100/nbBlockY * ((float)Actulvl.enti[nb].y-camx+nbBlockX/2), 0, (float)100/nbBlockY, 'n', 0, 0, 0, 0);
-    
+    if(Actulvl.enti[nb].type != -1){
+      Whereenti[actuEntiDes++] = nb;
+    }
     nb++;
   }
 
+  Whereenti[actuEntiDes] = -1;
+  qsort(Whereenti, actuEntiDes, sizeof(int), compareEntitiYlvl);
 
-
-
+  actuEntiDes = 0;
   
+  SDL_FillRect(renderer, NULL, SDL_MapRGB(renderer->format, 50, 50, 50));
+  
+
+  for(int j = 0; j < nbBlockY; j++){
+    for(int i = 0; i < nbBlockX; i++){
+      int image;
+      if((camx-nbBlockX/2 +j >= 0 && camx-nbBlockX/2 +j < Actulvl.TerX) && (camy-nbBlockY/2 +i >= 0 && camy-nbBlockY/2 +i < Actulvl.TerY) && Actulvl.ter.cellule[(int)camx-nbBlockX/2+j][(int)camy-nbBlockY/2+i].type != -3){
+	image = getimage(Actulvl.ter.cellule[(int)camx-nbBlockX/2+j][(int)camy-nbBlockY/2+i]);
+	DrawImage(image, 100.0/nbBlockY*(i-((float)camx-(int)camx))*((float)TailleEcranHaut/TailleEcranLong),
+		  100.0/nbBlockY * (j-((float)camy-(int)camy)), 100.1/nbBlockY * ((float)TailleEcranHaut/TailleEcranLong), 0, 'n', 0, 0, 0, 0);
+      }
+    }
+    
+    while(Whereenti[actuEntiDes] != -1 && Actulvl.enti[Whereenti[actuEntiDes]].y < j-0.85 - 11 + camx){
+      nb = Whereenti[actuEntiDes];
+      DrawImage(getimageEnti(Actulvl.enti[nb]), 100.0/nbBlockY*((float)Actulvl.enti[nb].x-camy+nbBlockY/2.0)*((float)TailleEcranHaut/TailleEcranLong),
+	      100.0/nbBlockY * ((float)Actulvl.enti[nb].y-camx+nbBlockX/2), 100.0/nbBlockY * ((float)TailleEcranHaut/TailleEcranLong), 0, 'n', 0, 0, 0, 0);
+      actuEntiDes++;
+      }
+  }
+
 }
 
 int getimageEnti(entite e){

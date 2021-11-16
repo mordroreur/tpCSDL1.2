@@ -22,5 +22,6 @@ int getimage(cellule l);
 
 int getimageEnti(entite e);
 
+
 	       
 #endif /* DRAW_HEADER_ */

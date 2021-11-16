@@ -1,10 +1,4 @@
 #include "RenderUtilities.h"
-#include "SDL_image.h"
-#include "SDL_rotozoom.h"
-#include "SDL_timer.h"
-#include "SDL_video.h"
-#include <SDL/SDL_video.h>
-#include <stdio.h>
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -27,6 +21,14 @@ extern int DEBUG; /* 1 : affiche le debug */
 
 extern TTF_Font *RobotoFont; /* Font utilise pour ecrire dans le programme */
 
+extern int unlockLVL; /* Dernier niveau debloque */
+
+extern int InputVal[2][6]; /* Valeur en int des inputs pour les action joueurs */
+
+
+extern int otherY;
+extern int otherX;
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -37,10 +39,9 @@ static int *PixelXnb;
 static int *PixelYnb;
 static int *XImagenb;
 static int *YImagenb;
+static int *ImYoffset;
+static int *ImXoffset;
 static int *TotalImagenb;
-
-
-
 
 
 
@@ -107,28 +108,31 @@ void *InitImage(void *CeciEstUneVariableVide){
   PixelYnb = (int *)malloc(sizeof(int) * nbImage);
   XImagenb = (int *)malloc(sizeof(int) * nbImage);
   YImagenb = (int *)malloc(sizeof(int) * nbImage);
+  ImYoffset = (int *)malloc(sizeof(int) * nbImage);
+  ImXoffset = (int *)malloc(sizeof(int) * nbImage);
   TotalImagenb = (int *)malloc(sizeof(int) * nbImage);
 
   
-  fileImage[0] = IMG_Load("Res/Image/Menu/Play.png");PixelXnb[0] = 64; PixelYnb[0] = 16;XImagenb[0] = 1; YImagenb[0] = 4; TotalImagenb[0] = 4;
-  fileImage[1] = IMG_Load("Res/Image/Menu/quitter.png");PixelXnb[1] = 64; PixelYnb[1] = 32;XImagenb[1] = 1; YImagenb[1] = 1; TotalImagenb[1] = 1;
-  fileImage[2] = IMG_Load("Res/Image/Menu/quitterNo.png");PixelXnb[2] = 64; PixelYnb[2] = 32;XImagenb[2] = 1; YImagenb[2] = 1; TotalImagenb[2] = 1;
-  fileImage[3] = IMG_Load("Res/Image/Menu/quitterYes.png");PixelXnb[3] = 64; PixelYnb[3] = 32;XImagenb[3] = 1; YImagenb[3] = 1; TotalImagenb[3] = 1;
+  fileImage[0] = IMG_Load("Res/Image/Menu/Play.png");PixelXnb[0] = 64; PixelYnb[0] = 16;XImagenb[0] = 1; YImagenb[0] = 4; TotalImagenb[0] = 4; ImYoffset[0] = 0; ImXoffset[0] = 0;
+  fileImage[1] = IMG_Load("Res/Image/Menu/quitter.png");PixelXnb[1] = 64; PixelYnb[1] = 32;XImagenb[1] = 1; YImagenb[1] = 1; TotalImagenb[1] = 1; ImYoffset[1] = 0; ImXoffset[1] = 0;
+  fileImage[2] = IMG_Load("Res/Image/Menu/quitterNo.png");PixelXnb[2] = 64; PixelYnb[2] = 32;XImagenb[2] = 1; YImagenb[2] = 1; TotalImagenb[2] = 1; ImYoffset[2] = 0; ImXoffset[2] = 0;
+  fileImage[3] = IMG_Load("Res/Image/Menu/quitterYes.png");PixelXnb[3] = 64; PixelYnb[3] = 32;XImagenb[3] = 1; YImagenb[3] = 1; TotalImagenb[3] = 1; ImYoffset[3] = 0; ImXoffset[3] = 0;
 
-  fileImage[4] = IMG_Load("Res/Image/CaseJeu/Sol.png");PixelXnb[4] = 16; PixelYnb[4] = 16;XImagenb[4] = 1; YImagenb[4] = 1; TotalImagenb[4] = 1;
-  fileImage[5] = IMG_Load("Res/Image/CaseJeu/SolLock.png");PixelXnb[5] = 16; PixelYnb[5] = 16;XImagenb[5] = 1; YImagenb[5] = 1; TotalImagenb[5] = 1;
-  fileImage[6] = IMG_Load("Res/Image/CaseJeu/mur.png");PixelXnb[6] = 16; PixelYnb[6] = 16;XImagenb[6] = 1; YImagenb[6] = 1; TotalImagenb[6] = 1;
+  fileImage[4] = IMG_Load("Res/Image/CaseJeu/Sol.png");PixelXnb[4] = 16; PixelYnb[4] = 20;XImagenb[4] = 1; YImagenb[4] = 1; TotalImagenb[4] = 1; ImYoffset[4] = 0; ImXoffset[4] = 0;
+  fileImage[5] = IMG_Load("Res/Image/CaseJeu/SolLock.png");PixelXnb[5] = 16; PixelYnb[5] = 20;XImagenb[5] = 1; YImagenb[5] = 1; TotalImagenb[5] = 1; ImYoffset[5] = 0; ImXoffset[5] = 0;
+  fileImage[6] = IMG_Load("Res/Image/CaseJeu/mur.png");PixelXnb[6] = 16; PixelYnb[6] = 23;XImagenb[6] = 1; YImagenb[6] = 1; TotalImagenb[6] = 1; ImYoffset[6] = 7; ImXoffset[6] = 0;
   
-  fileImage[7] = IMG_Load("Res/Image/CaseJeu/BoiteVide.png");PixelXnb[7] = 16; PixelYnb[7] = 16;XImagenb[7] = 1; YImagenb[7] = 1; TotalImagenb[7] = 1;
-  fileImage[8] = IMG_Load("Res/Image/CaseJeu/BoiteLock.png");PixelXnb[8] = 16; PixelYnb[8] = 16;XImagenb[8] = 1; YImagenb[8] = 1; TotalImagenb[8] = 1;
+  fileImage[7] = IMG_Load("Res/Image/CaseJeu/BoiteVide.png");PixelXnb[7] = 16; PixelYnb[7] = 23;XImagenb[7] = 1; YImagenb[7] = 1; TotalImagenb[7] = 1; ImYoffset[7] = 7; ImXoffset[7] = 0;
+  fileImage[8] = IMG_Load("Res/Image/CaseJeu/BoiteLock.png");PixelXnb[8] = 16; PixelYnb[8] = 23;XImagenb[8] = 1; YImagenb[8] = 1; TotalImagenb[8] = 1; ImYoffset[8] = 7; ImXoffset[8] = 0;
 
-  fileImage[9] = IMG_Load("Res/Image/Vert.png");PixelXnb[9] = 16; PixelYnb[9] = 16;XImagenb[9] = 4; YImagenb[9] = 1; TotalImagenb[9] = 4;
+  fileImage[9] = IMG_Load("Res/Image/Vert.png");PixelXnb[9] = 16; PixelYnb[9] = 16;XImagenb[9] = 4; YImagenb[9] = 1; TotalImagenb[9] = 4; ImYoffset[9] = 0; ImXoffset[9] = 0;
   
 
 
   EtapeActuelleDuJeu = 2;
   return NULL;
 }
+
 
 
 void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char center, int etatPremier, float TimebeforeNext, int flip, int angle){
@@ -142,10 +146,10 @@ void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char cen
   float resy;
   
   if(sizeY == 0 && sizeX != 0){
-    resx = ((float)TailleEcranLong * (float)sizeX/100)/PixelXnb[imagenb];
+    resx = ((float)TailleEcranLong * sizeX/99.9)/PixelXnb[imagenb];
     resy = resx;
   }else if(sizeX == 0 && sizeY != 0){
-    resy = ((float)TailleEcranHaut * (float)sizeY/100)/PixelYnb[imagenb];
+    resy = ((float)TailleEcranHaut * sizeY/100.0)/PixelYnb[imagenb];
     resx = resy;
   }else if(sizeX != 0 && sizeY != 0){
     resx = ((float)TailleEcranLong * (float)sizeX/100)/PixelXnb[imagenb];
@@ -159,7 +163,7 @@ void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char cen
   switch (center) {
   case 'n':
     Image_rect.x = (int)((float)(TailleEcranLong)/100 * x); 
-    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y);
+    Image_rect.y = (int)((float)(TailleEcranHaut)/100 * y - ImYoffset[imagenb]*resy);
     break;
   case 'e':
     Image_rect.x = (int)((float)(TailleEcranLong)/100 * x - (float)(PixelXnb[imagenb]) * resx); 
@@ -217,13 +221,27 @@ void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char cen
   SDL_Surface *tmp = rotozoomSurfaceXY(fileImage[imagenb], 0.0, resx, resy, 0);
   SDL_BlitSurface(tmp, &keepImage, renderer, &Image_rect);
   SDL_FreeSurface(tmp);
+}
 
-  
-  
 
-  
-  
+
+
+
+void PrintSave(){
+  FILE *Save = fopen("Res/Sauvegarde", "w+");
+  fprintf(Save, "%d\n%c\n%d\n%d\n", unlockLVL, (otherY<TailleEcranHaut)?'f':'n',
+	  (otherY<TailleEcranHaut)?otherX:TailleEcranLong,
+	  (otherY<TailleEcranHaut)?otherY:TailleEcranHaut);
+  for(int i = 0; i < 2; i++){
+    for(int j = 0; j < 6; j++){
+      fprintf(Save, "%d\n", InputVal[i][j]);
+    }
+  }
+  fflush(Save);
+  fclose(Save);	    
   
 }
+
+
 
 ////////SOKOBAN

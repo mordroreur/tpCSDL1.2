@@ -46,6 +46,7 @@ typedef struct Level{
 
 void addEntite(level *lev, int type, float longu, float larg);
 level initNextLVL();
+level initVoidLVL();
 void DestroyLVL();
 void Physique1play();
 void VerifWin();
@@ -53,5 +54,6 @@ void AvanceGauche(int actuGest);
 void AvanceDroite(int actuGest);
 void AvanceHaut(int actuGest);
 void AvanceBas(int actuGest);
+
 
 #endif /* JEU_HEADER_ */

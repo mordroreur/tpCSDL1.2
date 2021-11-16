@@ -1,4 +1,5 @@
 #include "Jeu.h"
+#include "RenderUtilities.h"
 #include <stdio.h>
 
 /////////////////////////////////////////////////////////////
@@ -35,6 +36,29 @@ void DestroyLVL(){
   Actulvl.TerX = 0;
   Actulvl.TerY = 0;
 }
+level initVoidLVL(){
+  level lev;
+  int longueur = 0;
+  int largeur = 0; 
+  lev.enti = (entite *)malloc(sizeof(entite)*50);
+  lev.maxEnti = 50;
+  for(int i = 0; i < 50; i++){
+    lev.enti[i].type = -5;
+  }
+  lev.TerX = longueur;
+  lev.TerY = largeur;
+  lev.ter.cellule = (cellule **)malloc(sizeof(cellule *)*longueur);
+  for(int i = 0; i < longueur; i++){
+    lev.ter.cellule[i] = (cellule *)malloc(sizeof(cellule)*largeur);
+    for(int j = 0; j < largeur; j++){
+      lev.ter.cellule[i][j].type = 0;
+    }
+  }
+  
+  return lev;
+  
+}
+
 
 level initNextLVL(){
   level lev;
@@ -69,15 +93,13 @@ level initNextLVL(){
       largeur = tempoLarg;
     }
   }
-  lev.enti = (entite *)malloc(sizeof(entite)*50);
-  lev.maxEnti = 0;
   lev.TerX = longueur;
   lev.TerY = largeur;
   lev.ter.cellule = (cellule **)malloc(sizeof(cellule *)*longueur);
   for(int i = 0; i < longueur; i++){
     lev.ter.cellule[i] = (cellule *)malloc(sizeof(cellule)*largeur);
     for(int j = 0; j < largeur; j++){
-      lev.ter.cellule[i][j].type = -3;
+      lev.ter.cellule[i][j].type = -3;lev.ter.cellule[i][j].isPassable = 0;
     }
   }
 
@@ -100,7 +122,8 @@ level initNextLVL(){
       case '.':lev.ter.cellule[longueur][largeur].type = 1;lev.ter.cellule[longueur][largeur].isPassable = 1;break;
       case '@':lev.ter.cellule[longueur][largeur].type = 0;addEntite(&lev, 1, longueur, largeur);lev.ter.cellule[longueur][largeur].isPassable = 1;break;
       case '=':lev.ter.cellule[longueur][largeur].type = 1;addEntite(&lev, 6, longueur, largeur);lev.ter.cellule[longueur][largeur].isPassable = 1;break;
-      default:printf("FUCK");break;
+      case 'A':lev.ter.cellule[longueur][largeur].isPassable = 0;break;
+      default:printf("FUCK %c \n", r);break;
       }
       largeur++;
     }else{
@@ -244,10 +267,7 @@ void VerifWin(){
     DestroyLVL();
     if(unlockLVL < 6){
       unlockLVL++;
-      FILE *Save = fopen("Res/Sauvegarde", "r+");
-      fprintf(Save, "%d", unlockLVL);
-      fflush(Save);
-      fclose(Save);
+      PrintSave();
       Actulvl = initNextLVL();
       EtapeActuelleDuJeu = 42;
     }else{
@@ -297,13 +317,13 @@ void AvanceGauche(int actuGest){
     if(avance){
       if(Actulvl.enti[actuGest].type == 1){//cas joueur
 	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
-	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
+	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x) || Actulvl.enti[actuGest].x < 0){
 	  Actulvl.enti[actuGest].x = (int)(Actulvl.enti[actuGest].x);
 	  Actulvl.enti[actuGest].xSpeed = 0;
 	}
       }else if(Actulvl.enti[actuGest].type == 5){// cas boite
 	Actulvl.enti[actuGest].x += Actulvl.enti[actuGest].xSpeed/60;
-	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x)){
+	if((int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xSpeed/60) != (int)(Actulvl.enti[actuGest].x) || Actulvl.enti[actuGest].x < 0){
 	  Actulvl.enti[actuGest].x = (int)(Actulvl.enti[actuGest].x);
 	  Actulvl.enti[actuGest].xSpeed = 0;
 	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[actuGest].x)].type == 1){
@@ -327,7 +347,7 @@ void AvanceDroite(int actuGest){
   int avance = 1;
   int verif = 0;
   // Si il n'y a pas de mur a droite
-  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitbox+ Actulvl.enti[actuGest].yHitboxOffset - 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable){
+  if(Actulvl.enti[actuGest].x+Actulvl.enti[actuGest].xHitboxOffset+Actulvl.enti[actuGest].xHitbox < Actulvl.TerY && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitbox+ Actulvl.enti[actuGest].yHitboxOffset - 0.001)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitbox + Actulvl.enti[actuGest].xHitboxOffset)].isPassable){
     //pour toute les autres entites
     while(Actulvl.enti[verif].type != -5){
       //si elles ont un y similaire
@@ -418,13 +438,13 @@ void AvanceHaut(int actuGest){
     if(avance){
       if(Actulvl.enti[actuGest].type == 1){//cas joueur
 	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
-	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y) || Actulvl.enti[actuGest].y < 0){
 	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y);
 	  Actulvl.enti[actuGest].ySpeed = 0;
 	}
       }else if(Actulvl.enti[actuGest].type == 5){// cas boite
 	Actulvl.enti[actuGest].y += Actulvl.enti[actuGest].ySpeed/60;
-	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y)){
+	if((int)(Actulvl.enti[actuGest].y + Actulvl.enti[actuGest].ySpeed/60) != (int)(Actulvl.enti[actuGest].y) || Actulvl.enti[actuGest].y < 0){
 	  Actulvl.enti[actuGest].y = (int)(Actulvl.enti[actuGest].y);
 	  Actulvl.enti[actuGest].ySpeed = 0;
 	  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y)][(int)(Actulvl.enti[actuGest].x)].type == 1){
@@ -447,7 +467,7 @@ void AvanceBas(int actuGest){
   int avance = 1;
   int verif = 0;
   // Si il n'y a pas de mur a droite
-  if(Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset+Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + 0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.001)].isPassable){
+  if(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset+Actulvl.enti[actuGest].yHitbox < Actulvl.TerX && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset+Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + 0.001)].isPassable && Actulvl.ter.cellule[(int)(Actulvl.enti[actuGest].y+Actulvl.enti[actuGest].yHitboxOffset + Actulvl.enti[actuGest].yHitbox)][(int)(Actulvl.enti[actuGest].x + Actulvl.enti[actuGest].xHitboxOffset + Actulvl.enti[actuGest].xHitbox - 0.001)].isPassable){
     //pour toute les autres entites
     while(Actulvl.enti[verif].type != -5){
       //si elles ont un x similaire
@@ -502,3 +522,6 @@ void AvanceBas(int actuGest){
     Actulvl.enti[actuGest].ySpeed = -Actulvl.enti[actuGest].ySpeed;
   }
 }
+
+
+
