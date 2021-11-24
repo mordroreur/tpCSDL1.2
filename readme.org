@@ -1,1 +1,0 @@
-- Ceci est un projet réalisé en SDL 1.2

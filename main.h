@@ -1,19 +1,16 @@
-#ifndef MAIN_HEADER_
-#define MAIN_HEADER_
+#ifndef _MAIN_HEADER
+#define _MAIN_HEADER
+
+
+#include "FonctionJeu.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL.h>
 #include <time.h>
-#include "Jeu.h"
-#include "render.h"
-
-#define FPS_TO_GET 60
-#define TICKS_TO_GET 60
 
 
 
 
 
-
-#endif /* MAIN_HEADER_ */
+#endif /* _MAIN_HEADER */
