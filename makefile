@@ -1,7 +1,7 @@
 CC=gcc
 LDFLAG=$(shell sdl-config --cflags --libs) -lpthread -D_REENTRANT -lSDL_ttf -lSDL_image -lSDL_gfx
 CFLAG=-Wall $(shell sdl-config --cflags --libs) 
-EXEC=res
+EXEC=jeu
 SRC=$(wildcard *.c)
 OBJ=$(SRC:.c=.o)
 

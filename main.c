@@ -32,7 +32,16 @@ int main(){
 	printf("Voulez vous chargé la partie sauvegardé ?\nTapez o pour oui ou n pour non : ");
 	scanf("%c", &play); while ((getchar()) != '\n');
 	if(play == 'o'){
-	  
+	  plateau = ReadEnCoursSave(0.5);
+	  if(plateau.taille == -1){
+	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
+	    EtapeDuJeu = -1;
+	  }else {
+	    afficheTer(plateau);
+	    printf("Appuyez sur une touche pour reprendre la partie.");
+	    getchar();
+	    EtapeDuJeu = 3;
+	  }
 	}else{
 	  printf("La partie à été supprimé au profit de la prochaine partie.\n");
 	  //
@@ -93,6 +102,8 @@ int main(){
 	  fclose(save);
 	  // on deplace
 	  CaseMouve(&plateau, depNum);
+	    //on fais apparaitre un 2 a 75 pourcent de chance, un 4 sinon
+	  SetRandomCase(&plateau, (rand()%100 < 75)?2:4);
 	  // on affiche le nouveau jeu
 	  afficheTer(plateau);
 	  // on cosidere que le joueur ne peu pas bouger

@@ -1,5 +1,6 @@
 #include "FonctionJeu.h"
 #include <stdio.h>
+#include <string.h>
 
 
 ter InitVide(int n){
@@ -40,7 +41,15 @@ ter InitVide(int n){
   fflush(save);
   fclose(save);
   // On met les deux premier zeros dans la grille
+  save = fopen(SAVE_NAME, "a");
+  fprintf(save, "%c ", 'n');
+  fflush(save);
+  fclose(save);
   SetRandomCase(&T, 2);
+  save = fopen(SAVE_NAME, "a");
+  fprintf(save, "%c ", 'n');
+  fflush(save);
+  fclose(save);
   SetRandomCase(&T, 2);
   // On retourne le terrain ainsi genere
   return T;
@@ -258,8 +267,6 @@ void CaseMouve(ter *T, int depNum){
   // on libere la memoire
   free(isfusX);
   free(isfusY);
-  //on fais apparaitre un 2 a 75 pourcent de chance, un 4 sinon
-  SetRandomCase(T, (rand()%100 < 75)?2:4);
 }
 
 
@@ -283,19 +290,129 @@ void LibereTer(ter *T){
 
 
 
-ter ReadEnCoursSave(){
+ter ReadEnCoursSave(float time){
+  //initialisation des variables utiles
   ter T;
-  T.taille = -1;
+  char r;
   FILE *save = fopen(SAVE_NAME, "r");
+  char str[100];
+  char append[10];
+  int tailleTo;
+  int nb = 0;
+  char play;
+  int Value;
+  int nbVide;
+  // on initialise les chaines de textes a vide
+  strcpy(str, "");
+  strcpy(append, "");
+  // on met la taille du terrain a -1 pour palier les erreurs
+  T.taille = -1;
+  // verification que le fichier existe
   if(save == NULL){
     printf("C'est assez cocasse... Un fichier ne devrais pas disparaitre...\n");
     return T;
   }
+  // Lectuer de la ligne d'entete 
+  while((r = getc(save)) != '\n'){
+    strcpy(append, "");
+    sprintf(append, "%c", r);
+    strcat(str, append);
+  }
+  //analyse de la premiere ligne pour recuperer la taille
+  if(str[0] == 'N'){
+    sscanf(str, "N %d %d", &tailleTo, &tailleTo);
+  }
+  //creation du tableau
+  T.tab = (int ** )malloc(sizeof(int *) * tailleTo);
+  if(T.tab == NULL){
+    return T;
+  }else{
+    for(int i = 0; i < tailleTo; i++){
+      T.tab[i] = (int *)malloc(sizeof(int) * tailleTo);
+      if(T.tab[i] == NULL){
+	for(int j = 0; j < i; i++){
+	  free(T.tab[j]);
+	}
+	free(T.tab);
+	return T;
+      }
+    }
+  }
+  // On met que toute les cases sont vides
+  for(int i = 0; i < tailleTo; i++){
+    for(int j = 0; j < tailleTo; j++){
+      T.tab[i][j] = -1;
+    } 
+  }
+  // initialisation des autres variables
+  T.max = 2;
+  T.score = 0;
+  T.vide = tailleTo*tailleTo;
+  T.taille = tailleTo;
 
-  printf("TODOOO : Read saved file");
-
-  TODO
-  
+  //pour tout les triple infos
+  strcpy(str, "");
+  while ((r = getc(save)) != EOF) {
+    //lecture de 3 infos
+    strcpy(append, "");
+    sprintf(append, "%c", r);
+    strcat(str, append);
+    if(r == ' '){
+      nb++;
+      // quand on en a lit 3
+      if(nb == 3){
+	// on les recupere
+	sscanf(str, "%c %d %d ", &play, &Value, &nbVide);
+	strcpy(str, "");
+	nb = 0;
+	// on effectue le deplacement necessaire
+	int depNum = (play == 'b')?1:(play == 'g')?2:(play == 'h')?3:(play == 'n')?0:4;
+	// sauf dans le cas des deux premier
+	if(depNum != 0){
+	  // on affiche le terrain pour que le joueur aie un replay du debut
+	  afficheTer(T);
+	  // on laisse le temps au joueur de voire le replay
+	  usleep((int)(1000000*time));
+	  // on effectue le deplacement deja effectue par le joueur
+	  CaseMouve(&T, depNum);
+	}
+	// on initialise les variables de mise de valeur
+	int mis = 0;
+	int videVue = -1;
+	//pour toute les cases
+	for(int i = 0; i < tailleTo; i++){
+	  for(int j = 0; j < tailleTo; j++){
+	    // si la case est vide
+	    if(T.tab[i][j] == -1){
+	      // Une case de plus ou on peu mettre
+	      videVue++;
+	      // si le numero de case coincide avec le numero de cette case on met a cette case
+	      if(videVue == nbVide){
+		T.tab[i][j] = Value;
+		mis = 1;
+		break;
+	      }
+	    }
+	  }
+	  // si on a deja mis une case, on sort de la boucle
+	  if(mis){
+	    break;
+	  }
+	}
+	// si une case a etait mis alors rien d anormale
+	if(mis){
+	  T.vide--;
+	  // sinon il doit y avoir une erreur
+	}else{
+	  printf("Erreur lors de la mise d'un block de valeur %d en %d alors qu'il y a %d vide.\n", Value, nbVide, T.vide);
+	  // on remet la taille a -1 pour recuperer le cas d erreur
+	  T.taille = -1;
+	  return T;
+	}
+	
+      }
+    }
+  }
   return T;
 }
 
