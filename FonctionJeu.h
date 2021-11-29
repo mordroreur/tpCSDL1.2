@@ -23,12 +23,16 @@ void CaseMouve(ter *T, int depNum);
 int CanDep(ter T, int depNum);
 void LibereTer(ter *T);
 ter ReadEnCoursSave(float time);
+void copiFile(char *old, char *nouv);
 
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);
 
 
 #define MAX(a, b) (a<b)?b:a
 
 #define SAVE_NAME "Res/Partie_encours"
+#define PARAM_NAME "Res/Parametres"
+#define SAVE_REPLAY "Res/Replay"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) /* cas ou le compilateur est windows */
 

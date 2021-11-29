@@ -416,3 +416,34 @@ ter ReadEnCoursSave(float time){
   return T;
 }
 
+
+
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay){
+  FILE *param = fopen(PARAM_NAME, "w");
+  fprintf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n", hightscore, endedGamesWin, endedLoseGame, mouvsup[0], mouvsup[1], mouvsup[2], mouvsup[3], nbReplay);
+  fflush(param);
+  fclose(param);
+}
+
+
+void copiFile(char *old, char *nouv){
+  FILE *originale;
+  FILE *copi;
+  char caractereActuel = 'A';
+
+
+  originale = fopen(old, "r");
+  if(originale == NULL){
+    printf("Il y a une erreur le fichier d'origine n'existe pas!\n");
+  }else{
+    copi = fopen(nouv, "w");
+
+    while ((caractereActuel = getc(originale)) != EOF){
+      putc(caractereActuel, copi);
+    }
+
+
+    fclose(copi);
+    fclose(originale);
+  }
+}

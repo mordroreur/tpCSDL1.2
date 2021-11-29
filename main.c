@@ -5,6 +5,29 @@
 int main(){
   srand(time(NULL));
   
+  int hightscore;
+  int endedGamesWin;
+  int endedLoseGame;
+  char mouvsup[4];
+  int nbReplay;
+
+  FILE *param = fopen(PARAM_NAME, "r");
+  if(param == NULL){
+    hightscore = 0;
+    endedGamesWin = 0;
+    endedLoseGame = 0;
+    mouvsup[0] = '-';
+    mouvsup[1] = '-';
+    mouvsup[2] = '-';
+    mouvsup[3] = '-';
+    nbReplay = 0;
+    writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+  }else{
+    fscanf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n", &hightscore, &endedGamesWin, &endedLoseGame, &mouvsup[0], &mouvsup[1], &mouvsup[2], &mouvsup[3], &nbReplay);
+    fclose(param);
+  }
+  
+    
   int EtapeDuJeu = -1;
   int isSave = 0;
   ter plateau;
@@ -33,6 +56,7 @@ int main(){
 	scanf("%c", &play); while ((getchar()) != '\n');
 	if(play == 'o'){
 	  plateau = ReadEnCoursSave(0.5);
+	  
 	  if(plateau.taille == -1){
 	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
 	    EtapeDuJeu = -1;
@@ -40,49 +64,31 @@ int main(){
 	    afficheTer(plateau);
 	    printf("Appuyez sur une touche pour reprendre la partie.");
 	    getchar();
-	    EtapeDuJeu = 3;
+	    // on cosidere que le joueur ne peu pas bouger
+	    int GameOver = 1;
+	    //pour les quatre deplacement
+	    for(int i = 1;i < 5; i++){
+	      if(CanDep(plateau, i)){
+		// si le joueur peu bouger on change cette variable
+		GameOver = 0;
+		break;
+	      }
+	    }
+	    // si GameOver est toujours a 1 alors le joueur a perdu
+	    if(GameOver){
+	      // il va donc a l ecran 4
+	      EtapeDuJeu = 4;
+	    }else{
+	      EtapeDuJeu = 3;
+	    }
 	  }
 	}else{
 	  printf("La partie à été supprimé au profit de la prochaine partie.\n");
-	  //
-	  // Lance la selection de jeu ici
-	  //
-	  // on lance une partie avec un terrain de taille 4
-	  printf("Appuyez sur entrer pour lancer le jeu.");
-	  plateau = InitVide(4);
-	  // cas ou l initialisation du terrain c est mal passe on quitte le jeu
-	  if(plateau.taille == -1){
-	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
-	    EtapeDuJeu = -1;
-	  }else {
-	    getchar();
-	    afficheTer(plateau);
-	    EtapeDuJeu = 3;
-	  }
-	  //
-	  //
-	  //
+	  EtapeDuJeu = 5;
 	}
       // si pas de partie en cours a charge
       }else{
-	//
-	// Lance la selection de jeu ici
-	//
-	// on lance une partie avec un terrain de taille 4
-	printf("Appuyez sur entrer pour lancer le jeu.");
-	plateau = InitVide(4);
-	// cas ou l initialisation du terrain c est mal passe on quitte le jeu
-	if(plateau.taille == -1){
-	  printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
-	  EtapeDuJeu = -1;
-	}else {
-	  getchar();
-	  afficheTer(plateau);
-	  EtapeDuJeu = 3;
-	}
-	//
-	//
-	//
+	EtapeDuJeu = 5;
       }
       break;
 
@@ -90,6 +96,10 @@ int main(){
       printf("Entrez le déplacement(d = droite, h = haut, g = gauche, b = bas) \n\tou q pour quitter : ");
       // recuperation de l entree joueur
       scanf("%c", &play); while ((getchar()) != '\n');
+      if(play == mouvsup[0] && mouvsup[0] != '-'){play = 'g';
+      }else if(play == mouvsup[1] && mouvsup[1] != '-'){play = 'h';
+      }else if(play == mouvsup[2] && mouvsup[2] != '-'){play = 'd';
+      }else if(play == mouvsup[3] && mouvsup[3] != '-'){play = 'b';}
       // si c est une entree de deplacement
       if(play == 'd' || play == 'h' || play == 'g' || play == 'b'){
 	int depNum = (play == 'b')?1:(play == 'g')?2:(play == 'h')?3:4;
@@ -103,7 +113,7 @@ int main(){
 	  // on deplace
 	  CaseMouve(&plateau, depNum);
 	    //on fais apparaitre un 2 a 75 pourcent de chance, un 4 sinon
-	  SetRandomCase(&plateau, (rand()%100 < 75)?2:4);
+	  SetRandomCase(&plateau, (rand()%100 < 90)?2:4);
 	  // on affiche le nouveau jeu
 	  afficheTer(plateau);
 	  // on cosidere que le joueur ne peu pas bouger
@@ -133,6 +143,65 @@ int main(){
       }
       break;
 
+    case 4:
+      afficheTer(plateau);
+      if(plateau.max < 2048){
+	printf("Vous avez perdu! ");
+	endedLoseGame++;
+      }else{
+	printf("Vous avez gagné! ");
+	endedGamesWin++;
+      }
+      printf("Votre meilleur score est de %d ", plateau.score);
+      if(plateau.score < hightscore){
+	printf("et donc inferieur au meilleur score de %d.\n", hightscore);
+      }else{
+	printf("et donc suppérieur au meilleur score de %d.\n", hightscore);
+	hightscore = plateau.score;
+      }
+      printf("Voulez-vous sauvegarder le replay?(o = oui, n = non) : ");
+      scanf("%c", &play); while ((getchar()) != '\n');
+      if(play == 'o'){
+	char tmp[100];
+	sprintf(tmp, "%s%d", SAVE_REPLAY, nbReplay);
+	copiFile(SAVE_NAME, tmp);
+	if(remove(SAVE_NAME) != 0){
+	  printf("Il y a un probleme inattendu...\n");
+	}
+	nbReplay++;
+      }else{
+	if(remove(SAVE_NAME) != 0){
+	  printf("Il y a un probleme inattendu...\n");
+	}
+      }
+      writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+      printf("Voulez-vous recommencer une partie?(o = oui, n = non) : ");
+      scanf("%c", &play); while ((getchar()) != '\n');
+      if(play == 'o'){
+	LibereTer(&plateau);
+	EtapeDuJeu = 5;
+      }else{
+	EtapeDuJeu = -1;
+      }
+      break;
+
+    case 5:
+	// on lance une partie avec un terrain de taille 4
+	printf("Appuyez sur entrer pour lancer le jeu.");
+	plateau = InitVide(4);
+	// cas ou l initialisation du terrain c est mal passe on quitte le jeu
+	if(plateau.taille == -1){
+	  printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
+	  EtapeDuJeu = -1;
+	}else {
+	  getchar();
+	  afficheTer(plateau);
+	  EtapeDuJeu = 3;
+	}
+	break;
+
+
+      
     case -1: // Cas de fermeture du jeu : liberation de la memoire et on sort de la boucle
       printf("Merci d'avoir joué, nous espérons vous revoir bientôt!!!\n");
       LibereTer(&plateau);
