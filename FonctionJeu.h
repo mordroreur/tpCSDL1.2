@@ -9,14 +9,15 @@
 typedef struct Terrain{
   int **tab;
   int max;
-  int taille;
+  int tailleX;
+  int tailleY;
   int vide;
   int score;
 }ter;
 
 
 
-ter InitVide(int n);
+ter InitVide(int n, int y);
 void afficheTer(ter T);
 int SetRandomCase(ter *T, int n);
 void CaseMouve(ter *T, int depNum);

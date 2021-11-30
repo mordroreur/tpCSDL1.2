@@ -47,7 +47,13 @@ int main(){
   while(EtapeDuJeu){
 
     switch (EtapeDuJeu) {
+      
     case 2 : /* Cas d'arriver dans le jeu */
+      //TODO changer ca pour tout setup
+      //et ajouter tailleY
+
+
+	
       clearScreen;
       printf("Bonjours et bienvenue sur ce jeu de 2048 version console.\n");
       // Si une savegarde a ete apercu en cours
@@ -57,7 +63,7 @@ int main(){
 	if(play == 'o'){
 	  plateau = ReadEnCoursSave(0.5);
 	  
-	  if(plateau.taille == -1){
+	  if(plateau.tailleX == -1){
 	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
 	    EtapeDuJeu = -1;
 	  }else {
@@ -153,9 +159,9 @@ int main(){
 	endedGamesWin++;
       }
       printf("Votre meilleur score est de %d ", plateau.score);
-      if(plateau.score < hightscore){
+      if(plateau.tailleX == plateau.tailleY && plateau.tailleX == 4 && plateau.score < hightscore){
 	printf("et donc inferieur au meilleur score de %d.\n", hightscore);
-      }else{
+      }else if(plateau.tailleX == plateau.tailleY && plateau.tailleX == 4){
 	printf("et donc suppérieur au meilleur score de %d.\n", hightscore);
 	hightscore = plateau.score;
       }
@@ -188,9 +194,9 @@ int main(){
     case 5:
 	// on lance une partie avec un terrain de taille 4
 	printf("Appuyez sur entrer pour lancer le jeu.");
-	plateau = InitVide(4);
+	plateau = InitVide(4, 2);
 	// cas ou l initialisation du terrain c est mal passe on quitte le jeu
-	if(plateau.taille == -1){
+	if(plateau.tailleX == -1){
 	  printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
 	  EtapeDuJeu = -1;
 	}else {
