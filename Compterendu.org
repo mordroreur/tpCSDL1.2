@@ -34,377 +34,188 @@
 
 * Rappel rapide du jeu 2048
 
+** Résumé du jeu
 
-** Cas général des méthodes
-
-Pour les deux méthodes, le but est le même, trouver l'équation d'une droite avec un nombre de points $n$ de la forme :
-
-
-\[ y= ax + b  \]
+Le but du jeu est de rassembler des tuiles sur une grille, pour combiner les tuiles de mêmes valeurs et créer ainsi une tuile portant le fameux nombre 2048. Cependant, le jeu s'arrête quand le joueur ne peut plus faire aucun mouvement/fusionner aucune tuile.
 
 
+** Problèmes potentiels identifiés au départ
 
+Ce jeu à en effet quelques spécificités :
 
-** Méthode des droites de régression
+*** Gestion des fusions
 
-Pour cette méthode, nous devons utiliser la formule du cours suivante (Où $\bar{x}$ et $\bar{y}$ sont les moyenne respective de $x$ et de $y$):
+Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes comme, par exemple, avec cet exemple :
 
-\[ a =\frac{\overline{xy}-\bar{x}\bar{y}}{\bar(x^2)-(\bar{x}^2)}  \]
+| 2 | 2 | 4 | 4 |
+| 4 | 8 | 2 | 2 |
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 |
 
+Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 présents sur la première ligne.
 
-et
+De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
+Nous devons donc gérer ce cas en plusieurs étapes.
 
-\[ b= \bar{y}-a\bar{x}  \]
+*** Différentes taille
 
+Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
 
+*** Gestion des sauvegardes
 
-*** Question 1
-
-Nous appliquons la formule du cours donnée précédemment.
-
- 
-*** Question 2
-
-Nous appliquerons la même méthode que la méthode à la [[*Question 1][Question 1]], sauf que nous le ferons pour les deux parties du tableau.
-Puis nous effectuons la moyenne des deux droites pour en obtenir une unique.
-
-** Méthode des ajustements
-
-Pour nous permettre de trouver une droite, nous devons modifier les deux équations pour arriver à une autre équation de la forme.
-
-\[ Y = AX + B  \]
-
-Nous allons donc modifier les équations initiales.
-
-Suite à cela, nous appliquerons la [[*Méthode des droites de régression][méthode des droites de régression]] avec les variables correspondantes.
-
-*** Question 3
-
-
-	    \begin{align*}
-	y &= ax^b \\
-\\
-	    ln(y)  &= ln(a) + ln(a^b)\\
-\\
-	ln(y) &= ln(a) + b*ln(a)\\
-	\end{align*}
-
-
-On pose donc $Y = ln(y)$, $X = ln(x)$, $A=b$ et $B = ln(a)$.
-
-
-
-*** Question 4
-
-	    \begin{align*}
-	y &= ce^{dx} \\
-\\
-	    ln(y)  &= ln(c) + ln(e^{dx})\\
-\\
-	ln(y) &= ln(c) + d*x*ln(e)\\
-	\end{align*}
-
-On pose donc $Y = ln(y)$, $X = x$, $A=d*ln(e)$ et $B = ln(c)$.
-
-
+Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
 
 
 
 * Présentation du programme console
 
-Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais ils sont consultables [[file:ajuste.c][ici pour la méthode des ajustements]] et [[file:DroiteReg.c][ici pour la méthode des régréssions]].
+Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
 
-** Nos structures
+** Introduction à la structure Terrain 
 
-Nous avons choisis d'utiliser plusieurs structures pour plusieurs cas :
-1. La première, la structure /point/, qui est utilisé partout. En effet, cette structure nous permet de stocker les différents points qui nous sont nécessaire pour trouver les droites respectant la diagonalisation.
-2. Puis, la structure /Maillon/. Cette structure est essentielle pour une chose : former des listes, ce qui nous permet d'ajouter un nombre de points indéfinis au départ, puis d'en rajouter, supprimer, etc, sans perdre de la mémoire.
-3. La structure /Liste/, qui est la suite logique de structure /Maillon/.
-4. La structure polynôme, qui contrairement au précédent tp, sera uniquement de degrès 0 ou 1.
-5. Enfin, même si ce n'est pas vraiment une structure, une fonction s'appelant /transformefloatenpoly/ transforme une liste de points en un tableau, permettant alors d'y accéder plus rapidement et facilement.
-
-*** Listes/Points
-
-
-**** Présentation du code général
-Le code pour les listes ainsi que pour les points est trouvable [[file:listePoint.c][ici]].
-
-Pour former un point, nous avons tout simplement besoin d'un x et d'un y associé à celui-ci.
-La structure des points est donc la suivante :
+Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
 
 #+begin_src C
-    
-  typedef struct point
-  {
-    float x;
-    float y;
-  } point;
-    
+  
+  typedef struct Terrain{
+  int **tab;
+  int max;
+  int tailleX;
+  int tailleY;
+  int vide;
+  int score;
+}ter;
+
+
+  
 #+end_src
 
-Puis, nous voulons rassembler ses points en des listes, nous avons donc besoin de deux structures supplémentaires : la structure /Maillon/ et la struture /Liste/. Ces deux structures permettent de structurer nos données, les utiliser, et les afficher dans des graphiques.
+Elle est composé de divers éléments, mais seulement d'entiers :
 
-#+begin_src C
-    
-  typedef struct Maillon{
-    struct Maillon *suiv;
-    point val;
-  }Maillon;
-    
-  typedef struct Liste{
-    struct Maillon *first;
-  }Liste;
-    
-    
-#+end_src
+1. Un tableau en 2 dimensions, qui serra la grille en elle même.
+2. max, qui sera l'entier présent dans la grille maximal. Permet de gérer le cas de “victoire” si l'on fait 2048.
+3. tailleX, qui sera le nombre de colonne
+4. tailleY, qui sera le nombre de ligne
+5. vide, qui sera le nombre de case vide du tableau
+6. score, qui sera le score du Terrain en cours
 
-De plus, les fonctions usuelles des listes sont également créé :
-1. /creerListe/
-2. /detruireListe/
-3. ajouteDebut
-4. ajouteFin
-5. /afficheListePoints/
-6. ListLenght
-7. supprDebut
-8. supprFin
-9. supprValeur
-10. supprMaillon
-11. ListeToTabsPoints, qui transforme une liste en un tableau.
-12. ViderListe
+
+Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes
    
 
-**** Présentation des fonctions utilisées pour résoudre le problème de départ
-
-Les différentes fonctions utilisées sont disponible dans la fin de [[file:listePoint.c][ici]].
-
-1. moyXY, qui nous permet de faire la moyenne des X et des Y
-2. moyX et moyY, qui nous permet de faire la moyenne 
-3. moyXmoyY
-4. moyXcar
-5. carmoyX
-6. lnListe
-7. moyXY2tab
-
-*** Polynômes
 
 
-Le code pour les polynôme est trouvable [[file:polynome.c][ici]]. 
 
-Comme vous le savez, le C n'inclue pas de type "polynôme". Nous avons donc dû creer la structure suivante :
+** Présentation des différentes fonctions  
 
-#+begin_src C
-  
-  typedef struct Polynome{
-    float *p;
-    int maxDeg;
-  }polynome;
-  
-#+end_src
+*** Initivei
 
-Cette structure à pour but de prendre un tableau, où l'indice du tableau nous permet de trouver le degrès de x, et les valeurs stockés dans le tableau sont les différents coefficients pour chaque x du polynôme.
+*** Affiche ter
 
-Nous avons également fait les diverses fonctions de bases :
-1. /polynome *creePolynome(int maxDeg)/, qui nous permet de créer un pointeur sur un polynôme.
-2. void destroyPolynome(polynome *p), qui supprime un polynôme.
-3. void affichepolynome(polynome *p), comme son nom l'indique, affiche le polynôme passé en paramètre.
-4. polynome *transformefloatenpoly(float unfloat), qui convertie un flottant en un polynôme.
-5. polynome *addPolynome(polynome *p1, polynome *p2), qui nous permet d'additionner (et dans le même temps de soustraire) deux polynôme entre eux
+*** SetRandomCase
 
-   #+begin_src C
-     
-     int i;
-     polynome *poly =
-       creePolynome((p1->maxDeg > p2->maxDeg) ? p1->maxDeg : p2->maxDeg);
-     
-     for (i = 0; i < p1->maxDeg + 1; ++i)
-       {
-	 /* printf("Degrèse de p1 %d \n", p1->maxDeg); */
-	 poly->p[i] = p1->p[i];
-       }
-     
-     for (i = 0; i < p2->maxDeg + 1; ++i)
-       {
-	 poly->p[i] += p2->p[i];
-       }
-     destroyPolynome(p1);
-     destroyPolynome(p2);
-     return poly;
-     
-   #+end_src
-6. polynome *multPolynome(polynome *p1, polynome *p2). Cette fonction multiplie deux polynômes entre eux.
+*** writesaveFile
 
-   #+begin_src C
-     
-     
-     int i, j;
-     polynome *poly = creePolynome(p1->maxDeg + p2->maxDeg);
-     
-     for (i = 0; i < p1->maxDeg + 1; ++i)
-       {
-	 for (j = 0; j < p2->maxDeg + 1; ++j)
-	   {
-	     poly->p[i + j] += p1->p[i] * p2->p[j];
-	   }
-       }
-     destroyPolynome(p1);
-     destroyPolynome(p2);
-     return poly;
-     
-   #+end_src
+*** ReadEnCoursSave
 
 
 
 
+** Explication du fonctionnement du jeu de base
+
+** Présentation des nouvelles fonctionnalités
+
+
+*** Fichier paramètre
+
+Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
+
+
+
+	  usleep((int)(1000000*time));
+	  // on effectue le deplacement deja effectue par le joueur
+	  CaseMouve(&T, depNum);
+
+stocker le nombre de case vide, et
+
+
+un fichier moddifiable
+Param_Name
+
+High score
+Nb de victoire
+Nb de défaite
+les nouvelles touches*4
+nb de replay (pour le nom du fichier des replays au fur et à mesure)
+
+
+*** Gestion des sauvegardes
+
+**** Présentation du fichier de sauvegarde
 
 
 
 
-** Présentation de la méthode droites de régression
+Un fichier de sauvegarde est présenter de cette manière :
+Unelettre Unchiffre Unautrechiffre
+Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre [...]
 
-*** Simple
-Pour résoudre avec cette méthode, nous avons tout simplement effectué, grâce à nos fonctions usuelles, les calculs "normaux" pour faire une droite de régression.
+Un exemple concret :
+#+begin_example
+N 4 2
+n 2 3 n 2 4 h 2 3 b 2 2 g 2 4 g 
+#+end_example
 
-Nous avons également pensé à libérer la mémoire de nos différents tableaux.
+Tout d'abord, les trois premiers éléments :
+1. Sert à déterminer le “type” de la sauvegarde.
+2. Les deux nombres suivant permette d'avoir la taille du terrain
+
+Puis, les autres sont simplement la partie enregistrer.
+Comment me direz vous ?
+Et bien, la lettre donne la direction (g gauche, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le [[*Récupération de la sauvegarde (avec \[\[*ReadEnCoursSave\]\[ReadEnCoursSave\]\])][principe suivant]].
+
+
+**** La sauvegarde en elle-même
+
+La gestion des sauvegardes est particulière.
+En effet, lorsque le joueur joue un coup, nous enregistrons, selon la méthode décrite [[*Présentation du fichier de sauvegarde][ici]], les différents éléments nécessaires à la sauvegarde.
+C'est-à-dire qu'à chaque fois que le joueur effectue un coup, nous récupérons les éléments nécessaires pour pouvoir simuler cette partie.
+
+**** Récupération de la sauvegarde (avec [[*ReadEnCoursSave][ReadEnCoursSave]])
+
+La sauvegarde est récupérée en deux étapes :
+
+***** Lecture du fichier
+
+Pour lire le fichier de sauvegarde, nous avons besoin de la fonction [[*ReadEnCoursSave][ReadEnCoursSave]]. En effet, cette fonction permet de lire les informations présentes dans le fichier de sauvegarde donné
 
 #+begin_src C
-  
-  polynome *UneDroiteReg(Liste l){
-  polynome *P = creePolynome(1);
-  int n = ListLenght(l);
-  float **Res = ListeToTabsPoints(l);
-  P->p[1] = (moyXY(Res, n) - moyX(Res, n) * moyY(Res, n))/(moyXcar(Res, n) - carmoyX(Res, n));
-  P->p[0] = moyY(Res, n) - moyX(Res, n)*((moyXY(Res, n) - moyX(Res, n) * moyY(Res, n))/(moyXcar(Res, n) - carmoyX(Res, n)));
-  free(Res[1]);free(Res[0]);free(Res);
-  return P;
-}
-  
+FILE *save = fopen(SAVE_NAME, "r");
 #+end_src
 
-*** Double
+où SAVE_NAME est une macro qui est le nom du fichier de la sauvegarde (non modifiable par le joueur).
 
-Pour résoudre avec deux droites de régression, nous avons d'abord séparé en deux notre tableau de points. Puis, nous avons appliqué la première méthode distinctement sur les deux tableaux. Enfin, nous avons fait la moyenne de ces deux droites pour calculer la dernière droite (qui est le polynôme renvoyé).
-
-#+begin_src C
-  
-  polynome *DeuxDroiteReg(Liste l){
-  float **Res = ListeToTabsPoints(l);
-  int n = ListLenght(l);
-  float moy = moyY(Res, n);
-  Maillon *m = l.first;
-  Liste l1 = creerListe();
-  Liste l2 = creerListe();
-  for(int i = 0; i < n; i++){
-    if(m->val.y < moy){
-      ajouteFin(&l1, m->val);
-    }else {
-      ajouteFin(&l2, m->val);
-    }
-    m = m->suiv;
-  }
-  polynome *p1 = UneDroiteReg(l1);
-  polynome *p2 = UneDroiteReg(l2);
-  polynome *Ret = creePolynome(1);
-  Ret->p[0] = (p1->p[0] + p2->p[0])/2;
-  Ret->p[1] = (p1->p[1] + p2->p[1])/2;
-
-  detruireListe(l1);
-  detruireListe(l2);
-  free(Res[1]);free(Res[0]);free(Res);
-  return Ret;
-}
-
-  
-#+end_src
-
-** Présentation de la méthode des ajustements
-
-Le code pour la méthode des ajustements est disponible [[file:ajuste.c][ici]].
-
-
-Pour la résolution par la méthode des ajustement, et après avoir résolu l'équation du type $Y = AX + B$, nous commençons tout d'abord, pour les deux méthodes, de transformer notre liste en tableau, ainsi que de créer le polynôme de degrés 1.
-Puis, grâce à la fonction /lnListe/, nous créons un second tableau qui contiendra les points avec application de la fonction logarithme (car on a posé $Y = ln(y)$, $X = ln(x)$, $A=b$ et $B = ln(a)$ pour la question 3 et $Y = ln(y)$, $X = x$, $A=d*ln(e)$ et $B = ln(c)$ pour la question 4). 
-
-
-#+begin_src C
-  
-  polynome *P = creePolynome(1);
-  int n = ListLenght(listedepoint);
-  float **Tnormal = ListeToTabsPoints(listedepoint);
-  float **Tln = lnListe(Tnormal, n);
-  
-#+end_src
+De plus, cette fonction permet de recréer un exactement le même terrain de la sauvegarde avec, on l'avoue, un petit subterfuge :
 
 
 
-*** Question 3 (Exponentiel)
+***** Replay automatique
+
+Lors de l'appel de la fonction, nous créons d'abord le terrain avec le tableau de la bonne dimension. Nous lisons donc la première ligne.
+Puis, nous parcourons la deuxième. Nous stockons dans une chaîne de caractère un seul et unique coup. Nous avons donc besoin de stocker une lettre et 2 nombre.
+Le fichier de sauvegarde ressemblant à ceci :
+
+#+begin_example
+N unnombre unautre
+n 2 31 n 2 4 h 2 3 b 2 22 g 2 4 g 
+#+end_example
+
+nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous avons 31 et 22 qui ne marcherait pas) pour séparer deux coup. Quand ce nombre d'espace atteint 3, nous somme donc en présence du coup suivant.
 
 
-Nous initialisons les variables /a/ et /b/, qui seront des variables temporaires.
-
-Puis, nous calculons les moyennes de X et de Yln, pour faciliter la lecture du code et rendre le code plus facilement compréhensible.
-
-#+begin_src C
-  
-  float moyenneX = moyX(Tnormal, n);
-  float moyenneYln = moyY(Tln, n);
-  
-#+end_src
-
-Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
-
-Le premier calcul sera pour calculer l'exposant présent devant x, donc d.
-
-#+begin_src C
-  
-a = (moyXY2tab(Tnormal, Tln, n) - moyX(Tnormal, n) * moyY(Tln, n)) /
-      (moyXcar(Tnormal, n) - carmoyX(Tnormal, n));
-  
-#+end_src
-
-Et le second sera pour la coefficient présent devant x.
+*** Replays
 
 
-#+begin_src C
- 
-float temp = moyenneYln - (a * moyenneX);
-  b = exp(1) * exp(temp);
-  
-#+end_src
- 
-Enfin, nous pouvons retourner le polynôme P.
-
-
-
-*** Question 4 (Puissance)
-
-Nous initialisons les variables /a/ et /b/, qui seront des variables temporaires.
-
-
-Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
-
-Le premier calcul sera pour calculer l'exposant, donc b.
-
-#+begin_src C
-  
-  b = (moyXY(Tln, n) - moyX(Tln, n) * moyY(Tln, n)) /
-      (moyXcar(Tln, n) - carmoyX(Tln, n));
-  
-#+end_src
-
-Et le second sera pour la coefficient présent devant x.
-
-
-#+begin_src C
- 
-float temp = moyenneYnl - (b * moyenneXnl);
-  a = exp(temp);
-  
-#+end_src
- 
-Enfin, nous pouvons retourner le polynôme P.
-
-
-** Gestion des sauvegardes
 
 * SDL
 
@@ -464,66 +275,9 @@ Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions
 La fonction /end-sdl/ nous permet de fermet la fenêtre SDL proprement, ainsi que faire les opérations nécessaires pour vider la mémoire qui a besoin d'être libéré.
 
 
-* TODO Présentation des nouvelles fonctionnalités
-
-
-Les différents résultats sont disponibles en faisant les test grâces aux fonctionnalités implémentées dans le programme.
-
-
-** Série S
-
-Liste de points sans difficulté particulière, mais pas dans le bon ordre.
-
-Résultats : On peut voir que les résultats sont les bons : l'approximation à l'air (graphiquement) efficace.
 
 
 
-** Les trois séries :
-
-Suites de points normaux.
-Difficultés potentielles : aucune, sauf pour le dernier qui ne pourra sûrement pas être calculé (car ce n'est pas une suite de points avec différents $x$)
-
-
-Résultats : 
-
-  1. Les approximations sont les bonnes, aucune difficulté.
-
-  2. Les approximations sont bonnes, aucune difficulté également.
-
-  3. Ne peut pas se calculer : en effet, les points sont sur le même X. Les approximations sont donc incalculables (et infaisable).
-
-     
-** Dépenses mensuelles et revenus :
-
-Pour ces données, il y a un grand nombre de données, ainsi qu'un axe des x qui commence avec de "grandes valeurs".
-
-Difficultés potentielles : précisions dû aux résultats importants obtenus.
-
-
-Résultats :Les polynômes ont soit des coefficients très importants, soit des coefficients presque négligeable. En revanche, on peut constater qu'il y a des approximations de calcul dans les deux méthodes. En effet, les deux polynômes finaux ne sont pas exactement les mêmes, même si ils sont tous les deux du même ordre de grandeur.
-
-
-** Série chronologique avec accroissement exponentiel
-
-L'exponentiel de la forme $y = ce^{dx}$ est parfaitement sur les données, ce qui prouve que cette approximation est adaptée.
-
-** Vérification de la loi d Pareto
-
-L'exponentiel de la forme $y = ax^b$ est parfaitement sur les données, ce qui prouve la vérification de cette loi.
-
-** Commentaire global
-
-Pour ses différents jeux d'essais, on peut constater plusieurs choses :
-
-1. La méthode des droites de régression et deux droites de régression ne donnent pas la même chose
-
-   Et c'est normal. En effet, avec l'un, nous appliquons la formule sur l'ensemble des points. Tandis que sur la deuxième, nous séparons le tableau en deux, puis effectuons une moyenne des deux droites obtenues. Leur efficacité dépend donc des points donnés, et est donc "aléatoire".
-   
-2. Les méthodes d'ajustements sont plus ou moins précises en fonction des cas (comme on peut le constater dans le programme)
-
-3. Évaluation des coûts :
-   Pour les droites d'approximation, la complexité est de l'ordre (o)n^2, elle est également de (o)n^2 pour les méthodes des questions 3 et 4.
-   
 
 * Conclusion 
 

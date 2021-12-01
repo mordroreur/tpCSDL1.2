@@ -1,4 +1,4 @@
-% Created 2021-11-29 Mon 10:28
+% Created 2021-12-01 Wed 15:14
 % Intended LaTeX compiler: pdflatex
 \documentclass[letter]{article}
                       \usepackage[utf8]{inputenc}
@@ -37,319 +37,144 @@
 
 \newpage
 
-\section{Rappel rapide des méthodes}
-\label{sec:org989b1f0}
+\section{Rappel rapide du jeu 2048}
+\label{sec:org92ace60}
+
+\subsection{Résumé du jeu}
+\label{sec:org2219a01}
+
+Le but du jeu est de rassembler des tuiles sur une grille, pour combiner les tuiles de mêmes valeurs et créer ainsi une tuile portant le fameux nombre 2048. Cependant, le jeu s'arrête quand le joueur ne peut plus faire aucun mouvement/fusionner aucune tuile.
 
 
-\subsection{Cas général des méthodes}
-\label{sec:org9f4a19b}
+\subsection{Problèmes potentiels}
+\label{sec:org578c7bc}
 
-Pour les deux méthodes, le but est le même, trouver l'équation d'une droite avec un nombre de points \(n\) de la forme :
+Ce jeu à en effet quelques spécificités :
 
+\subsubsection{Gestion des fusions}
+\label{sec:org8f9db05}
 
-\[ y= ax + b  \]
+Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes, comme par exemple avec cette exemple :
 
+\begin{center}
+\begin{tabular}{rrrr}
+2 & 2 & 4 & 4\\
+4 & 8 & 2 & 2\\
+0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0\\
+\end{tabular}
+\end{center}
 
+Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 présents sur la première ligne.
 
+De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
+Nous devons donc gérer ce cas en plusieurs étapes.
 
-\subsection{Méthode des droites de régression}
-\label{sec:orgcc39515}
+\subsubsection{Différentes taille}
+\label{sec:org650b468}
 
-Pour cette méthode, nous devons utiliser la formule du cours suivante (Où \(\bar{x}\) et \(\bar{y}\) sont les moyenne respective de \(x\) et de \(y\)):
+Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
 
-\[ a =\frac{\overline{xy}-\bar{x}\bar{y}}{\bar(x^2)-(\bar{x}^2)}  \]
+\subsubsection{Gestion des sauvegardes}
+\label{sec:org3397192}
 
+Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
 
-et
+\section{Présentation du programme console}
+\label{sec:org47b6c16}
 
-\[ b= \bar{y}-a\bar{x}  \]
+Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
 
+\subsection{Introduction à la structure Terrain}
+\label{sec:orgde715e9}
 
-
-\subsubsection{Question 1}
-\label{sec:org258d844}
-
-Nous appliquons la formule du cours donnée précédemment.
-
-
-\subsubsection{Question 2}
-\label{sec:org9fcfce3}
-
-Nous appliquerons la même méthode que la méthode à la \hyperref[sec:org258d844]{Question 1}, sauf que nous le ferons pour les deux parties du tableau.
-Puis nous effectuons la moyenne des deux droites pour en obtenir une unique.
-
-\subsection{Méthode des ajustements}
-\label{sec:org833f78f}
-
-Pour nous permettre de trouver une droite, nous devons modifier les deux équations pour arriver à une autre équation de la forme.
-
-\[ Y = AX + B  \]
-
-Nous allons donc modifier les équations initiales.
-
-Suite à cela, nous appliquerons la \hyperref[sec:orgcc39515]{méthode des droites de régression} avec les variables correspondantes.
-
-\subsubsection{Question 3}
-\label{sec:org323c8be}
-
-
-	    \begin{align*}
-	y &= ax^b \\
-\\
-	    ln(y)  &= ln(a) + ln(a^b)\\
-\\
-	ln(y) &= ln(a) + b*ln(a)\\
-	\end{align*}
-
-
-On pose donc \(Y = ln(y)\), \(X = ln(x)\), \(A=b\) et \(B = ln(a)\).
-
-
-
-\subsubsection{Question 4}
-\label{sec:org8a197bc}
-
-	    \begin{align*}
-	y &= ce^{dx} \\
-\\
-	    ln(y)  &= ln(c) + ln(e^{dx})\\
-\\
-	ln(y) &= ln(c) + d*x*ln(e)\\
-	\end{align*}
-
-On pose donc \(Y = ln(y)\), \(X = x\), \(A=d*ln(e)\) et \(B = ln(c)\).
-
-
-
-
-
-\section{Présentation des programmes commentés}
-\label{sec:orga73dbf5}
-
-Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais ils sont consultables \href{ajuste.c}{ici pour la méthode des ajustements} et \href{DroiteReg.c}{ici pour la méthode des régréssions}.
-
-\subsection{Nos structures}
-\label{sec:orgeba98bd}
-
-Nous avons choisis d'utiliser plusieurs structures pour plusieurs cas :
-\begin{enumerate}
-\item La première, la structure \emph{point}, qui est utilisé partout. En effet, cette structure nous permet de stocker les différents points qui nous sont nécessaire pour trouver les droites respectant la diagonalisation.
-\item Puis, la structure \emph{Maillon}. Cette structure est essentielle pour une chose : former des listes, ce qui nous permet d'ajouter un nombre de points indéfinis au départ, puis d'en rajouter, supprimer, etc, sans perdre de la mémoire.
-\item La structure \emph{Liste}, qui est la suite logique de structure \emph{Maillon}.
-\item La structure polynôme, qui contrairement au précédent tp, sera uniquement de degrès 0 ou 1.
-\item Enfin, même si ce n'est pas vraiment une structure, une fonction s'appelant \emph{transformefloatenpoly} transforme une liste de points en un tableau, permettant alors d'y accéder plus rapidement et facilement.
-\end{enumerate}
-
-\subsubsection{Listes/Points}
-\label{sec:org55c61a5}
-
-
-\begin{enumerate}
-\item Présentation du code général
-\label{sec:orgefc6f8b}
-Le code pour les listes ainsi que pour les points est trouvable \href{listePoint.c}{ici}.
-
-Pour former un point, nous avons tout simplement besoin d'un x et d'un y associé à celui-ci.
-La structure des points est donc la suivante :
+Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
 
 \begin{verbatim}
 
-typedef struct point
-{
-  float x;
-  float y;
-} point;
+  typedef struct Terrain{
+  int **tab;
+  int max;
+  int tailleX;
+  int tailleY;
+  int vide;
+  int score;
+}ter;
 
-\end{verbatim}
-
-Puis, nous voulons rassembler ses points en des listes, nous avons donc besoin de deux structures supplémentaires : la structure \emph{Maillon} et la struture \emph{Liste}. Ces deux structures permettent de structurer nos données, les utiliser, et les afficher dans des graphiques.
-
-\begin{verbatim}
-
-typedef struct Maillon{
-  struct Maillon *suiv;
-  point val;
-}Maillon;
-
-typedef struct Liste{
-  struct Maillon *first;
-}Liste;
 
 
 \end{verbatim}
 
-De plus, les fonctions usuelles des listes sont également créé :
+Elle est composé de divers éléments, mais seulement d'entiers :
+
 \begin{enumerate}
-\item \emph{creerListe}
-\item \emph{detruireListe}
-\item ajouteDebut
-\item ajouteFin
-\item \emph{afficheListePoints}
-\item ListLenght
-\item supprDebut
-\item supprFin
-\item supprValeur
-\item supprMaillon
-\item ListeToTabsPoints, qui transforme une liste en un tableau.
-\item ViderListe
+\item Un tableau en 2 dimensions, qui serra la grille en elle même.
+\item max, qui sera l'entier présent dans la grille maximal. Permet de gérer le cas de “victoire” si l'on fait 2048.
+\item tailleX, qui sera le nombre de colonne
+\item tailleY, qui sera le nombre de ligne
+\item vide, qui sera le nombre de case vide du tableau
+\item score, qui sera le score du Terrain en cours
 \end{enumerate}
 
 
-\item Présentation des fonctions utilisées pour résoudre le problème de départ
-\label{sec:org9ca27a3}
-
-Les différentes fonctions utilisées sont disponible dans la fin de \href{listePoint.c}{ici}.
-
-\begin{enumerate}
-\item moyXY, qui nous permet de faire la moyenne des X et des Y
-\item moyX et moyY, qui nous permet de faire la moyenne
-\item moyXmoyY
-\item moyXcar
-\item carmoyX
-\item lnListe
-\item moyXY2tab
-\end{enumerate}
-\end{enumerate}
-
-\subsubsection{Polynômes}
-\label{sec:orgc2520be}
-
-
-Le code pour les polynôme est trouvable \href{polynome.c}{ici}. 
-
-Comme vous le savez, le C n'inclue pas de type "polynôme". Nous avons donc dû creer la structure suivante :
-
-\begin{verbatim}
-
-typedef struct Polynome{
-  float *p;
-  int maxDeg;
-}polynome;
-
-\end{verbatim}
-
-Cette structure à pour but de prendre un tableau, où l'indice du tableau nous permet de trouver le degrès de x, et les valeurs stockés dans le tableau sont les différents coefficients pour chaque x du polynôme.
-
-Nous avons également fait les diverses fonctions de bases :
-\begin{enumerate}
-\item \emph{polynome *creePolynome(int maxDeg)}, qui nous permet de créer un pointeur sur un polynôme.
-\item void destroyPolynome(polynome *p), qui supprime un polynôme.
-\item void affichepolynome(polynome *p), comme son nom l'indique, affiche le polynôme passé en paramètre.
-\item polynome *transformefloatenpoly(float unfloat), qui convertie un flottant en un polynôme.
-\item polynome *addPolynome(polynome *p1, polynome *p2), qui nous permet d'additionner (et dans le même temps de soustraire) deux polynôme entre eux
-
-\begin{verbatim}
-
-int i;
-polynome *poly =
-  creePolynome((p1->maxDeg > p2->maxDeg) ? p1->maxDeg : p2->maxDeg);
-
-for (i = 0; i < p1->maxDeg + 1; ++i)
-  {
-    /* printf("Degrèse de p1 %d \n", p1->maxDeg); */
-    poly->p[i] = p1->p[i];
-  }
-
-for (i = 0; i < p2->maxDeg + 1; ++i)
-  {
-    poly->p[i] += p2->p[i];
-  }
-destroyPolynome(p1);
-destroyPolynome(p2);
-return poly;
-
-\end{verbatim}
-\item polynome *multPolynome(polynome *p1, polynome *p2). Cette fonction multiplie deux polynômes entre eux.
-
-\begin{verbatim}
-
-
-int i, j;
-polynome *poly = creePolynome(p1->maxDeg + p2->maxDeg);
-
-for (i = 0; i < p1->maxDeg + 1; ++i)
-  {
-    for (j = 0; j < p2->maxDeg + 1; ++j)
-      {
-	poly->p[i + j] += p1->p[i] * p2->p[j];
-      }
-  }
-destroyPolynome(p1);
-destroyPolynome(p2);
-return poly;
-
-\end{verbatim}
-\end{enumerate}
+Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes
 
 
 
 
 
+\subsection{Présentation des différentes fonctions}
+\label{sec:org32988b4}
+
+\subsubsection{Initivei}
+\label{sec:org1cde1d5}
+
+\subsubsection{Affiche ter}
+\label{sec:org5ad3c42}
+
+\subsubsection{SetRandomCase}
+\label{sec:org9d6c966}
+
+\subsubsection{writesaveFile}
+\label{sec:orge97b042}
+
+\subsubsection{ReadEnCoursSave}
+\label{sec:org51a70e7}
+
+
+Partie\textsubscript{encours}
+paramètre : time pour temps entre séquence de jeu lors du replay
+
+N = type de la partie (), puis taille X et Y du ter
+n = rien
+puis emplacement de la case, en ne prenant pas en compte les case vides
+
+Replay : même logique
 
 
 
-\subsection{Présentation de la méthode droites de régression}
-\label{sec:org7c742f9}
-
-\subsubsection{Simple}
-\label{sec:org3469787}
-Pour résoudre avec cette méthode, nous avons tout simplement effectué, grâce à nos fonctions usuelles, les calculs "normaux" pour faire une droite de régression.
-
-Nous avons également pensé à libérer la mémoire de nos différents tableaux.
-
-\begin{verbatim}
-
-  polynome *UneDroiteReg(Liste l){
-  polynome *P = creePolynome(1);
-  int n = ListLenght(l);
-  float **Res = ListeToTabsPoints(l);
-  P->p[1] = (moyXY(Res, n) - moyX(Res, n) * moyY(Res, n))/(moyXcar(Res, n) - carmoyX(Res, n));
-  P->p[0] = moyY(Res, n) - moyX(Res, n)*((moyXY(Res, n) - moyX(Res, n) * moyY(Res, n))/(moyXcar(Res, n) - carmoyX(Res, n)));
-  free(Res[1]);free(Res[0]);free(Res);
-  return P;
-}
-
-\end{verbatim}
-
-\subsubsection{Double}
-\label{sec:orgd7cf879}
-
-Pour résoudre avec deux droites de régression, nous avons d'abord séparé en deux notre tableau de points. Puis, nous avons appliqué la première méthode distinctement sur les deux tableaux. Enfin, nous avons fait la moyenne de ces deux droites pour calculer la dernière droite (qui est le polynôme renvoyé).
-
-\begin{verbatim}
-
-  polynome *DeuxDroiteReg(Liste l){
-  float **Res = ListeToTabsPoints(l);
-  int n = ListLenght(l);
-  float moy = moyY(Res, n);
-  Maillon *m = l.first;
-  Liste l1 = creerListe();
-  Liste l2 = creerListe();
-  for(int i = 0; i < n; i++){
-    if(m->val.y < moy){
-      ajouteFin(&l1, m->val);
-    }else {
-      ajouteFin(&l2, m->val);
-    }
-    m = m->suiv;
-  }
-  polynome *p1 = UneDroiteReg(l1);
-  polynome *p2 = UneDroiteReg(l2);
-  polynome *Ret = creePolynome(1);
-  Ret->p[0] = (p1->p[0] + p2->p[0])/2;
-  Ret->p[1] = (p1->p[1] + p2->p[1])/2;
-
-  detruireListe(l1);
-  detruireListe(l2);
-  free(Res[1]);free(Res[0]);free(Res);
-  return Ret;
-}
+Pour rejouer : re fait le replay
 
 
-\end{verbatim}
+usleep((int)(1000000*time));
+// on effectue le deplacement deja effectue par le joueur
+CaseMouve(\&T, depNum);
+
+stocker le nombre de case vide, et
+
+
+un fichier moddifiable
+Param\textsubscript{Name}
+
+High score
+Nb de victoire
+Nb de défaite
+les nouvelles touches*4
+nb de replay (pour le nom du fichier des replays au fur et à mesure)
+
 
 \subsection{Présentation de la méthode des ajustements}
-\label{sec:org762cacc}
+\label{sec:orgcfb108f}
 
 Le code pour la méthode des ajustements est disponible \href{ajuste.c}{ici}.
 
@@ -370,7 +195,7 @@ float **Tln = lnListe(Tnormal, n);
 
 
 \subsubsection{Question 3 (Exponentiel)}
-\label{sec:orgeb0f4d2}
+\label{sec:orga9ce6dc}
 
 
 Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
@@ -410,7 +235,7 @@ Enfin, nous pouvons retourner le polynôme P.
 
 
 \subsubsection{Question 4 (Puissance)}
-\label{sec:org00e22eb}
+\label{sec:org46ad138}
 
 Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
 
@@ -438,85 +263,44 @@ float temp = moyenneYnl - (b * moyenneXnl);
 
 Enfin, nous pouvons retourner le polynôme P.
 
-\section{Présentation des Jeux d'essais avec commentaires}
-\label{sec:org2c75375}
+
+\subsection{Gestion des sauvegardes}
+\label{sec:orgea98c50}
 
 
-Les différents résultats sont disponibles en faisant les test grâces aux fonctionnalités implémentées dans le programme.
+\subsubsection{Présentation du fichier de sauvegarde}
+\label{sec:org99b6329}
+
+Un fichier de sauvegarde est présenter de cette manière :
+Unelettre Unchiffre Unautrechiffre
+Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre [\ldots{}]
+
+Un exemple concret :
+\begin{verbatim}
+N 4 2
+n 2 3 n 2 4 h 2 3 b 2 2 g 2 4 g 
+\end{verbatim}
+
+\textbf{Explication :}
 
 
-\subsection{Série S}
-\label{sec:org09e3a08}
-
-Liste de points sans difficulté particulière, mais pas dans le bon ordre.
-
-Résultats : On peut voir que les résultats sont les bons : l'approximation à l'air (graphiquement) efficace.
 
 
+\subsubsection{La sauvegarde en elle-même}
+\label{sec:org738bca4}
+La gestion des sauvegardes est particulière.
+En effet, lorsque le joueur joue un coup, nous enregistr
 
-\subsection{Les trois séries :}
-\label{sec:org0de77dd}
-
-Suites de points normaux.
-Difficultés potentielles : aucune, sauf pour le dernier qui ne pourra sûrement pas être calculé (car ce n'est pas une suite de points avec différents \(x\))
-
-
-Résultats : 
-
-\begin{enumerate}
-\item Les approximations sont les bonnes, aucune difficulté.
-
-\item Les approximations sont bonnes, aucune difficulté également.
-
-\item Ne peut pas se calculer : en effet, les points sont sur le même X. Les approximations sont donc incalculables (et infaisable).
-\end{enumerate}
-
-
-\subsection{Dépenses mensuelles et revenus :}
-\label{sec:org550909f}
-
-Pour ces données, il y a un grand nombre de données, ainsi qu'un axe des x qui commence avec de "grandes valeurs".
-
-Difficultés potentielles : précisions dû aux résultats importants obtenus.
-
-
-Résultats :Les polynômes ont soit des coefficients très importants, soit des coefficients presque négligeable. En revanche, on peut constater qu'il y a des approximations de calcul dans les deux méthodes. En effet, les deux polynômes finaux ne sont pas exactement les mêmes, même si ils sont tous les deux du même ordre de grandeur.
-
-
-\subsection{Série chronologique avec accroissement exponentiel}
-\label{sec:org4837a61}
-
-L'exponentiel de la forme \(y = ce^{dx}\) est parfaitement sur les données, ce qui prouve que cette approximation est adaptée.
-
-\subsection{Vérification de la loi d Pareto}
-\label{sec:org8d16b62}
-
-L'exponentiel de la forme \(y = ax^b\) est parfaitement sur les données, ce qui prouve la vérification de cette loi.
-
-\subsection{Commentaire global}
-\label{sec:org7be5a46}
-
-Pour ses différents jeux d'essais, on peut constater plusieurs choses :
-
-\begin{enumerate}
-\item La méthode des droites de régression et deux droites de régression ne donnent pas la même chose
-
-Et c'est normal. En effet, avec l'un, nous appliquons la formule sur l'ensemble des points. Tandis que sur la deuxième, nous séparons le tableau en deux, puis effectuons une moyenne des deux droites obtenues. Leur efficacité dépend donc des points donnés, et est donc "aléatoire".
-
-\item Les méthodes d'ajustements sont plus ou moins précises en fonction des cas (comme on peut le constater dans le programme)
-
-\item Évaluation des coûts :
-Pour les droites d'approximation, la complexité est de l'ordre (o)n\textsuperscript{2}, elle est également de (o)n\textsuperscript{2} pour les méthodes des questions 3 et 4.
-\end{enumerate}
-
+\subsubsection{Récupération de la sauvegarde}
+\label{sec:org78730c2}
 
 \section{SDL}
-\label{sec:org0995792}
+\label{sec:org5279e08}
 
 Le code qui nous permet de gérer la fenêtre SDL est disponible \href{render.c}{ici}.
 
 \subsection{Début}
-\label{sec:org69a8fbe}
+\label{sec:orgb8981dd}
 
 Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par exemple :
 
@@ -533,10 +317,10 @@ Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par e
 
 
 \subsection{Affichage et fonctionnalité}
-\label{sec:orga1147ff}
+\label{sec:orga74c89e}
 
 \subsubsection{Affichage}
-\label{sec:orgd436556}
+\label{sec:orgb9b7f6e}
 
 Pour effectuer l'affichage d'une fenêtre SDL, nous devons passer par une boucle \emph{while}.
 
@@ -558,7 +342,7 @@ Puis, nous avons aussi un cas de débogage. En effet, si l'on n'est pas entré d
 
 
 \subsubsection{Fonctionnalités :}
-\label{sec:orgc331462}
+\label{sec:org1d5c4c5}
 
 Divers fonctionnalités sont présentes :
 Vous pouvez afficher la fenêtre grâce à la touche "g". Vous pouvez désormais voir la liste des points, les courbes représentant les différentes méthodes d'approximation, ainsi que la liste de points à droite.
@@ -573,13 +357,85 @@ Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions
 
 
 \subsection{Fin de SDL}
-\label{sec:orgd1e36bf}
+\label{sec:org28196a5}
 
 La fonction \emph{end-sdl} nous permet de fermet la fenêtre SDL proprement, ainsi que faire les opérations nécessaires pour vider la mémoire qui a besoin d'être libéré.
 
 
-\section{Conclusion sur les méthodes}
-\label{sec:orgb8f9874}
+\section{{\bfseries\sffamily TODO} Présentation des nouvelles fonctionnalités}
+\label{sec:org306c323}
 
-Différentes méthodes peuvent être utilisées pour une approximation. En effet, dans certains cas, les droites d'approximations seront plus efficaces, tandis que, par exemple, pour la loi de Pareto, nous préférerons une des méthodes d'ajustement.
+
+Les différents résultats sont disponibles en faisant les test grâces aux fonctionnalités implémentées dans le programme.
+
+
+\subsection{Série S}
+\label{sec:orga6df84e}
+
+Liste de points sans difficulté particulière, mais pas dans le bon ordre.
+
+Résultats : On peut voir que les résultats sont les bons : l'approximation à l'air (graphiquement) efficace.
+
+
+
+\subsection{Les trois séries :}
+\label{sec:orgbdb02d0}
+
+Suites de points normaux.
+Difficultés potentielles : aucune, sauf pour le dernier qui ne pourra sûrement pas être calculé (car ce n'est pas une suite de points avec différents \(x\))
+
+
+Résultats : 
+
+\begin{enumerate}
+\item Les approximations sont les bonnes, aucune difficulté.
+
+\item Les approximations sont bonnes, aucune difficulté également.
+
+\item Ne peut pas se calculer : en effet, les points sont sur le même X. Les approximations sont donc incalculables (et infaisable).
+\end{enumerate}
+
+
+\subsection{Dépenses mensuelles et revenus :}
+\label{sec:org578d6a9}
+
+Pour ces données, il y a un grand nombre de données, ainsi qu'un axe des x qui commence avec de "grandes valeurs".
+
+Difficultés potentielles : précisions dû aux résultats importants obtenus.
+
+
+Résultats :Les polynômes ont soit des coefficients très importants, soit des coefficients presque négligeable. En revanche, on peut constater qu'il y a des approximations de calcul dans les deux méthodes. En effet, les deux polynômes finaux ne sont pas exactement les mêmes, même si ils sont tous les deux du même ordre de grandeur.
+
+
+\subsection{Série chronologique avec accroissement exponentiel}
+\label{sec:org14c4a82}
+
+L'exponentiel de la forme \(y = ce^{dx}\) est parfaitement sur les données, ce qui prouve que cette approximation est adaptée.
+
+\subsection{Vérification de la loi d Pareto}
+\label{sec:orgf142cf4}
+
+L'exponentiel de la forme \(y = ax^b\) est parfaitement sur les données, ce qui prouve la vérification de cette loi.
+
+\subsection{Commentaire global}
+\label{sec:org1500eb3}
+
+Pour ses différents jeux d'essais, on peut constater plusieurs choses :
+
+\begin{enumerate}
+\item La méthode des droites de régression et deux droites de régression ne donnent pas la même chose
+
+Et c'est normal. En effet, avec l'un, nous appliquons la formule sur l'ensemble des points. Tandis que sur la deuxième, nous séparons le tableau en deux, puis effectuons une moyenne des deux droites obtenues. Leur efficacité dépend donc des points donnés, et est donc "aléatoire".
+
+\item Les méthodes d'ajustements sont plus ou moins précises en fonction des cas (comme on peut le constater dans le programme)
+
+\item Évaluation des coûts :
+Pour les droites d'approximation, la complexité est de l'ordre (o)n\textsuperscript{2}, elle est également de (o)n\textsuperscript{2} pour les méthodes des questions 3 et 4.
+\end{enumerate}
+
+
+\section{Conclusion}
+\label{sec:org9cc52f3}
+
+Maintenant, on vous souhaite bonne chance.
 \end{document}
