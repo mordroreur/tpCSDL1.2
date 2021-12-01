@@ -1,0 +1,9 @@
+#+LaTeX_HEADER:\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+#+LaTeX_HEADER:\usepackage[frenchb]{babel}
+#+LaTeX_HEADER:\usepackage{libertine}
+#+LaTeX_HEADER:\usepackage[pdftex]{graphicx}
+
+
+#+LaTeX_HEADER:\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+#+LaTeX_HEADER:\newcommand{\hsp}{\hspace{20pt}}
+#+LaTeX_HEADER:\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}

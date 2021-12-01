@@ -1,0 +1,14 @@
+
+#+LATEX_HEADER:\usepackage[utf8]{inputenc}
+#+LATEX_HEADER:\usepackage[T1]{fontenc}
+#+LATEX_HEADER:\usepackage{graphicx}
+#+LATEX_HEADER:\usepackage{grffile}
+#+LATEX_HEADER:\usepackage{longtable}
+#+LATEX_HEADER:\usepackage{wrapfig}
+#+LATEX_HEADER:\usepackage{rotating}
+#+LATEX_HEADER:\usepackage[normalem]{ulem}
+#+LATEX_HEADER:\usepackage{amsmath}
+#+LATEX_HEADER:\usepackage{textcomp}
+#+LATEX_HEADER:\usepackage{amssymb}
+#+LATEX_HEADER:\usepackage{capt-of}
+#+LATEX_HEADER:\usepackage{hyperref}

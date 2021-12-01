@@ -1,0 +1,20 @@
+* Indentation
+
+
+#+LaTeX_HEADER:\setlength{\parindent}{0cm} % (pour désactiver les indenations en début de paragraphe)
+
+
+\documentclass[12pt]{article}
+
+\newlength\tindent
+\setlength{\tindent}{\parindent}
+\setlength{\parindent}{0pt}
+\renewcommand{\indent}{\hspace*{\tindent}}
+
+\begin{document}
+
+This is some text that will not be indented.
+
+\indent This is some text that will be indented.
+
+\end{document}
