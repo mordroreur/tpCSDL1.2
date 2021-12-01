@@ -21,6 +21,7 @@ clean:
 mrproper: clean
 	rm -rf $(EXEC)
 
-
+run: all
+	./jeu
 
 

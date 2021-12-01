@@ -1,0 +1,5 @@
+#+LaTeX_CLASS: org-plain-latex
+#+LaTeX_CLASS_OPTIONS: [letter]
+
+
+#+SETUPFILE: ../pourlesconfigs.org

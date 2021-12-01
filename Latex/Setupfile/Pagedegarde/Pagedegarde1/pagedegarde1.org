@@ -1,0 +1,50 @@
+
+
+
+
+\begin{titlepage}
+  \begin{sffamily}
+  \begin{center}
+
+
+    \includegraphics[scale=0.4]{Latex/Images/prepisima.png}~\\[1.5cm]
+
+    \textsc{\LARGE {Programmation avancée en C}}\\[2cm]
+
+
+
+    % Title
+    \HRule \\[0.4cm]
+    { \huge \bfseries Approximation\\[0.4cm] }
+Avec les méthodes des droites de regression ainsi que les ajustements\\
+
+    \HRule \\[2cm]
+    \includegraphics[scale=0.8]{Latex/Images/uca.jpeg}
+    \\[2cm]
+
+    % Author and supervisor
+    \begin{minipage}{0.4\textwidth}
+      \begin{flushleft} \large
+        Clément \textsc{Payard}\\
+        Mathieu \textsc{Laurençot}\\
+      \end{flushleft}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+      \begin{flushright} \large
+        \emph{Encadrant :} M. \textsc{Suzanne ÉLODIE}\\
+
+      \end{flushright}
+    \end{minipage}
+
+
+
+
+    \vfill
+
+    % Bottom of the page
+    {\large 2021}
+
+  \end{center}
+  \end{sffamily}
+\end{titlepage}
+

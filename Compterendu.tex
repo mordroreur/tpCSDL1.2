@@ -1,0 +1,441 @@
+% Created 2021-12-01 Wed 15:14
+% Intended LaTeX compiler: pdflatex
+\documentclass[letter]{article}
+                      \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[frenchb, ]{babel}
+\usepackage{libertine}
+\usepackage[pdftex]{graphicx}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\newcommand{\hsp}{\hspace{20pt}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\usepackage{lastpage} %les latex header ici
+\date{\today}
+\title{}
+\begin{document}
+
+%chargement de la page de garde
+\input{$PWD/Latex/Setupfile/Pagedegarde/Pagedegarde1/pagedegarde1.org}
+
+
+
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\newpage
+
+\section{Rappel rapide du jeu 2048}
+\label{sec:org92ace60}
+
+\subsection{Résumé du jeu}
+\label{sec:org2219a01}
+
+Le but du jeu est de rassembler des tuiles sur une grille, pour combiner les tuiles de mêmes valeurs et créer ainsi une tuile portant le fameux nombre 2048. Cependant, le jeu s'arrête quand le joueur ne peut plus faire aucun mouvement/fusionner aucune tuile.
+
+
+\subsection{Problèmes potentiels}
+\label{sec:org578c7bc}
+
+Ce jeu à en effet quelques spécificités :
+
+\subsubsection{Gestion des fusions}
+\label{sec:org8f9db05}
+
+Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes, comme par exemple avec cette exemple :
+
+\begin{center}
+\begin{tabular}{rrrr}
+2 & 2 & 4 & 4\\
+4 & 8 & 2 & 2\\
+0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0\\
+\end{tabular}
+\end{center}
+
+Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 présents sur la première ligne.
+
+De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
+Nous devons donc gérer ce cas en plusieurs étapes.
+
+\subsubsection{Différentes taille}
+\label{sec:org650b468}
+
+Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
+
+\subsubsection{Gestion des sauvegardes}
+\label{sec:org3397192}
+
+Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
+
+\section{Présentation du programme console}
+\label{sec:org47b6c16}
+
+Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
+
+\subsection{Introduction à la structure Terrain}
+\label{sec:orgde715e9}
+
+Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
+
+\begin{verbatim}
+
+  typedef struct Terrain{
+  int **tab;
+  int max;
+  int tailleX;
+  int tailleY;
+  int vide;
+  int score;
+}ter;
+
+
+
+\end{verbatim}
+
+Elle est composé de divers éléments, mais seulement d'entiers :
+
+\begin{enumerate}
+\item Un tableau en 2 dimensions, qui serra la grille en elle même.
+\item max, qui sera l'entier présent dans la grille maximal. Permet de gérer le cas de “victoire” si l'on fait 2048.
+\item tailleX, qui sera le nombre de colonne
+\item tailleY, qui sera le nombre de ligne
+\item vide, qui sera le nombre de case vide du tableau
+\item score, qui sera le score du Terrain en cours
+\end{enumerate}
+
+
+Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes
+
+
+
+
+
+\subsection{Présentation des différentes fonctions}
+\label{sec:org32988b4}
+
+\subsubsection{Initivei}
+\label{sec:org1cde1d5}
+
+\subsubsection{Affiche ter}
+\label{sec:org5ad3c42}
+
+\subsubsection{SetRandomCase}
+\label{sec:org9d6c966}
+
+\subsubsection{writesaveFile}
+\label{sec:orge97b042}
+
+\subsubsection{ReadEnCoursSave}
+\label{sec:org51a70e7}
+
+
+Partie\textsubscript{encours}
+paramètre : time pour temps entre séquence de jeu lors du replay
+
+N = type de la partie (), puis taille X et Y du ter
+n = rien
+puis emplacement de la case, en ne prenant pas en compte les case vides
+
+Replay : même logique
+
+
+
+Pour rejouer : re fait le replay
+
+
+usleep((int)(1000000*time));
+// on effectue le deplacement deja effectue par le joueur
+CaseMouve(\&T, depNum);
+
+stocker le nombre de case vide, et
+
+
+un fichier moddifiable
+Param\textsubscript{Name}
+
+High score
+Nb de victoire
+Nb de défaite
+les nouvelles touches*4
+nb de replay (pour le nom du fichier des replays au fur et à mesure)
+
+
+\subsection{Présentation de la méthode des ajustements}
+\label{sec:orgcfb108f}
+
+Le code pour la méthode des ajustements est disponible \href{ajuste.c}{ici}.
+
+
+Pour la résolution par la méthode des ajustement, et après avoir résolu l'équation du type \(Y = AX + B\), nous commençons tout d'abord, pour les deux méthodes, de transformer notre liste en tableau, ainsi que de créer le polynôme de degrés 1.
+Puis, grâce à la fonction \emph{lnListe}, nous créons un second tableau qui contiendra les points avec application de la fonction logarithme (car on a posé \(Y = ln(y)\), \(X = ln(x)\), \(A=b\) et \(B = ln(a)\) pour la question 3 et \(Y = ln(y)\), \(X = x\), \(A=d*ln(e)\) et \(B = ln(c)\) pour la question 4). 
+
+
+\begin{verbatim}
+
+polynome *P = creePolynome(1);
+int n = ListLenght(listedepoint);
+float **Tnormal = ListeToTabsPoints(listedepoint);
+float **Tln = lnListe(Tnormal, n);
+
+\end{verbatim}
+
+
+
+\subsubsection{Question 3 (Exponentiel)}
+\label{sec:orga9ce6dc}
+
+
+Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
+
+Puis, nous calculons les moyennes de X et de Yln, pour faciliter la lecture du code et rendre le code plus facilement compréhensible.
+
+\begin{verbatim}
+
+float moyenneX = moyX(Tnormal, n);
+float moyenneYln = moyY(Tln, n);
+
+\end{verbatim}
+
+Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
+
+Le premier calcul sera pour calculer l'exposant présent devant x, donc d.
+
+\begin{verbatim}
+
+a = (moyXY2tab(Tnormal, Tln, n) - moyX(Tnormal, n) * moyY(Tln, n)) /
+      (moyXcar(Tnormal, n) - carmoyX(Tnormal, n));
+
+\end{verbatim}
+
+Et le second sera pour la coefficient présent devant x.
+
+
+\begin{verbatim}
+
+float temp = moyenneYln - (a * moyenneX);
+  b = exp(1) * exp(temp);
+
+\end{verbatim}
+
+Enfin, nous pouvons retourner le polynôme P.
+
+
+
+\subsubsection{Question 4 (Puissance)}
+\label{sec:org46ad138}
+
+Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
+
+
+Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
+
+Le premier calcul sera pour calculer l'exposant, donc b.
+
+\begin{verbatim}
+
+b = (moyXY(Tln, n) - moyX(Tln, n) * moyY(Tln, n)) /
+    (moyXcar(Tln, n) - carmoyX(Tln, n));
+
+\end{verbatim}
+
+Et le second sera pour la coefficient présent devant x.
+
+
+\begin{verbatim}
+
+float temp = moyenneYnl - (b * moyenneXnl);
+  a = exp(temp);
+
+\end{verbatim}
+
+Enfin, nous pouvons retourner le polynôme P.
+
+
+\subsection{Gestion des sauvegardes}
+\label{sec:orgea98c50}
+
+
+\subsubsection{Présentation du fichier de sauvegarde}
+\label{sec:org99b6329}
+
+Un fichier de sauvegarde est présenter de cette manière :
+Unelettre Unchiffre Unautrechiffre
+Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre [\ldots{}]
+
+Un exemple concret :
+\begin{verbatim}
+N 4 2
+n 2 3 n 2 4 h 2 3 b 2 2 g 2 4 g 
+\end{verbatim}
+
+\textbf{Explication :}
+
+
+
+
+\subsubsection{La sauvegarde en elle-même}
+\label{sec:org738bca4}
+La gestion des sauvegardes est particulière.
+En effet, lorsque le joueur joue un coup, nous enregistr
+
+\subsubsection{Récupération de la sauvegarde}
+\label{sec:org78730c2}
+
+\section{SDL}
+\label{sec:org5279e08}
+
+Le code qui nous permet de gérer la fenêtre SDL est disponible \href{render.c}{ici}.
+
+\subsection{Début}
+\label{sec:orgb8981dd}
+
+Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par exemple :
+
+\begin{itemize}
+\item La variable \emph{Stape}, qui nous permet de fermer SDL si elle est égale à 0,
+\item \emph{size}, qui va nous permettre de gérer la taille de l'écran,
+\item des variables permettant de garder un nombre d'image par seconde (fps) constant et agréable
+\item des variables permettant de détecter où le curseur de la souris se trouve sur l'écran
+\item les varibles permettant de dessiner le graphique
+\item etc.
+\end{itemize}
+
+
+
+
+\subsection{Affichage et fonctionnalité}
+\label{sec:orga74c89e}
+
+\subsubsection{Affichage}
+\label{sec:orgb9b7f6e}
+
+Pour effectuer l'affichage d'une fenêtre SDL, nous devons passer par une boucle \emph{while}.
+
+Puis, nous distinguerons trois cas grâce à un \emph{if} (et \emph{else if}).
+
+\begin{enumerate}
+\item Dans le premier cas, SDL dessinera l'écran, s'il n'a pas été dessiné depuis un certain temps
+\item Sinon, nous vérifierons également si les courbes sont en adéquation avec les polynômes. Si ce n'est pas le cas, nous entrons alors dans le \emph{else if} qui va nous permettre d'écraser l'image précédente. Enfin,
+\item si nous passons les deux conditions précédentes, nous devons \textbf{absolument} endormir le Central Processing Unit (CPU). Cela nous permet de ne pas utiliser tout le processeur de l'ordinateur.
+\end{enumerate}
+
+Puis, nous avons aussi un cas de débogage. En effet, si l'on n'est pas entré dans le while depuis une seconde ou plus, il peut y avoir un problème. On recommence alors une seconde "propre", en mettant certaines variables à 0.
+
+
+
+
+
+
+
+
+\subsubsection{Fonctionnalités :}
+\label{sec:org1d5c4c5}
+
+Divers fonctionnalités sont présentes :
+Vous pouvez afficher la fenêtre grâce à la touche "g". Vous pouvez désormais voir la liste des points, les courbes représentant les différentes méthodes d'approximation, ainsi que la liste de points à droite.
+
+De plus, si jamais vous voulez rajouter des points à la liste, cette fonctionnalité est disponible grâce au bouton gauche de la souris. Le bouton droit aura pour effet de supprimer le point sélectionné.
+
+Le curseur aura alors une position (x et y) qui sera automatiquement ajouté dans la liste des points. Les courbes ainsi que les polynômes vont s'adapter automatiquement !
+
+D'autre part, vous pouvez zoomer et dézoomer grâce à la molette de la souris.
+
+Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions en appuyant sur leur nom. 
+
+
+\subsection{Fin de SDL}
+\label{sec:org28196a5}
+
+La fonction \emph{end-sdl} nous permet de fermet la fenêtre SDL proprement, ainsi que faire les opérations nécessaires pour vider la mémoire qui a besoin d'être libéré.
+
+
+\section{{\bfseries\sffamily TODO} Présentation des nouvelles fonctionnalités}
+\label{sec:org306c323}
+
+
+Les différents résultats sont disponibles en faisant les test grâces aux fonctionnalités implémentées dans le programme.
+
+
+\subsection{Série S}
+\label{sec:orga6df84e}
+
+Liste de points sans difficulté particulière, mais pas dans le bon ordre.
+
+Résultats : On peut voir que les résultats sont les bons : l'approximation à l'air (graphiquement) efficace.
+
+
+
+\subsection{Les trois séries :}
+\label{sec:orgbdb02d0}
+
+Suites de points normaux.
+Difficultés potentielles : aucune, sauf pour le dernier qui ne pourra sûrement pas être calculé (car ce n'est pas une suite de points avec différents \(x\))
+
+
+Résultats : 
+
+\begin{enumerate}
+\item Les approximations sont les bonnes, aucune difficulté.
+
+\item Les approximations sont bonnes, aucune difficulté également.
+
+\item Ne peut pas se calculer : en effet, les points sont sur le même X. Les approximations sont donc incalculables (et infaisable).
+\end{enumerate}
+
+
+\subsection{Dépenses mensuelles et revenus :}
+\label{sec:org578d6a9}
+
+Pour ces données, il y a un grand nombre de données, ainsi qu'un axe des x qui commence avec de "grandes valeurs".
+
+Difficultés potentielles : précisions dû aux résultats importants obtenus.
+
+
+Résultats :Les polynômes ont soit des coefficients très importants, soit des coefficients presque négligeable. En revanche, on peut constater qu'il y a des approximations de calcul dans les deux méthodes. En effet, les deux polynômes finaux ne sont pas exactement les mêmes, même si ils sont tous les deux du même ordre de grandeur.
+
+
+\subsection{Série chronologique avec accroissement exponentiel}
+\label{sec:org14c4a82}
+
+L'exponentiel de la forme \(y = ce^{dx}\) est parfaitement sur les données, ce qui prouve que cette approximation est adaptée.
+
+\subsection{Vérification de la loi d Pareto}
+\label{sec:orgf142cf4}
+
+L'exponentiel de la forme \(y = ax^b\) est parfaitement sur les données, ce qui prouve la vérification de cette loi.
+
+\subsection{Commentaire global}
+\label{sec:org1500eb3}
+
+Pour ses différents jeux d'essais, on peut constater plusieurs choses :
+
+\begin{enumerate}
+\item La méthode des droites de régression et deux droites de régression ne donnent pas la même chose
+
+Et c'est normal. En effet, avec l'un, nous appliquons la formule sur l'ensemble des points. Tandis que sur la deuxième, nous séparons le tableau en deux, puis effectuons une moyenne des deux droites obtenues. Leur efficacité dépend donc des points donnés, et est donc "aléatoire".
+
+\item Les méthodes d'ajustements sont plus ou moins précises en fonction des cas (comme on peut le constater dans le programme)
+
+\item Évaluation des coûts :
+Pour les droites d'approximation, la complexité est de l'ordre (o)n\textsuperscript{2}, elle est également de (o)n\textsuperscript{2} pour les méthodes des questions 3 et 4.
+\end{enumerate}
+
+
+\section{Conclusion}
+\label{sec:org9cc52f3}
+
+Maintenant, on vous souhaite bonne chance.
+\end{document}

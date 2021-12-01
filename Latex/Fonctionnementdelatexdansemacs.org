@@ -1,0 +1,301 @@
+
+Ne pas oublier de faire "narrow to subtree" lors de l'exportation si besoin
+
+*** Latex :
+
+
+**** Pour faire un nouveau style :
+
+  mettre le style dans config.org
+  mettre dans /Document.../Stylelatex/nomdusyle.org :
+
+  #+LaTeX_CLASS: nomdustyle
+  #+SETUPFILE: /home/msi/Documents/Org/Latex/Setupfile/pourlesconfigs.org
+  (cela rajoute le packages pour org que le style enlève)
+
+
+  puis, faire, dans le fichier de conversion latex, un 
+  #+SETUPFILE:/cheminjusqu'au/style.org
+
+**** Pour une nouvelle page de garde
+
+  2 choses:
+
+  1. mettre la page de garde dans un pagedegardeX.org
+  2. mettre les packages de la page de garde dans un pourpagedegardeX.org
+
+  mettre dans le fichier latex.org : 
+  #+LANGUAGE:french
+  #+OPTIONS: toc:nil %pour ne pas afficher la tdm avant la page de garde
+
+  #+SETUPFILE:/home/msi/Documents/Org/Latex/Setupfile/Pagedegardex/pourpagedegardex.org
+  %packages chargée de la page de garde (pour fonctionner)
+
+  et, après 
+
+  #+BEGIN_EXPORT latex
+  %chargement de la page de garde
+  \input{/home/msi/Documents/Org/Latex/Setupfile/Pagedegarde1/Pagedegarde1.org}
+  #+END_EXPORT
+
+  et enfin pour mettre l'endroit de la table des matières :
+  #+TOC: headlines 2 % afficher tdm ici, nombre de "sous titre", 3= va jusqu'à titre 3
+
+**** Conclusion :
+
+
+  #+LANGUAGE:french
+  #+OPTIONS: toc:nil %pour ne pas afficher la tdm avant la page de garde
+
+
+  #+SETUPFILE:/.../Styleslatex/nomdustyle.org
+  %style du doc
+
+  #+SETUPFILE:/../PagedegardeX/pourpagedegardeX.org
+  %packages chargée de la page de garde (pour fonctionner)
+
+
+  %Début du doc normal!!!!
+
+
+  #+BEGIN_EXPORT latex
+  %chargement de la page de garde
+  \input{/.../Pagedegarde/PagedegardeX/pagedegardeX.org}
+  #+END_EXPORT
+
+
+  #+TOC: headlines 2 % afficher tdm ici, nombre de "sous titre", 3= va jusqu'à titre 3
+
+**** vrai Exemple
+
+***** Mettre ceci dans le config.org
+
+#+begin_src emacs-lisp 
+
+with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+		 '("org-plain-latex"
+		   "\\documentclass{article}
+               [NO-DEFAULT-PACKAGES]
+               [PACKAGES]
+               [EXTRA]"
+		   ("\\section{%s}" . "\\section*{%s}")
+		   ("\\subsection{%s}" . "\\subsection*{%s}")
+		   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+		   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+		   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+#+end_src
+
+
+***** Titre 1
+
+  textetxetx
+
+****** Titre 2
+
+****** Tirte 2
+
+   tertitruaei
+
+******* Titre 3
+
+***** Saltu
+
+#+Latex: \newpage
+
+***** Test
+
+  sateuit
+
+**** Exemple concret (ancien)
+
+#+LANGUAGE:french
+#+OPTIONS: toc:nil %pour ne pas afficher la tdm avant la page de garde
+
+#+OPTIONS: title:nil %pour les subtree propres
+
+
+#+SETUPFILE:/home/msi/Documents/Org/Latex/Setupfile/Styleslatex/org-plain-latex.org
+
+
+#+SETUPFILE:/home/msi/Documents/Org/Latex/Setupfile/Pagedegarde/Pagedegarde1/pourpagedegarde1.org
+#+Latex_header: \usepackage{eurosym}
+#+Latex_header: \usepackage{multido}
+#+Latex_header: \usepackage[usenames]{color}
+#+Latex_header: \usepackage{setspace}
+#+Latex_header: \renewcommand{\labelenumi}
+
+#+Latex_header:{\colorbox{cyan}{\textbf{\theenumi}}}
+#+Latex_header:\renewcommand{\labelenumii}{
+#+Latex_header:\colorbox{green}{\textbf{\theenumii}}}
+
+#+Latex_header:\newcommand{\itemb}{\item\hspace*{\leftmarginii}}
+
+#+Latex_header:\usepackage{lastpage}
+#+Latex_header:\usepackage{ifthen}
+#+Latex_header:\usepackage{fancyhdr}
+#+Latex_header:\pagestyle{fancy}
+#+Latex_header: \fancyhead[R]{}
+
+
+#+Latex_header: \rfoot{\ifthenelse{\equal{\thepage}
+#+Latex_header: {\pageref{LastPage}}}{Fin}{Tournez, SVP !}}
+
+
+
+
+#+BEGIN_EXPORT latex
+%chargement de la page de garde
+\input{/home/msi/Documents/Org/Latex/Setupfile/Pagedegarde/Pagedegarde1/pagedegarde1.org}
+#+END_EXPORT
+
+
+
+
+
+
+\newpage
+
+***** Ajouter le symbole €
+
+On commence doucement avec la possibilité d'ajouter le symbole € avec le package
+eurosym.
+
+***** La commande input
+
+Cette commande, désormais indispensable, permet d'inclure le contenu d'un
+fichier dans latex !
+
+***** La commande framebox
+
+Cette commande permet de mettre en valeur un contenu en l'encadrant !
+
+\framebox[\textwidth]{Pratique non ?}
+
+***** Possibilité de faire des beamers !
+
+Latex peut faire des beamers, ce qui peut-être trés pratique pour
+des présentations clair et simple.
+(J'ai réussi à en faire un avec l'aide d'org-mode, trés classe)
+
+***** La commande multido
+
+Cette commande est trés pratique:
+elle va permettre de faire des tâches répétitives, comme par exemple la suite
+des 10 premiers entiers:
+$0 \multido{\i=1+1}{9}{+ \i }$
+
+***** Écrire de la norme des complexes/vecteurs
+
+On peut utiliser les commandes \vert et \Vert:
+
+
+$\vert x_\mathrm{B}-x_\mathrm{A} \vert = 10$
+
+$\left\|\overrightarrow{AB}\right\|=5$
+
+***** Parallèles et perpendiculaires
+
+On peut écrire les symbole perpendiculaire et parallèle dans Latex !
+$H \perp D'$ ou 
+$H // D'$
+
+***** Encadrer et surligner
+
+****** On peut encadrer des formules ! Grâce à la commande boxed
+
+\[ \boxed{(a+b)^2 = a^2 + 2ab + b^2 }   \]
+
+****** Mais aussi lui donner une couleur, grâce à colorbox ! Comme par exemple bleue
+
+\colorbox{yellow}{$(a+b)^2 = a^2 + 2ab + b^2 $}
+
+***** On peut modifier la taille des interlignes, extension setspace
+
+Début de texte blabla…
+Salut.
+\par\begin{spacing}{0.2}
+Suite du texte ici.\par\end{spacing}
+Suite du texte là.
+\par\singlespacing 
+Et on remet normal
+\par
+
+***** Simple et basique pour faire un retour à la ligne :
+
+Ce texte peut faire \newline un retour à la ligne avec la commande newline.
+
+***** On peut faire de résumé du document que l'on peut placer sur la page de garde, avec la commande abstract.
+
+***** Faire des notes de bas de page ! Grâce à la commande footnote
+
+Je veux une note de bas de page ici[fn:1].
+
+***** Changement de la valeur de la section.
+
+Si l'on travaille avec des feuilles/documents disjoints, on peut changer la
+valeur de la section grâce à setcounter{section}{numéro}.
+
+***** Choisir de mettre tous les titres de la même couleur.
+
+Grâce au package sectsty.
+
+***** Choisir des styles d'énumération, grâce à différents packages.
+
+****** Couleurs...
+
+\begin{enumerate}
+\item Test ;
+\item Salut
+\begin{enumerate}
+\item Test2 ;
+\item Girafe.
+\end{enumerate}
+\end{enumerate}
+
+****** ... et alignement vertical
+
+\begin{enumerate}
+\itemb Premiers
+\item
+\begin{enumerate}
+\item Deuxième
+\item Troisième
+\end{enumerate}
+\itemb Quatrième
+\end{enumerate}
+
+***** Des notes dans la marge grâce à marginpar
+
+Test de marginpar. \marginpar{test test test}
+
+***** Centrer son texte avec center
+
+\begin{center}Ceci est un texte magnifiquement centré !\end{center}
+
+***** Prendre toute la place d'une ligne avec hfill
+
+Ce qui peut donner des choses sympathiques niveau présentation \hfill Numéro de page
+
+***** On peut modifier le compilateur :
+
+Il existe deux compilateurs possible : \LaTeX{} et pdf\LaTeX{}.
+
+\LaTeX{} peut insérer des images seulement en PostScript, mais pdf\LaTeX{}
+permet d’insérer des images de tous les autres for-mats :gif,jpeg,pdf et png.
+
+***** Tournez svp (que ma prof de physique utilisée tout le temps, maintenant je sais d'où cela vient)
+
+J'ai ajouté cette fonctionnalité avec rfoot et pagref.
+
+***** PS
+
+Je me suis trompé de fichier lors du rendu, et je m'en suis rendu compte un petit
+tard, d'où la date de rendu tardive. 
+
+***** Footnotes
+
+[fn:1] Exemple de note de bas de page
+
+
