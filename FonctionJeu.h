@@ -23,7 +23,7 @@ int SetRandomCase(ter *T, int n);
 void CaseMouve(ter *T, int depNum);
 int CanDep(ter T, int depNum);
 void LibereTer(ter *T);
-ter ReadEnCoursSave(float time);
+ter ReadEnCoursSave(float time, char *name);
 void copiFile(char *old, char *nouv);
 
 void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);

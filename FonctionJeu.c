@@ -293,11 +293,11 @@ void LibereTer(ter *T){
 
 
 
-ter ReadEnCoursSave(float time){
+ter ReadEnCoursSave(float time, char *name){
   //initialisation des variables utiles
   ter T;
   char r;
-  FILE *save = fopen(SAVE_NAME, "r");
+  FILE *save = fopen(name, "r");
   char str[100];
   char append[10];
   int tailleToX;

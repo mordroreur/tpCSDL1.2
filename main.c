@@ -39,7 +39,7 @@ int main(){
     fclose(save);
   }
   
-  EtapeDuJeu = 2;
+  EtapeDuJeu = 1;
 
   
   
@@ -47,29 +47,40 @@ int main(){
   while(EtapeDuJeu){
 
     switch (EtapeDuJeu) {
-      
-    case 2 : /* Cas d'arriver dans le jeu */
-      //TODO changer ca pour tout setup
-      //et ajouter tailleY
-
-
-	
+    case 1 : /* Cas d'arriver dans le jeu */
       clearScreen;
       printf("Bonjours et bienvenue sur ce jeu de 2048 version console.\n");
+      printf("Retenez bien que les mouvement de base sont :\n\tb : Bas\n\th : Haut\n\tg : Gauche\n\td : Droite\n\tq : Quitter\n\t- : Quitter (permet de lié q et pouvoir quitter quand même)\n\n");
+      EtapeDuJeu = 2;
+      break;
+      
+    case 2 :
       // Si une savegarde a ete apercu en cours
       if(isSave){
-	printf("Voulez vous chargé la partie sauvegardé ?\nTapez o pour oui ou n pour non : ");
-	scanf("%c", &play); while ((getchar()) != '\n');
-	if(play == 'o'){
-	  plateau = ReadEnCoursSave(0.5);
-	  
+	printf("Voulez avez une partie en cours sauvegardée.\n\n");
+      }
+
+      printf("Que voulez vous faire ?\n\t");
+
+      if(isSave){
+	printf("s : récupérer la sauvergarde en cours.\n\tg : continuer la sauvegarde avec un replay.\n\t");
+      }
+      printf("c : commencer un 2048 \"standard\".\n\tt : lancer un 2048 avec une configuration bizarre.%s\n\tp : ouvrir les paramètre.\n\tq : si vous voulez deja partir.\n\n\t\t : ", (nbReplay > 0)?"\n\tr : lancer un replay.":"");
+      scanf("%c", &play); while ((getchar()) != '\n');
+      float temporary = -1;
+      int tempX = -1;
+      int tempY = -1;
+      switch (play) {
+      case 's' :
+	if(save){
+	  plateau = ReadEnCoursSave(0, SAVE_NAME);
 	  if(plateau.tailleX == -1){
 	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
 	    EtapeDuJeu = -1;
 	  }else {
 	    afficheTer(plateau);
 	    printf("Appuyez sur une touche pour reprendre la partie.");
-	    getchar();
+	    while ((getchar()) != '\n');
 	    // on cosidere que le joueur ne peu pas bouger
 	    int GameOver = 1;
 	    //pour les quatre deplacement
@@ -87,19 +98,101 @@ int main(){
 	    }else{
 	      EtapeDuJeu = 3;
 	    }
+	    break;
 	  }
-	}else{
-	  printf("La partie à été supprimé au profit de la prochaine partie.\n");
-	  EtapeDuJeu = 5;
 	}
-      // si pas de partie en cours a charge
-      }else{
+	break;
+
+      case 'g':
+	if(save){
+	  while(temporary < 0){
+	    printf("Combien de temps en secondes sur chaque étape du replay voulez vous ? ");
+	    scanf("%f", &temporary); while ((getchar()) != '\n');
+	  }
+	  plateau = ReadEnCoursSave(temporary, SAVE_NAME);
+	  if(plateau.tailleX == -1){
+	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
+	    EtapeDuJeu = -1;
+	  }else {
+	    afficheTer(plateau);
+	    printf("Appuyez sur une touche pour reprendre la partie.");
+	    while ((getchar()) != '\n');
+	    // on cosidere que le joueur ne peu pas bouger
+	    int GameOver = 1;
+	    //pour les quatre deplacement
+	    for(int i = 1;i < 5; i++){
+	      if(CanDep(plateau, i)){
+		// si le joueur peu bouger on change cette variable
+		GameOver = 0;
+		break;
+	      }
+	    }
+	    // si GameOver est toujours a 1 alors le joueur a perdu
+	    if(GameOver){
+	      // il va donc a l ecran 4
+	      EtapeDuJeu = 4;
+	    }else{
+	      EtapeDuJeu = 3;
+	    }
+	    break;
+	  }
+	}
+	break;
+
+      case 'c' : if(save){printf("La partie à été supprimé au profit de la prochaine partie.\n");}
+	// on lance une partie avec un terrain de taille 4
+	printf("Appuyez sur entrer pour lancer le jeu.");
+	plateau = InitVide(4, 4);
 	EtapeDuJeu = 5;
+	break;
+
+      case 't' :
+	while (tempY < 0) {
+	  printf("Veuillez entrez le nombre de ligne voulu : ");
+	  scanf("%d", &tempY); while ((getchar()) != '\n');
+	}
+	while (tempX < 0) {
+	  printf("Veuillez entrez le nombre de colonnes voulu : ");
+	  scanf("%d", &tempX); while ((getchar()) != '\n');
+	}
+	if(save){printf("La partie à été supprimé au profit de la prochaine partie.\n");}
+	// on lance une partie avec un terrain de taille defini apr le joueur
+	printf("Appuyez sur entrer pour lancer le jeu.");
+	printf("%d %d\n", tempY, tempX);
+	plateau = InitVide(tempY, tempX);
+	EtapeDuJeu = 5;
+	break;
+
+
+      case 'r':
+	if(nbReplay > 0){
+	  while (tempX <= -1 || tempX >= nbReplay) {
+	    printf("Entrez le nombre du replay entre 0 et %d : ", nbReplay-1);
+	    scanf("%d", &tempX); while ((getchar()) != '\n');
+	  }
+	  char name[100];
+	  sprintf(name, "%s%d", SAVE_REPLAY, tempX);
+	  while(temporary < 0){
+	    printf("Combien de temps en secondes sur chaque étape du replay voulez vous ? ");
+	    scanf("%f", &temporary); while ((getchar()) != '\n');
+	  }
+	  ReadEnCoursSave(temporary, name);
+	  printf("Appuyez sur entrez pour continuer\n");
+	  while ((getchar()) != '\n');
+	  clearScreen;
+	}
+	break;
+
+      case 'p': EtapeDuJeu = 6; break;
+
+      case 'q' :case '-': EtapeDuJeu = -1;break;
+
+      default: printf("Ce n'est pas une proposition!\n");break;
       }
       break;
 
     case 3 : /* Cas du jeu en affichage console */
-      printf("Entrez le déplacement(d = droite, h = haut, g = gauche, b = bas) \n\tou q pour quitter : ");
+      printf("Entrez le déplacement : ");
       // recuperation de l entree joueur
       scanf("%c", &play); while ((getchar()) != '\n');
       if(play == mouvsup[0] && mouvsup[0] != '-'){play = 'g';
@@ -141,7 +234,7 @@ int main(){
 	  printf("Ce déplacement n'est pas valide!!!");
 	}
       // si le joueur selectionne de sortir du jeu
-      }else if (play == 'q') {
+      }else if (play == 'q' || play == '-') {
 	// il va a l etape de fermeture du jeu
 	EtapeDuJeu = -1;
       }else{
@@ -192,15 +285,12 @@ int main(){
       break;
 
     case 5:
-	// on lance une partie avec un terrain de taille 4
-	printf("Appuyez sur entrer pour lancer le jeu.");
-	plateau = InitVide(4, 2);
 	// cas ou l initialisation du terrain c est mal passe on quitte le jeu
 	if(plateau.tailleX == -1){
 	  printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
 	  EtapeDuJeu = -1;
 	}else {
-	  getchar();
+	  while ((getchar()) != '\n');
 	  afficheTer(plateau);
 	  EtapeDuJeu = 3;
 	}
@@ -208,10 +298,62 @@ int main(){
 
 
       
+    case 6:
+      printf("Bienvenue dans les parametre. Vous pouvez :\n\t Ajouter une touche pour l'une des touche(g, b, d, h).\n Voulez vous faire ca ou partir (o = faire ca) ? ");
+      scanf("%c", &play); while ((getchar()) != '\n');
+      if(play == 'o'){
+	printf("A quelle touche voulez vous mettre une correspondance ? ");
+	scanf("%c", &play); while ((getchar()) != '\n');
+	
+	if(play == 'd'){
+	  printf("Quelle correspondance voulez vous mettre ? ");
+	  scanf("%c", &play); while ((getchar()) != '\n');
+	  if(play == ' ' || play == '-'){
+	    printf("Cette touche fais malheureusement partie d'un des rare que l'on ne peu associer...\n");
+	  }else{
+	    mouvsup[2] = play;
+	  }
+	}else if(play == 'b'){
+	  printf("Quelle correspondance voulez vous mettre ? ");
+	  scanf("%c", &play); while ((getchar()) != '\n');
+	  if(play == ' ' || play == '-'){
+	    printf("Cette touche fais malheureusement partie d'un des rare que l'on ne peu associer...\n");
+	  }else{
+	    mouvsup[3] = play;
+	  }
+	}else if(play == 'g'){
+	  printf("Quelle correspondance voulez vous mettre ? ");
+	  scanf("%c", &play); while ((getchar()) != '\n');
+	  if(play == ' ' || play == '-'){
+	    printf("Cette touche fais malheureusement partie d'un des rare que l'on ne peu associer...\n");
+	  }else{
+	    mouvsup[0] = play;
+	  }
+	}else if(play == 'h'){
+	  printf("Quelle correspondance voulez vous mettre ? ");
+	  scanf("%c", &play); while ((getchar()) != '\n');
+	  if(play == ' ' || play == '-'){
+	    printf("Cette touche fais malheureusement partie d'un des rare que l'on ne peu associer...\n");
+	  }else{
+	    mouvsup[1] = play;
+	  }
+	}else{
+	  printf("Cette touche n'existe malheureusement pas dans le jeu...\n");
+	}
+	writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+      }else{
+	clearScreen;
+	EtapeDuJeu = 2;
+      }
+      break;
+
+      
+
+      
     case -1: // Cas de fermeture du jeu : liberation de la memoire et on sort de la boucle
       printf("Merci d'avoir joué, nous espérons vous revoir bientôt!!!\n");
       LibereTer(&plateau);
-      getchar();
+      while ((getchar()) != '\n');
       clearScreen;
       EtapeDuJeu = 0;
       break;
