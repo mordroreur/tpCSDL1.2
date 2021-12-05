@@ -417,7 +417,6 @@ void *BouclePrincipaleDesTicks(void *arg){
 	    nb = 15;
 	  }
 	}
-	win->timeBegin = getTime();
 	if(nb != 15){
 	  
 	  sscanf(str, "%c %d %d ", &play, &Value, &nbVide);
@@ -425,6 +424,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 	  if(win->depEnCours != 0){
 	    // on effectue le deplacement deja effectue par le joueur
 	    recupeDep(win);
+	    win->timeBegin = getTime();
 	  }
 
 	  int mis = 0;
