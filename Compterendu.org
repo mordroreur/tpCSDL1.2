@@ -32,18 +32,12 @@
 * Newpage :ignore:
 \newpage
 
-* Rappel rapide du jeu 2048
 
-** Résumé du jeu
-
-Le but du jeu est de rassembler des tuiles sur une grille, pour combiner les tuiles de mêmes valeurs et créer ainsi une tuile portant le fameux nombre 2048. Cependant, le jeu s'arrête quand le joueur ne peut plus faire aucun mouvement/fusionner aucune tuile.
-
-
-** Problèmes potentiels identifiés au départ
+* Problèmes potentiels identifiés au départ
 
 Ce jeu à en effet quelques spécificités :
 
-*** Gestion des fusions
+** Gestion des fusions
 
 Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes comme, par exemple, avec cet exemple :
 
@@ -57,11 +51,11 @@ Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 prés
 De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
 Nous devons donc gérer ce cas en plusieurs étapes.
 
-*** Différentes taille
+** Différentes taille
 
 Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
 
-*** Gestion des sauvegardes
+** Gestion des sauvegardes
 
 Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
 
@@ -71,7 +65,7 @@ Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de
 
 Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
 
-** Introduction à la structure Terrain 
+** Introduction à la structure Terrain/ter 
 
 Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
 
@@ -100,31 +94,96 @@ Elle est composé de divers éléments, mais seulement d'entiers :
 6. score, qui sera le score du Terrain en cours
 
 
-Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes
+Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes.
    
 
 
 
+** Présentation des différentes fonctions  avec leurs signatures
 
-** Présentation des différentes fonctions  
+*** InitVide
 
-*** Initivei
+#+begin_src C
+ter InitVide(int n, int y);
+#+end_src
 
-*** Affiche ter
+Cette fonction prend deux entier et renvoie un ter de la taille de /n/ et de /y/.
+Elle nous permet de créer notre grille proprement.
+
+*** afficheTer
+
+#+begin_src C
+void afficheTer(ter T);
+#+end_src
+
+afficheTer nous permet, comme son nom l'indique, d'afficher le ter donné en paramètre.
 
 *** SetRandomCase
 
-*** writesaveFile
+#+begin_src C
+int SetRandomCase(ter *T, int n);
+#+end_src
+
+SetRandomCase permet d'initialiser une case =vide= à une certain valeur. Elle prend en paramètre un entier, qui détermine l'emplacement de la case. Petit particularité : le nombre de case /n/ ne s'incrémente pas si la case est déjà rempli. C'est donc après /n/ case vide que l'on initialise la case numéro /n/ + *nombre de case déjà remplie* à une valeur 2 ou 4.
+
+*** CaseMouve
+
+#+begin_src C
+void CaseMouve(ter *T, int depNum);
+#+end_src
+
+Cette fonction est sûrement une des plus importante. En effet, elle prend en paramètre un pointeur sur un terrain ainsi qu'un déplacement. 
+Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans [[file:FonctionJeu.c][Fonction.c]].
+Dépend de la fonction [[*CanDep][CanDep]] pour vérifier si le joueur peut se déplacer ou à perdu.
+
+*** TODO CanDep
+
+#+begin_src C
+int CanDep(ter T, int depNum);
+#+end_src
+
+
+
+Également essentielle, cette fonction permet de savoir si le
+
+Nous avons géré le game over comme ceci ([[file:main.c][dans le main.c]]) :
+#+begin_src C
+for(int i = 1;i < 5; i++){
+	      if(CanDep(plateau, i)){
+		// si le joueur peu bouger on change cette variable
+		GameOver = 0;
+		break;
+	      }
+	    }
+#+end_src
+
+
+*** LibereTer
+
+#+begin_src C
+void LibereTer(ter *T);
+#+end_src
 
 *** ReadEnCoursSave
 
 
 
+*** copiFile
+
+#+begin_src C
+void copiFile(char *old, char *nouv);
+#+end_src
+
+Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copi /old/ dans /nouv/.
+
+*** writesaveFile
 
 ** Explication du fonctionnement du jeu de base
 
 ** Présentation des nouvelles fonctionnalités
 
+
+*** Possibilité de mapper les touches de déplacement
 
 *** Fichier paramètre
 

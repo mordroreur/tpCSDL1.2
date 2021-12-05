@@ -103,54 +103,65 @@ void afficheTer(ter T){
   }
 }
 
-
-int SetRandomCase(ter *T, int n){
+int SetRandomCase(ter *T, int n)
+{
   // Dans le cas ou il reste de la place sur le terrain
-  if(T->vide != 0){
-    int mis = 0; // Un case a t elle etais ajoute
-    int videVue = -1; // case ou l'on peu mettre
-    int r = random()%T->vide; // numero de la case ou l on va mettre
+  if (T->vide != 0)
+  {
+    int mis = 0;                // Un case a t elle etais ajoute
+    int videVue = -1;           // case ou l'on peu mettre
+    int r = random() % T->vide; // numero de la case ou l on va mettre
     // ajout de la nouvelle case au fichier de sauvegarde
     FILE *save = fopen(SAVE_NAME, "a");
     fprintf(save, "%d %d ", n, r);
     fflush(save);
     fclose(save);
-    //pour toute les cases
-    for(int i = 0; i < T->tailleY; i++){
-      for(int j = 0; j < T->tailleX; j++){
-	// si la case est vide
-	if(T->tab[i][j] == -1){
-	  // Une case de plus ou on peu mettre
-	  videVue++;
-	  // si le numero de case coincide avec le numero de cette case on met a cette case
-	  if(videVue == r){
-	    T->tab[i][j] = n;
-	    mis = 1;
-	    break;
-	  }
-	}
+    // pour toute les cases
+    for (int i = 0; i < T->tailleY; i++)
+    {
+      for (int j = 0; j < T->tailleX; j++)
+      {
+        // si la case est vide
+        if (T->tab[i][j] == -1)
+        {
+          // Une case de plus ou on peu mettre
+          videVue++;
+          // si le numero de case coincide avec le numero de cette case on met a
+          // cette case
+          if (videVue == r)
+          {
+            T->tab[i][j] = n;
+            mis = 1;
+            break;
+          }
+        }
       }
       // si on a deja mis une case, on sort de la boucle
-      if(mis){
-	break;
+      if (mis)
+      {
+        break;
       }
     }
     // si une case a etait mis alors rien d anormale
-    if(mis){
+    if (mis)
+    {
       T->vide--;
       return 1;
-    // sinon il doit y avoir une erreur
-    }else{
+      // sinon il doit y avoir une erreur
+    }
+    else
+    {
       printf("Erreur lors de la mise d'un block : %d %d\n", T->vide, r);
       return 0;
     }
-  // Si il n'y a plus de case libre... cas du game over
-  }else{
+    // Si il n'y a plus de case libre... cas du game over, normalement on arrive
+    // jamais là car le cas du game over est géré avant.
+  }
+  else
+  {
     return 0;
   }
 }
-
-
 
 // Verifie si le deplacement dans le sens depNum est possible
 int CanDep(ter T, int depNum){

@@ -1,4 +1,4 @@
-% Created 2021-12-01 Wed 15:14
+% Created 2021-12-03 Fri 14:31
 % Intended LaTeX compiler: pdflatex
 \documentclass[letter]{article}
                       \usepackage[utf8]{inputenc}
@@ -37,24 +37,16 @@
 
 \newpage
 
-\section{Rappel rapide du jeu 2048}
-\label{sec:org92ace60}
 
-\subsection{Résumé du jeu}
-\label{sec:org2219a01}
-
-Le but du jeu est de rassembler des tuiles sur une grille, pour combiner les tuiles de mêmes valeurs et créer ainsi une tuile portant le fameux nombre 2048. Cependant, le jeu s'arrête quand le joueur ne peut plus faire aucun mouvement/fusionner aucune tuile.
-
-
-\subsection{Problèmes potentiels}
-\label{sec:org578c7bc}
+\section{Problèmes potentiels identifiés au départ}
+\label{sec:org32da960}
 
 Ce jeu à en effet quelques spécificités :
 
-\subsubsection{Gestion des fusions}
-\label{sec:org8f9db05}
+\subsection{Gestion des fusions}
+\label{sec:org7c91f4f}
 
-Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes, comme par exemple avec cette exemple :
+Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes comme, par exemple, avec cet exemple :
 
 \begin{center}
 \begin{tabular}{rrrr}
@@ -70,23 +62,25 @@ Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 prés
 De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
 Nous devons donc gérer ce cas en plusieurs étapes.
 
-\subsubsection{Différentes taille}
-\label{sec:org650b468}
+\subsection{Différentes taille}
+\label{sec:orgb30459e}
 
 Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
 
-\subsubsection{Gestion des sauvegardes}
-\label{sec:org3397192}
+\subsection{Gestion des sauvegardes}
+\label{sec:org76ecd61}
 
 Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
 
+
+
 \section{Présentation du programme console}
-\label{sec:org47b6c16}
+\label{sec:org0ffd9a7}
 
 Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
 
-\subsection{Introduction à la structure Terrain}
-\label{sec:orgde715e9}
+\subsection{Introduction à la structure Terrain/ter}
+\label{sec:orgb4268e1}
 
 Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
 
@@ -117,43 +111,115 @@ Elle est composé de divers éléments, mais seulement d'entiers :
 \end{enumerate}
 
 
-Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes
+Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes.
 
 
 
 
+\subsection{Présentation des différentes fonctions  avec leurs signatures}
+\label{sec:org1aa6e88}
 
-\subsection{Présentation des différentes fonctions}
-\label{sec:org32988b4}
+\subsubsection{InitVide}
+\label{sec:org9eeaa9b}
 
-\subsubsection{Initivei}
-\label{sec:org1cde1d5}
+\begin{verbatim}
+ter InitVide(int n, int y);
+\end{verbatim}
 
-\subsubsection{Affiche ter}
-\label{sec:org5ad3c42}
+Cette fonction prend deux entier et renvoie un ter de la taille de \emph{n} et de \emph{y}.
+Elle nous permet de créer notre grille proprement.
+
+\subsubsection{afficheTer}
+\label{sec:org77b2d18}
+
+\begin{verbatim}
+void afficheTer(ter T);
+\end{verbatim}
+
+afficheTer nous permet, comme son nom l'indique, d'afficher le ter donné en paramètre.
 
 \subsubsection{SetRandomCase}
-\label{sec:org9d6c966}
+\label{sec:org760c4c9}
 
-\subsubsection{writesaveFile}
-\label{sec:orge97b042}
+\begin{verbatim}
+int SetRandomCase(ter *T, int n);
+\end{verbatim}
+
+SetRandomCase permet d'initialiser une case \texttt{vide} à une certain valeur. Elle prend en paramètre un entier, qui détermine l'emplacement de la case. Petit particularité : le nombre de case \emph{n} ne s'incrémente pas si la case est déjà rempli. C'est donc après \emph{n} case vide que l'on initialise la case numéro \emph{n} + \textbf{nombre de case déjà remplie} à une valeur 2 ou 4.
+
+\subsubsection{CaseMouve}
+\label{sec:orgf9c39a8}
+
+\begin{verbatim}
+void CaseMouve(ter *T, int depNum);
+\end{verbatim}
+
+Cette fonction est sûrement une des plus importante. En effet, elle prend en paramètre un pointeur sur un terrain ainsi qu'un déplacement. 
+Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans \href{FonctionJeu.c}{Fonction.c}.
+Dépend de la fonction \hyperref[sec:org42dfd89]{CanDep} pour vérifier si le joueur peut se déplacer ou à perdu.
+
+\subsubsection{{\bfseries\sffamily TODO} CanDep}
+\label{sec:org42dfd89}
+
+\begin{verbatim}
+int CanDep(ter T, int depNum);
+\end{verbatim}
+
+
+
+Également essentielle, cette fonction permet de savoir si le
+
+Nous avons géré le game over comme ceci (\href{main.c}{dans le main.c}) :
+\begin{verbatim}
+for(int i = 1;i < 5; i++){
+	      if(CanDep(plateau, i)){
+		// si le joueur peu bouger on change cette variable
+		GameOver = 0;
+		break;
+	      }
+	    }
+\end{verbatim}
+
+
+\subsubsection{LibereTer}
+\label{sec:org202c82b}
+
+\begin{verbatim}
+void LibereTer(ter *T);
+\end{verbatim}
 
 \subsubsection{ReadEnCoursSave}
-\label{sec:org51a70e7}
-
-
-Partie\textsubscript{encours}
-paramètre : time pour temps entre séquence de jeu lors du replay
-
-N = type de la partie (), puis taille X et Y du ter
-n = rien
-puis emplacement de la case, en ne prenant pas en compte les case vides
-
-Replay : même logique
+\label{sec:orge8f4271}
 
 
 
-Pour rejouer : re fait le replay
+\subsubsection{copiFile}
+\label{sec:org8b1382e}
+
+\begin{verbatim}
+void copiFile(char *old, char *nouv);
+\end{verbatim}
+
+Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copi \emph{old} dans \emph{nouv}.
+
+\subsubsection{writesaveFile}
+\label{sec:org92a1e2b}
+
+\subsection{Explication du fonctionnement du jeu de base}
+\label{sec:org9c76c47}
+
+\subsection{Présentation des nouvelles fonctionnalités}
+\label{sec:orgdb3a22f}
+
+
+\subsubsection{Possibilité de mapper les touches de déplacement}
+\label{sec:org49421fe}
+
+\subsubsection{Fichier paramètre}
+\label{sec:org02b90ca}
+
+Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
+
 
 
 usleep((int)(1000000*time));
@@ -173,103 +239,15 @@ les nouvelles touches*4
 nb de replay (pour le nom du fichier des replays au fur et à mesure)
 
 
-\subsection{Présentation de la méthode des ajustements}
-\label{sec:orgcfb108f}
+\subsubsection{Gestion des sauvegardes}
+\label{sec:org5920778}
 
-Le code pour la méthode des ajustements est disponible \href{ajuste.c}{ici}.
-
-
-Pour la résolution par la méthode des ajustement, et après avoir résolu l'équation du type \(Y = AX + B\), nous commençons tout d'abord, pour les deux méthodes, de transformer notre liste en tableau, ainsi que de créer le polynôme de degrés 1.
-Puis, grâce à la fonction \emph{lnListe}, nous créons un second tableau qui contiendra les points avec application de la fonction logarithme (car on a posé \(Y = ln(y)\), \(X = ln(x)\), \(A=b\) et \(B = ln(a)\) pour la question 3 et \(Y = ln(y)\), \(X = x\), \(A=d*ln(e)\) et \(B = ln(c)\) pour la question 4). 
-
-
-\begin{verbatim}
-
-polynome *P = creePolynome(1);
-int n = ListLenght(listedepoint);
-float **Tnormal = ListeToTabsPoints(listedepoint);
-float **Tln = lnListe(Tnormal, n);
-
-\end{verbatim}
+\begin{enumerate}
+\item Présentation du fichier de sauvegarde
+\label{sec:org526f538}
 
 
 
-\subsubsection{Question 3 (Exponentiel)}
-\label{sec:orga9ce6dc}
-
-
-Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
-
-Puis, nous calculons les moyennes de X et de Yln, pour faciliter la lecture du code et rendre le code plus facilement compréhensible.
-
-\begin{verbatim}
-
-float moyenneX = moyX(Tnormal, n);
-float moyenneYln = moyY(Tln, n);
-
-\end{verbatim}
-
-Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
-
-Le premier calcul sera pour calculer l'exposant présent devant x, donc d.
-
-\begin{verbatim}
-
-a = (moyXY2tab(Tnormal, Tln, n) - moyX(Tnormal, n) * moyY(Tln, n)) /
-      (moyXcar(Tnormal, n) - carmoyX(Tnormal, n));
-
-\end{verbatim}
-
-Et le second sera pour la coefficient présent devant x.
-
-
-\begin{verbatim}
-
-float temp = moyenneYln - (a * moyenneX);
-  b = exp(1) * exp(temp);
-
-\end{verbatim}
-
-Enfin, nous pouvons retourner le polynôme P.
-
-
-
-\subsubsection{Question 4 (Puissance)}
-\label{sec:org46ad138}
-
-Nous initialisons les variables \emph{a} et \emph{b}, qui seront des variables temporaires.
-
-
-Subséquemment, nous pouvons effectuer le calcul des ajustement de la puissance appliquant la formule du cours, ainsi qu'en utilisant la formule posé précédemment.
-
-Le premier calcul sera pour calculer l'exposant, donc b.
-
-\begin{verbatim}
-
-b = (moyXY(Tln, n) - moyX(Tln, n) * moyY(Tln, n)) /
-    (moyXcar(Tln, n) - carmoyX(Tln, n));
-
-\end{verbatim}
-
-Et le second sera pour la coefficient présent devant x.
-
-
-\begin{verbatim}
-
-float temp = moyenneYnl - (b * moyenneXnl);
-  a = exp(temp);
-
-\end{verbatim}
-
-Enfin, nous pouvons retourner le polynôme P.
-
-
-\subsection{Gestion des sauvegardes}
-\label{sec:orgea98c50}
-
-
-\subsubsection{Présentation du fichier de sauvegarde}
-\label{sec:org99b6329}
 
 Un fichier de sauvegarde est présenter de cette manière :
 Unelettre Unchiffre Unautrechiffre
@@ -281,26 +259,74 @@ N 4 2
 n 2 3 n 2 4 h 2 3 b 2 2 g 2 4 g 
 \end{verbatim}
 
-\textbf{Explication :}
+Tout d'abord, les trois premiers éléments :
+\begin{enumerate}
+\item Sert à déterminer le “type” de la sauvegarde.
+\item Les deux nombres suivant permette d'avoir la taille du terrain
+\end{enumerate}
+
+Puis, les autres sont simplement la partie enregistrer.
+Comment me direz vous ?
+Et bien, la lettre donne la direction (g gauche, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le \hyperref[sec:org9f990e6]{principe suivant}.
 
 
+\item La sauvegarde en elle-même
+\label{sec:orga34f6bc}
 
-
-\subsubsection{La sauvegarde en elle-même}
-\label{sec:org738bca4}
 La gestion des sauvegardes est particulière.
-En effet, lorsque le joueur joue un coup, nous enregistr
+En effet, lorsque le joueur joue un coup, nous enregistrons, selon la méthode décrite \hyperref[sec:org526f538]{ici}, les différents éléments nécessaires à la sauvegarde.
+C'est-à-dire qu'à chaque fois que le joueur effectue un coup, nous récupérons les éléments nécessaires pour pouvoir simuler cette partie.
 
-\subsubsection{Récupération de la sauvegarde}
-\label{sec:org78730c2}
+\item Récupération de la sauvegarde (avec \hyperref[sec:orge8f4271]{ReadEnCoursSave})
+\label{sec:org9f990e6}
+
+La sauvegarde est récupérée en deux étapes :
+
+\begin{enumerate}
+\item Lecture du fichier
+\label{sec:orgbe94e85}
+
+Pour lire le fichier de sauvegarde, nous avons besoin de la fonction \hyperref[sec:orge8f4271]{ReadEnCoursSave}. En effet, cette fonction permet de lire les informations présentes dans le fichier de sauvegarde donné
+
+\begin{verbatim}
+FILE *save = fopen(SAVE_NAME, "r");
+\end{verbatim}
+
+où SAVE\textsubscript{NAME} est une macro qui est le nom du fichier de la sauvegarde (non modifiable par le joueur).
+
+De plus, cette fonction permet de recréer un exactement le même terrain de la sauvegarde avec, on l'avoue, un petit subterfuge :
+
+
+
+\item Replay automatique
+\label{sec:org0afd7c8}
+
+Lors de l'appel de la fonction, nous créons d'abord le terrain avec le tableau de la bonne dimension. Nous lisons donc la première ligne.
+Puis, nous parcourons la deuxième. Nous stockons dans une chaîne de caractère un seul et unique coup. Nous avons donc besoin de stocker une lettre et 2 nombre.
+Le fichier de sauvegarde ressemblant à ceci :
+
+\begin{verbatim}
+N unnombre unautre
+n 2 31 n 2 4 h 2 3 b 2 22 g 2 4 g 
+\end{verbatim}
+
+nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous avons 31 et 22 qui ne marcherait pas) pour séparer deux coup. Quand ce nombre d'espace atteint 3, nous somme donc en présence du coup suivant.
+\end{enumerate}
+\end{enumerate}
+
+
+\subsubsection{Replays}
+\label{sec:orgbcb4959}
+
+
 
 \section{SDL}
-\label{sec:org5279e08}
+\label{sec:orgfc5bbfc}
 
 Le code qui nous permet de gérer la fenêtre SDL est disponible \href{render.c}{ici}.
 
 \subsection{Début}
-\label{sec:orgb8981dd}
+\label{sec:org3c0b1e5}
 
 Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par exemple :
 
@@ -317,10 +343,10 @@ Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par e
 
 
 \subsection{Affichage et fonctionnalité}
-\label{sec:orga74c89e}
+\label{sec:orga04fbb7}
 
 \subsubsection{Affichage}
-\label{sec:orgb9b7f6e}
+\label{sec:orgb90d9de}
 
 Pour effectuer l'affichage d'une fenêtre SDL, nous devons passer par une boucle \emph{while}.
 
@@ -342,7 +368,7 @@ Puis, nous avons aussi un cas de débogage. En effet, si l'on n'est pas entré d
 
 
 \subsubsection{Fonctionnalités :}
-\label{sec:org1d5c4c5}
+\label{sec:orgc9abc89}
 
 Divers fonctionnalités sont présentes :
 Vous pouvez afficher la fenêtre grâce à la touche "g". Vous pouvez désormais voir la liste des points, les courbes représentant les différentes méthodes d'approximation, ainsi que la liste de points à droite.
@@ -357,85 +383,17 @@ Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions
 
 
 \subsection{Fin de SDL}
-\label{sec:org28196a5}
+\label{sec:org61c6735}
 
 La fonction \emph{end-sdl} nous permet de fermet la fenêtre SDL proprement, ainsi que faire les opérations nécessaires pour vider la mémoire qui a besoin d'être libéré.
 
 
-\section{{\bfseries\sffamily TODO} Présentation des nouvelles fonctionnalités}
-\label{sec:org306c323}
 
 
-Les différents résultats sont disponibles en faisant les test grâces aux fonctionnalités implémentées dans le programme.
-
-
-\subsection{Série S}
-\label{sec:orga6df84e}
-
-Liste de points sans difficulté particulière, mais pas dans le bon ordre.
-
-Résultats : On peut voir que les résultats sont les bons : l'approximation à l'air (graphiquement) efficace.
-
-
-
-\subsection{Les trois séries :}
-\label{sec:orgbdb02d0}
-
-Suites de points normaux.
-Difficultés potentielles : aucune, sauf pour le dernier qui ne pourra sûrement pas être calculé (car ce n'est pas une suite de points avec différents \(x\))
-
-
-Résultats : 
-
-\begin{enumerate}
-\item Les approximations sont les bonnes, aucune difficulté.
-
-\item Les approximations sont bonnes, aucune difficulté également.
-
-\item Ne peut pas se calculer : en effet, les points sont sur le même X. Les approximations sont donc incalculables (et infaisable).
-\end{enumerate}
-
-
-\subsection{Dépenses mensuelles et revenus :}
-\label{sec:org578d6a9}
-
-Pour ces données, il y a un grand nombre de données, ainsi qu'un axe des x qui commence avec de "grandes valeurs".
-
-Difficultés potentielles : précisions dû aux résultats importants obtenus.
-
-
-Résultats :Les polynômes ont soit des coefficients très importants, soit des coefficients presque négligeable. En revanche, on peut constater qu'il y a des approximations de calcul dans les deux méthodes. En effet, les deux polynômes finaux ne sont pas exactement les mêmes, même si ils sont tous les deux du même ordre de grandeur.
-
-
-\subsection{Série chronologique avec accroissement exponentiel}
-\label{sec:org14c4a82}
-
-L'exponentiel de la forme \(y = ce^{dx}\) est parfaitement sur les données, ce qui prouve que cette approximation est adaptée.
-
-\subsection{Vérification de la loi d Pareto}
-\label{sec:orgf142cf4}
-
-L'exponentiel de la forme \(y = ax^b\) est parfaitement sur les données, ce qui prouve la vérification de cette loi.
-
-\subsection{Commentaire global}
-\label{sec:org1500eb3}
-
-Pour ses différents jeux d'essais, on peut constater plusieurs choses :
-
-\begin{enumerate}
-\item La méthode des droites de régression et deux droites de régression ne donnent pas la même chose
-
-Et c'est normal. En effet, avec l'un, nous appliquons la formule sur l'ensemble des points. Tandis que sur la deuxième, nous séparons le tableau en deux, puis effectuons une moyenne des deux droites obtenues. Leur efficacité dépend donc des points donnés, et est donc "aléatoire".
-
-\item Les méthodes d'ajustements sont plus ou moins précises en fonction des cas (comme on peut le constater dans le programme)
-
-\item Évaluation des coûts :
-Pour les droites d'approximation, la complexité est de l'ordre (o)n\textsuperscript{2}, elle est également de (o)n\textsuperscript{2} pour les méthodes des questions 3 et 4.
-\end{enumerate}
 
 
 \section{Conclusion}
-\label{sec:org9cc52f3}
+\label{sec:org7c249da}
 
 Maintenant, on vous souhaite bonne chance.
 \end{document}
