@@ -26,10 +26,12 @@ void LibereTer(ter *T);
 ter ReadEnCoursSave(float time, char *name);
 void copiFile(char *old, char *nouv);
 
-void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay, int SreenSizeX, int SreenSizeY, int isFullscreen, int sound, int music, int time);
 
 
-#define MAX(a, b) (a<b)?b:a
+
+#define MAX(a, b) (a < b) ? b : a
+#define MIN(a, b) (a<b)?a:b
 
 #define SAVE_NAME "Res/Partie_encours"
 #define PARAM_NAME "Res/Parametres"

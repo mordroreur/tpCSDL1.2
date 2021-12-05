@@ -1,0 +1,47 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-I/usr/include/SDL",
+            "-D_GNU_SOURCE=1",
+            "-D_REENTRANT",
+            "-o",
+            "main.o",
+            "main.c"
+        ],
+        "directory": "/mnt/c/Users/mlaur/Documents/tp2048",
+        "file": "main.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-I/usr/include/SDL",
+            "-D_GNU_SOURCE=1",
+            "-D_REENTRANT",
+            "-o",
+            "Render.o",
+            "Render.c"
+        ],
+        "directory": "/mnt/c/Users/mlaur/Documents/tp2048",
+        "file": "Render.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-I/usr/include/SDL",
+            "-D_GNU_SOURCE=1",
+            "-D_REENTRANT",
+            "-o",
+            "FonctionJeu.o",
+            "FonctionJeu.c"
+        ],
+        "directory": "/mnt/c/Users/mlaur/Documents/tp2048",
+        "file": "FonctionJeu.c"
+    }
+]

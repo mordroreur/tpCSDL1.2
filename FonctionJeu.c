@@ -274,20 +274,23 @@ void CaseMouve(ter *T, int depNum){
 
 void LibereTer(ter *T){
   // On libere toute la memoire mis sur le tableau
-  if(T->tab != NULL){
-    for(int i = 0; i < T->tailleY; i++){
-      if(T->tab[i] != NULL){
-	free(T->tab[i]);
+  if(T->tailleX != -1){
+    if(T->tab != NULL){
+      for(int i = 0; i < T->tailleY; i++){
+	if(T->tab[i] != NULL){
+	  free(T->tab[i]);
+	}
       }
+      free(T->tab);
+    
     }
-    free(T->tab);
-  }
   // On met toute les caracteristique a 0 au cas ou quelque chose les appelles
-  T->tailleX = 0;
-  T->tailleY = 0;
-  T->max = 0;
-  T->score = 0;
-  T->vide = 0;
+    T->tailleX = 0;
+    T->tailleY = 0;
+    T->max = 0;
+    T->score = 0;
+    T->vide = 0;
+  }
 }
 
 
@@ -301,7 +304,7 @@ ter ReadEnCoursSave(float time, char *name){
   char str[100];
   char append[10];
   int tailleToX;
-  int tailleToY;
+  int tailleToY = -1;
   int nb = 0;
   char play;
   int Value;
@@ -322,7 +325,7 @@ ter ReadEnCoursSave(float time, char *name){
     strcpy(append, "");
     sprintf(append, "%c", r);
     strcat(str, append);
-  }
+  }  
   //analyse de la premiere ligne pour recuperer la taille
   if(str[0] == 'N'){
     sscanf(str, "N %d %d", &tailleToX, &tailleToY);
@@ -425,9 +428,9 @@ ter ReadEnCoursSave(float time, char *name){
 
 
 
-void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay){
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay, int SreenSizeX, int SreenSizeY, int isFullscreen, int sound, int music, int time){
   FILE *param = fopen(PARAM_NAME, "w");
-  fprintf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n", hightscore, endedGamesWin, endedLoseGame, mouvsup[0], mouvsup[1], mouvsup[2], mouvsup[3], nbReplay);
+  fprintf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", hightscore, endedGamesWin, endedLoseGame, mouvsup[0], mouvsup[1], mouvsup[2], mouvsup[3], nbReplay, SreenSizeX, SreenSizeY, isFullscreen, sound, music, time);
   fflush(param);
   fclose(param);
 }

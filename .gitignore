@@ -1,4 +1,7 @@
 *.o
-res
+jeu
 .clang*
 .cach*
+Res/Parametres
+Res/Replay*
+Res/Partie*

@@ -3,7 +3,7 @@
 
 
 #include "FonctionJeu.h"
-
+#include "Render.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,6 +1,6 @@
 #include "main.h"
-#include "FonctionJeu.h"
-#include <stdio.h>
+#include "Render.h"
+
 
 int main(){
   srand(time(NULL));
@@ -10,6 +10,22 @@ int main(){
   int endedLoseGame;
   char mouvsup[4];
   int nbReplay;
+  int SreenSizeX;
+  int SreenSizeY;
+  int isFullscreen;
+  int sound;
+  int music;
+  int time;
+  
+  int EtapeDuJeu = -1;
+  int isSave = 0;
+  ter plateau;
+  char play = 'O';
+
+  plateau.tailleX = -1;
+  
+  EtapeDuJeu = BouclePrincipaleDuJeu();
+  
 
   FILE *param = fopen(PARAM_NAME, "r");
   if(param == NULL){
@@ -21,17 +37,20 @@ int main(){
     mouvsup[2] = '-';
     mouvsup[3] = '-';
     nbReplay = 0;
-    writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+    SreenSizeX = 750;
+    SreenSizeY = 500;
+    isFullscreen = 0;
+    sound = 100;
+    music = 100;
+    time = 1000000;
+    writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay, SreenSizeX, SreenSizeY, isFullscreen, sound, music, time);
   }else{
-    fscanf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n", &hightscore, &endedGamesWin, &endedLoseGame, &mouvsup[0], &mouvsup[1], &mouvsup[2], &mouvsup[3], &nbReplay);
+    fscanf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", &hightscore, &endedGamesWin, &endedLoseGame, &mouvsup[0], &mouvsup[1], &mouvsup[2], &mouvsup[3], &nbReplay, &SreenSizeX, &SreenSizeY, &isFullscreen, &sound, &music, &time);
     fclose(param);
   }
   
     
-  int EtapeDuJeu = -1;
-  int isSave = 0;
-  ter plateau;
-  char play = 'O';
+
 
   FILE *save = fopen(SAVE_NAME, "r");
   if(save != NULL){
@@ -39,9 +58,13 @@ int main(){
     fclose(save);
   }
   
-  EtapeDuJeu = 1;
+  if(EtapeDuJeu == 2){
+    EtapeDuJeu = 1;
+  }
 
   
+  
+
   
 
   while(EtapeDuJeu){
@@ -63,14 +86,48 @@ int main(){
       printf("Que voulez vous faire ?\n\t");
 
       if(isSave){
-	printf("s : récupérer la sauvergarde en cours.\n\tg : continuer la sauvegarde avec un replay.\n\t");
+	printf("s : récupérer la sauvergarde en cours.\n\tn : continuer la sauvegarde avec un replay.\n\t");
       }
-      printf("c : commencer un 2048 \"standard\".\n\tt : lancer un 2048 avec une configuration bizarre.%s\n\tp : ouvrir les paramètre.\n\tq : si vous voulez deja partir.\n\n\t\t : ", (nbReplay > 0)?"\n\tr : lancer un replay.":"");
+      printf("g : utiliser l'interface graphique.\n\tc : commencer un 2048 \"standard\".\n\tt : lancer un 2048 avec une configuration bizarre.%s\n\tp : ouvrir les paramètre.\n\tq : si vous voulez deja partir.\n\n\t\t : ", (nbReplay > 0)?"\n\tr : lancer un replay.":"");
       scanf("%c", &play); while ((getchar()) != '\n');
       float temporary = -1;
       int tempX = -1;
       int tempY = -1;
       switch (play) {
+	
+      case 'g':
+	EtapeDuJeu = BouclePrincipaleDuJeu();
+	FILE *param = fopen(PARAM_NAME, "r");
+	if(param == NULL){
+	  hightscore = 0;
+	  endedGamesWin = 0;
+	  endedLoseGame = 0;
+	  mouvsup[0] = '-';
+	  mouvsup[1] = '-';
+	  mouvsup[2] = '-';
+	  mouvsup[3] = '-';
+	  nbReplay = 0;
+	  SreenSizeX = 750;
+	  SreenSizeY = 500;
+	  isFullscreen = 0;
+	  sound = 100;
+	  music = 100;
+	  time = 1000000;
+	  writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay, SreenSizeX, SreenSizeY, isFullscreen, sound, music, time);
+	}else{
+	  fscanf(param, "%d\n%d\n%d\n%c\n%c\n%c\n%c\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", &hightscore, &endedGamesWin, &endedLoseGame, &mouvsup[0], &mouvsup[1], &mouvsup[2], &mouvsup[3], &nbReplay, &SreenSizeX, &SreenSizeY, &isFullscreen, &sound, &music, &time);
+	  fclose(param);
+	}
+	FILE *save = fopen(SAVE_NAME, "r");
+	if(save != NULL){
+	  isSave = 1;
+	  fclose(save);
+	}
+	if(EtapeDuJeu == 2){
+	  EtapeDuJeu = 1;
+	}
+	break;
+	
       case 's' :
 	if(save){
 	  plateau = ReadEnCoursSave(0, SAVE_NAME);
@@ -103,7 +160,7 @@ int main(){
 	}
 	break;
 
-      case 'g':
+      case 'n':
 	if(save){
 	  while(temporary < 0){
 	    printf("Combien de temps en secondes sur chaque étape du replay voulez vous ? ");
@@ -273,7 +330,7 @@ int main(){
 	  printf("Il y a un probleme inattendu...\n");
 	}
       }
-      writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+      writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay, SreenSizeX, SreenSizeY, isFullscreen, sound, music, time);
       printf("Voulez-vous recommencer une partie?(o = oui, n = non) : ");
       scanf("%c", &play); while ((getchar()) != '\n');
       if(play == 'o'){
@@ -340,7 +397,7 @@ int main(){
 	}else{
 	  printf("Cette touche n'existe malheureusement pas dans le jeu...\n");
 	}
-	writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay);
+	writesaveFile(hightscore, endedGamesWin, endedLoseGame, mouvsup, nbReplay, SreenSizeX, SreenSizeY, isFullscreen, sound, music, time);
       }else{
 	clearScreen;
 	EtapeDuJeu = 2;
@@ -358,8 +415,17 @@ int main(){
       EtapeDuJeu = 0;
       break;
 
+
       
-    default : printf("Pas implementé!!!\n"); EtapeDuJeu = 0;break;
+      
+      
+    default :
+
+      
+      
+
+
+      printf("Pas implementé!!!\n"); EtapeDuJeu = 0;break;
     }
 
     
