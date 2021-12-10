@@ -1,8 +1,7 @@
 #include "Render.h"
+#include "FonctionJeu.h"
 #include "RenderUtilities.h"
-#include "SDL_timer.h"
 #include "SDL_video.h"
-#include <math.h>
 
 static int tickCount = 0;
 static int resizingTime = 0;
@@ -123,6 +122,7 @@ int BouclePrincipaleDuJeu(){
 	switch (win->EtapeActuelleDujeu) {
 	case 1: DrawMenu(win);break;
 	case 2: DrawPlateau(win); break;
+	case 4: DrawPlateau(win); DrawGameOver(win); break;
 	case 8: DrawPlateau(win); break;
 	default: break;//EtapeActuelleDujeu = 0;break;
 	}
@@ -306,7 +306,7 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
       }else if(key->keysym.sym == win->mouvsup[2] && win->mouvsup[2] != '-'){key->keysym.sym = 'd';
       }else if(key->keysym.sym == win->mouvsup[3] && win->mouvsup[3] != '-'){key->keysym.sym = 'b';}
       // si c est une entree de deplacement
-      if(key->keysym.sym == 'd' || key->keysym.sym == 'h' || key->keysym.sym == 'g' || key->keysym.sym == 'b'){
+    if(win->EtapeActuelleDujeu == 2 && (key->keysym.sym == 'd' || key->keysym.sym == 'h' || key->keysym.sym == 'g' || key->keysym.sym == 'b')){
 	int depNum = (key->keysym.sym == 'b')?1:(key->keysym.sym == 'g')?2:(key->keysym.sym == 'h')?3:4;
 	// si le joueur peu se deplacer dans la direction qu il a choisi
 	if(CanDep(win->plateau, depNum)){
@@ -552,7 +552,6 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    }
 		    
 		    
-		    
 		    win->EtapeActuelleDujeu = 2;
 
 		  }else if(mousX > win->TailleX/10 && mousX < win->TailleX/10 * 2 && mousY > win->TailleY/10 && mousY < win->TailleY/10 * 2 ){
@@ -671,6 +670,84 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    win->returnValue = 2;
 		    win->EtapeActuelleDujeu = 0;
 		  }
+		}else if(win->EtapeActuelleDujeu == 4){
+
+
+		  if(mousX > win->TailleX/100 && mousX < win->TailleX/10 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+		    char tmp[100];
+		    sprintf(tmp, "%s%d", SAVE_REPLAY, win->nbReplay);
+		    copiFile(SAVE_NAME, tmp);
+		    win->nbReplay++;
+		    if(remove(SAVE_NAME) != 0){
+		      printf("Il y a un probleme inattendu...\n");
+		    }
+		    win->EtapeActuelleDujeu = 1;
+		    if(remove(SAVE_NAME) != 0){
+		      printf("Il y a un probleme inattendu...\n");
+		    }
+		    if(win->plateau.tailleX != -1){
+		      if(win->oldTer != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->oldTer[i] != NULL){
+			    free(win->oldTer[i]);
+			  }
+			}
+			free(win->oldTer);
+		      }
+
+		      if(win->DepCase != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->DepCase[i] != NULL){
+			    free(win->DepCase[i]);
+			  }
+			}
+			free(win->DepCase);
+		      }
+		    }
+		    LibereTer(&win->plateau);
+		    
+		    if(win->plateau.max < 2048){
+		      win->endedLoseGame++;
+		    }else{
+		      win->endedGamesWin++;
+		    }
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+		  }else if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+		    win->EtapeActuelleDujeu = 1;
+		    if(remove(SAVE_NAME) != 0){
+		      printf("Il y a un probleme inattendu...\n");
+		    }
+		    if(win->plateau.tailleX != -1){
+		      if(win->oldTer != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->oldTer[i] != NULL){
+			    free(win->oldTer[i]);
+			  }
+			}
+			free(win->oldTer);
+		      }
+
+		      if(win->DepCase != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->DepCase[i] != NULL){
+			    free(win->DepCase[i]);
+			  }
+			}
+			free(win->DepCase);
+		      }
+		    }
+		    LibereTer(&win->plateau);
+		    
+		   if(win->plateau.max < 2048){
+		      win->endedLoseGame++;
+		    }else{
+		      win->endedGamesWin++;
+		    }
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
+		    
+		  }
+
+		  
 		}
 	      } else if (event.button.button == SDL_BUTTON_RIGHT) {
 	
@@ -725,10 +802,10 @@ void DrawPlateau(screen *win){
   SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 150, 150, 150));
 
   gameRect.w = 0.01*maxi;
-  gameRect.h = 6*maxi/8;
+  gameRect.h = 6.0*maxi/8;
   
   for(int i = 0; i < win->plateau.tailleX+1; i++){
-    gameRect.x = win->TailleX/2 - 3*maxi/8 + (3*maxi/((win->plateau.tailleX) * 4))*i;
+    gameRect.x = win->TailleX/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleX) * 4))*i;
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
   }
   
@@ -736,7 +813,7 @@ void DrawPlateau(screen *win){
   gameRect.h = 0.01*maxi;
   gameRect.w = 6.0*maxi/8 + 0.01*maxi;
   for(int i = 0; i < win->plateau.tailleY+1; i++){
-    gameRect.y = win->TailleY/2 - 3*maxi/8 + (3*maxi/((win->plateau.tailleY) * 4))*i;
+    gameRect.y = win->TailleY/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleY) * 4))*i;
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
   }
 
@@ -872,6 +949,74 @@ void DrawMenu(screen *win){
   }
   
 }
+
+
+void DrawGameOver(screen *win){
+
+
+
+  int mousX;
+  int mousY;
+  SDL_Rect gameRect;
+  int maxi = MIN(win->TailleX, win->TailleY);
+
+  
+  SDL_GetMouseState(&mousX, &mousY);
+
+  gameRect.x = win->TailleX/2 - 3*maxi/8;
+  gameRect.y = win->TailleY/2 - 3*maxi/8;
+  gameRect.w = 3.0*maxi/4 + 0.01*maxi;
+  gameRect.h = 3.0*maxi/4 + 0.01*maxi;
+  SDL_Surface *surf = SDL_CreateRGBSurface(0, gameRect.w, gameRect.h, 32, 150, 150, 150, 150);
+  SDL_FillRect(surf, NULL, 0x0000000F);
+  SDL_BlitSurface(surf, NULL, win->renderer, &gameRect);
+
+  SDL_FreeSurface(surf);
+
+
+  if(win->plateau.max < 2048){
+    DrawString("Game Over", 50, 50, 15, 'c', 255, 255, 255, *win);
+  }else{
+    DrawString("Well Done", 50, 50, 15, 'c', 255, 255, 255, *win);
+  }
+
+  
+  
+  gameRect.x = win->TailleX/100;
+  gameRect.y = win->TailleY/4;
+  gameRect.w = win->TailleX/10 - win->TailleX/100;
+  gameRect.h = win->TailleY/2;
+
+  if(mousX > win->TailleX/100 && mousX < win->TailleX/10 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+
+  DrawString("Save", 6, 42, 6, 'c', 255, 255, 255, *win);
+  DrawString("replay", 6, 49, 6, 'c', 255, 255, 255, *win);
+  DrawString("?", 6, 55, 6, 'c', 255, 255, 255, *win);
+
+
+  gameRect.x = win->TailleX - win->TailleX/100 - win->TailleX/10;
+  gameRect.y = win->TailleY/4;
+  gameRect.w = win->TailleX/10 - win->TailleX/100;
+  gameRect.h = win->TailleY/2;
+
+  if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+
+
+  DrawString("menu", 94, 49, 6, 'c', 255, 255, 255, *win);
+
+
+  
+}
+
+
 
 
 void recupeDep(screen *win){

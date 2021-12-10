@@ -23,6 +23,7 @@ void keyUp(SDL_KeyboardEvent *key, screen *win);
 void *BouclePrincipaleDesTicks(void *arg);
 
 void DrawPlateau(screen *win);
+void DrawGameOver(screen *win);
 void DrawMenu(screen *win);
 void recupeDep(screen *win);
 
