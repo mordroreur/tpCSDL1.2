@@ -1,10 +1,9 @@
 
-
-
 * Config latex                                                       :ignore:
 
 #+LANGUAGE:french
 #+OPTIONS: toc:nil %pour ne pas afficher la tdm avant la page de garde
+#+OPTIONS: H:2 %export les titre comme des titres jusqu'au niveau 6. Sinon, fait des liste
 
 
 #+SETUPFILE:Latex/Setupfile/Styleslatex/org-plain-latex.org
@@ -136,13 +135,11 @@ Cette fonction est sûrement une des plus importante. En effet, elle prend en pa
 Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans [[file:FonctionJeu.c][Fonction.c]].
 Dépend de la fonction [[*CanDep][CanDep]] pour vérifier si le joueur peut se déplacer ou à perdu.
 
-*** TODO CanDep
+*** CanDep
 
 #+begin_src C
 int CanDep(ter T, int depNum);
 #+end_src
-
-
 
 Également essentielle, cette fonction permet de savoir si le
 
@@ -157,6 +154,7 @@ for(int i = 1;i < 5; i++){
 	    }
 #+end_src
 
+Nous testons donc tous les coup grâce à cette fonction à chaque fois après le coup du joueur. Si le joueur peut faire un déplacement, alors /CanDep/ retournera 1, ce qui mettra la variable /GameOver/ à 0, le joueur n'a pas perdu. Dans le cas contraire, /GameOver/ restera à 1 et le joueur aura donc perdu.
 
 *** LibereTer
 
@@ -164,9 +162,17 @@ for(int i = 1;i < 5; i++){
 void LibereTer(ter *T);
 #+end_src
 
+Comme son nom l'indique, cette fonction permet simplement de libérer un /ter/ proprement.
+
 *** ReadEnCoursSave
 
 
+#+begin_src C
+ter ReadEnCoursSave(float time, char *name);
+#+end_src
+
+
+Grâce à cette fonction permet, nous pouvons lire le fichier de sauvegarde. Plus de détail dans la suite du document ([[*Gestion des sauvegardes][ici]]).
 
 *** copiFile
 
@@ -174,39 +180,42 @@ void LibereTer(ter *T);
 void copiFile(char *old, char *nouv);
 #+end_src
 
-Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copi /old/ dans /nouv/.
+Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copie le contenu de /old/ dans /nouv/, qui seront les noms des fichiers.
 
 *** writesaveFile
 
-** Explication du fonctionnement du jeu de base
 
+#+begin_src C
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);
+#+end_src
+
+Enfin, cette dernière fonction nous permet de sauvegarder la partie dans un fichier de sauvegarde, en prenant paramètres nécessitant une sauvegarde pour recharger la partie. Plus
+de détail dans la suite de ce document ([[*Gestion des sauvegardes][ici]])
+
+** TODO Explication du fonctionnement du jeu de base
+
+Les fonctions étant définis dans /FonctionJeu.c/, le jeu en lui même est entièrement présent dans le /main.c/.
+
+*** Cas du switch :ignore:
+
+Notre programme est basé sur un switch, qui nous laisse 6 choix (dont 1 de fermeture)
+
+1. Le premier cas est lors de l'arrivé dans le jeu. Il renvoie systématiquement à :
+2. Notre menu, qui est le cas numéro 2. C'est ici que le joueur décide si il veut lancer une nouvelle partie, voir un replay, etc. On peut distinguer 3 cas majeurs :
+   - Lancement d'un jeu
+   - Voir un replay
+   - Quitter le jeu
+3. Subséquemment, le cas 3 nous permet de gérer les déplacement du joueur ainsi que l’affichage du jeu
+4. Ensuite, le quatrième cas permet de gérer lorsque que le joueur à fini la partie. Affiche si il a gagné ou perdu (score </> à 2048), ainsi que son meilleur score.
+5. Le cas 5 est le cas où l'initialisation du terrain s'est mal passé. On va alors au cas -1.
+6. Le cas 6 est dédié à la modification des paramètre du jeu (tel que les touches par exemple)
+7. Enfin, le cas -1, qui est réservé pour arrêter le jeu et le fermer proprement
+
+*** TODO Gestion des fusions                                       :noexport:
+
+Pour gérer les 
+ 
 ** Présentation des nouvelles fonctionnalités
-
-
-*** Possibilité de mapper les touches de déplacement
-
-*** Fichier paramètre
-
-Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
-
-
-
-	  usleep((int)(1000000*time));
-	  // on effectue le deplacement deja effectue par le joueur
-	  CaseMouve(&T, depNum);
-
-stocker le nombre de case vide, et
-
-
-un fichier moddifiable
-Param_Name
-
-High score
-Nb de victoire
-Nb de défaite
-les nouvelles touches*4
-nb de replay (pour le nom du fichier des replays au fur et à mesure)
-
 
 *** Gestion des sauvegardes
 
@@ -272,11 +281,36 @@ n 2 31 n 2 4 h 2 3 b 2 22 g 2 4 g
 nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous avons 31 et 22 qui ne marcherait pas) pour séparer deux coup. Quand ce nombre d'espace atteint 3, nous somme donc en présence du coup suivant.
 
 
+*** Possibilité de mapper les touches de déplacement
+
+*** Fichier paramètre
+
+Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
+
+
+
+	  usleep((int)(1000000*time));
+	  // on effectue le deplacement deja effectue par le joueur
+	  CaseMouve(&T, depNum);
+
+stocker le nombre de case vide, et
+
+
+un fichier moddifiable
+Param_Name
+
+High score
+Nb de victoire
+Nb de défaite
+les nouvelles touches*4
+nb de replay (pour le nom du fichier des replays au fur et à mesure)
+
+
 *** Replays
 
 
 
-* SDL
+* TODO La partie SDL
 
 Le code qui nous permet de gérer la fenêtre SDL est disponible [[file:render.c][ici]].
 

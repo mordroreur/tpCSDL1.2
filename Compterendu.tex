@@ -1,4 +1,4 @@
-% Created 2021-12-03 Fri 14:31
+% Created 2021-12-11 Sat 10:54
 % Intended LaTeX compiler: pdflatex
 \documentclass[letter]{article}
                       \usepackage[utf8]{inputenc}
@@ -39,12 +39,12 @@
 
 
 \section{Problèmes potentiels identifiés au départ}
-\label{sec:org32da960}
+\label{sec:org65bcba3}
 
 Ce jeu à en effet quelques spécificités :
 
 \subsection{Gestion des fusions}
-\label{sec:org7c91f4f}
+\label{sec:org2d499ad}
 
 Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différentes lignes et colonnes. De plus, sur ces mêmes lignes et colonnes comme, par exemple, avec cet exemple :
 
@@ -63,24 +63,24 @@ De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les ré
 Nous devons donc gérer ce cas en plusieurs étapes.
 
 \subsection{Différentes taille}
-\label{sec:orgb30459e}
+\label{sec:org1e4672e}
 
 Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
 
 \subsection{Gestion des sauvegardes}
-\label{sec:org76ecd61}
+\label{sec:orgcf11b20}
 
 Nous voulons que notre joueur puisse faire une pause. Nous nous imposons donc de faire un système de sauvegarde rapide et efficace.
 
 
 
 \section{Présentation du programme console}
-\label{sec:org0ffd9a7}
+\label{sec:org8bf5eb3}
 
 Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais il est consultable dans les fichiers joints.
 
 \subsection{Introduction à la structure Terrain/ter}
-\label{sec:orgb4268e1}
+\label{sec:org13c0a0d}
 
 Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
 
@@ -117,10 +117,11 @@ Toutes ces éléments sont présents pour simplifier le nombre de paramètre pri
 
 
 \subsection{Présentation des différentes fonctions  avec leurs signatures}
-\label{sec:org1aa6e88}
+\label{sec:orgbb13507}
 
-\subsubsection{InitVide}
-\label{sec:org9eeaa9b}
+\begin{enumerate}
+\item InitVide
+\label{sec:org62d41b5}
 
 \begin{verbatim}
 ter InitVide(int n, int y);
@@ -129,8 +130,8 @@ ter InitVide(int n, int y);
 Cette fonction prend deux entier et renvoie un ter de la taille de \emph{n} et de \emph{y}.
 Elle nous permet de créer notre grille proprement.
 
-\subsubsection{afficheTer}
-\label{sec:org77b2d18}
+\item afficheTer
+\label{sec:orgf2a5f00}
 
 \begin{verbatim}
 void afficheTer(ter T);
@@ -138,8 +139,8 @@ void afficheTer(ter T);
 
 afficheTer nous permet, comme son nom l'indique, d'afficher le ter donné en paramètre.
 
-\subsubsection{SetRandomCase}
-\label{sec:org760c4c9}
+\item SetRandomCase
+\label{sec:orga9ef16f}
 
 \begin{verbatim}
 int SetRandomCase(ter *T, int n);
@@ -147,8 +148,8 @@ int SetRandomCase(ter *T, int n);
 
 SetRandomCase permet d'initialiser une case \texttt{vide} à une certain valeur. Elle prend en paramètre un entier, qui détermine l'emplacement de la case. Petit particularité : le nombre de case \emph{n} ne s'incrémente pas si la case est déjà rempli. C'est donc après \emph{n} case vide que l'on initialise la case numéro \emph{n} + \textbf{nombre de case déjà remplie} à une valeur 2 ou 4.
 
-\subsubsection{CaseMouve}
-\label{sec:orgf9c39a8}
+\item CaseMouve
+\label{sec:org0c230d8}
 
 \begin{verbatim}
 void CaseMouve(ter *T, int depNum);
@@ -156,16 +157,14 @@ void CaseMouve(ter *T, int depNum);
 
 Cette fonction est sûrement une des plus importante. En effet, elle prend en paramètre un pointeur sur un terrain ainsi qu'un déplacement. 
 Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans \href{FonctionJeu.c}{Fonction.c}.
-Dépend de la fonction \hyperref[sec:org42dfd89]{CanDep} pour vérifier si le joueur peut se déplacer ou à perdu.
+Dépend de la fonction \hyperref[sec:orgec1067c]{CanDep} pour vérifier si le joueur peut se déplacer ou à perdu.
 
-\subsubsection{{\bfseries\sffamily TODO} CanDep}
-\label{sec:org42dfd89}
+\item CanDep
+\label{sec:orgec1067c}
 
 \begin{verbatim}
 int CanDep(ter T, int depNum);
 \end{verbatim}
-
-
 
 Également essentielle, cette fonction permet de savoir si le
 
@@ -180,71 +179,81 @@ for(int i = 1;i < 5; i++){
 	    }
 \end{verbatim}
 
+Nous testons donc tous les coup grâce à cette fonction à chaque fois après le coup du joueur. Si le joueur peut faire un déplacement, alors \emph{CanDep} retournera 1, ce qui mettra la variable \emph{GameOver} à 0, le joueur n'a pas perdu. Dans le cas contraire, \emph{GameOver} restera à 1 et le joueur aura donc perdu.
 
-\subsubsection{LibereTer}
-\label{sec:org202c82b}
+\item LibereTer
+\label{sec:orga1798dd}
 
 \begin{verbatim}
 void LibereTer(ter *T);
 \end{verbatim}
 
-\subsubsection{ReadEnCoursSave}
-\label{sec:orge8f4271}
+Comme son nom l'indique, cette fonction permet simplement de libérer un \emph{ter} proprement.
+
+\item ReadEnCoursSave
+\label{sec:org2ded51b}
 
 
+\begin{verbatim}
+ter ReadEnCoursSave(float time, char *name);
+\end{verbatim}
 
-\subsubsection{copiFile}
-\label{sec:org8b1382e}
+
+Grâce à cette fonction permet, nous pouvons lire le fichier de sauvegarde. Plus de détail dans la suite du document (\hyperref[sec:orgcf11b20]{ici}).
+
+\item copiFile
+\label{sec:orga17698c}
 
 \begin{verbatim}
 void copiFile(char *old, char *nouv);
 \end{verbatim}
 
-Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copi \emph{old} dans \emph{nouv}.
+Cette fonction permet de prendre deux chaînes de caractères qui sont les noms de fichiers, et qui copie le contenu de \emph{old} dans \emph{nouv}, qui seront les noms des fichiers.
 
-\subsubsection{writesaveFile}
-\label{sec:org92a1e2b}
+\item writesaveFile
+\label{sec:orga53634a}
 
-\subsection{Explication du fonctionnement du jeu de base}
-\label{sec:org9c76c47}
+
+\begin{verbatim}
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);
+\end{verbatim}
+
+Enfin, cette dernière fonction nous permet de sauvegarder la partie dans un fichier de sauvegarde, en prenant paramètres nécessitant une sauvegarde pour recharger la partie. Plus
+de détail dans la suite de ce document (\hyperref[sec:orgcf11b20]{ici})
+\end{enumerate}
+
+\subsection{{\bfseries\sffamily TODO} Explication du fonctionnement du jeu de base}
+\label{sec:orge1d658f}
+
+Les fonctions étant définis dans \emph{FonctionJeu.c}, le jeu en lui même est entièrement présent dans le \emph{main.c}.
+
+Notre programme est basé sur un switch, qui nous laisse 6 choix (dont 1 de fermuture)
+
+\begin{enumerate}
+\item Le premier cas est lors de l'arrivé dans le jeu. Il renvoie systématiquement à :
+\item Notre menu, qui est le cas numéro 2. C'est ici que le joueur décide si il veut lancer une nouvelle partie, voir un replay, etc. On peut distinguer 3 cas majeurs :
+\begin{itemize}
+\item Lancement d'un jeu
+\item Voir un replay
+\item Quitter le jeu
+\end{itemize}
+\item Subséquemment, le cas 3 nous permet de gérer les déplacement du joueur ainsi que l’affichage du jeu
+\item Ensuite, le quatrième cas permet de gérer lorsque que le joueur à fini la partie. Affiche si il a gagné ou perdu (score </> à 2048), ainsi que son meilleur score.
+\item Le cas 5 est le cas où l'initialisation du terrain s'est mal passé. On va alors au cas -1.
+\item Le cas 6 est dédié à la modification des paramètre du jeu (tel que les touches par exemple)
+\item Enfin, le cas -1, qui est réservé pour arrêter le jeu et le fermer proprement
+\end{enumerate}
 
 \subsection{Présentation des nouvelles fonctionnalités}
-\label{sec:orgdb3a22f}
+\label{sec:orga39c03f}
 
-
-\subsubsection{Possibilité de mapper les touches de déplacement}
-\label{sec:org49421fe}
-
-\subsubsection{Fichier paramètre}
-\label{sec:org02b90ca}
-
-Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
-
-
-
-usleep((int)(1000000*time));
-// on effectue le deplacement deja effectue par le joueur
-CaseMouve(\&T, depNum);
-
-stocker le nombre de case vide, et
-
-
-un fichier moddifiable
-Param\textsubscript{Name}
-
-High score
-Nb de victoire
-Nb de défaite
-les nouvelles touches*4
-nb de replay (pour le nom du fichier des replays au fur et à mesure)
-
-
-\subsubsection{Gestion des sauvegardes}
-\label{sec:org5920778}
+\begin{enumerate}
+\item Gestion des sauvegardes
+\label{sec:org8335584}
 
 \begin{enumerate}
 \item Présentation du fichier de sauvegarde
-\label{sec:org526f538}
+\label{sec:org7d2c40d}
 
 
 
@@ -267,26 +276,26 @@ Tout d'abord, les trois premiers éléments :
 
 Puis, les autres sont simplement la partie enregistrer.
 Comment me direz vous ?
-Et bien, la lettre donne la direction (g gauche, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le \hyperref[sec:org9f990e6]{principe suivant}.
+Et bien, la lettre donne la direction (g gauche, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le \hyperref[sec:orge1d9381]{principe suivant}.
 
 
 \item La sauvegarde en elle-même
-\label{sec:orga34f6bc}
+\label{sec:org0ed3ffd}
 
 La gestion des sauvegardes est particulière.
-En effet, lorsque le joueur joue un coup, nous enregistrons, selon la méthode décrite \hyperref[sec:org526f538]{ici}, les différents éléments nécessaires à la sauvegarde.
+En effet, lorsque le joueur joue un coup, nous enregistrons, selon la méthode décrite \hyperref[sec:org7d2c40d]{ici}, les différents éléments nécessaires à la sauvegarde.
 C'est-à-dire qu'à chaque fois que le joueur effectue un coup, nous récupérons les éléments nécessaires pour pouvoir simuler cette partie.
 
-\item Récupération de la sauvegarde (avec \hyperref[sec:orge8f4271]{ReadEnCoursSave})
-\label{sec:org9f990e6}
+\item Récupération de la sauvegarde (avec \hyperref[sec:org2ded51b]{ReadEnCoursSave})
+\label{sec:orge1d9381}
 
 La sauvegarde est récupérée en deux étapes :
 
 \begin{enumerate}
 \item Lecture du fichier
-\label{sec:orgbe94e85}
+\label{sec:org35e1794}
 
-Pour lire le fichier de sauvegarde, nous avons besoin de la fonction \hyperref[sec:orge8f4271]{ReadEnCoursSave}. En effet, cette fonction permet de lire les informations présentes dans le fichier de sauvegarde donné
+Pour lire le fichier de sauvegarde, nous avons besoin de la fonction \hyperref[sec:org2ded51b]{ReadEnCoursSave}. En effet, cette fonction permet de lire les informations présentes dans le fichier de sauvegarde donné
 
 \begin{verbatim}
 FILE *save = fopen(SAVE_NAME, "r");
@@ -299,7 +308,7 @@ De plus, cette fonction permet de recréer un exactement le même terrain de la 
 
 
 \item Replay automatique
-\label{sec:org0afd7c8}
+\label{sec:org86a4097}
 
 Lors de l'appel de la fonction, nous créons d'abord le terrain avec le tableau de la bonne dimension. Nous lisons donc la première ligne.
 Puis, nous parcourons la deuxième. Nous stockons dans une chaîne de caractère un seul et unique coup. Nous avons donc besoin de stocker une lettre et 2 nombre.
@@ -315,18 +324,46 @@ nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous
 \end{enumerate}
 
 
-\subsubsection{Replays}
-\label{sec:orgbcb4959}
+\item Possibilité de mapper les touches de déplacement
+\label{sec:org1fd6767}
+
+\item Fichier paramètre
+\label{sec:org0af3236}
+
+Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
 
 
 
-\section{SDL}
-\label{sec:orgfc5bbfc}
+usleep((int)(1000000*time));
+// on effectue le deplacement deja effectue par le joueur
+CaseMouve(\&T, depNum);
+
+stocker le nombre de case vide, et
+
+
+un fichier moddifiable
+Param\textsubscript{Name}
+
+High score
+Nb de victoire
+Nb de défaite
+les nouvelles touches*4
+nb de replay (pour le nom du fichier des replays au fur et à mesure)
+
+
+\item Replays
+\label{sec:orgb4af942}
+\end{enumerate}
+
+
+
+\section{{\bfseries\sffamily TODO} La partie SDL}
+\label{sec:org1f8a787}
 
 Le code qui nous permet de gérer la fenêtre SDL est disponible \href{render.c}{ici}.
 
 \subsection{Début}
-\label{sec:org3c0b1e5}
+\label{sec:org60af0cc}
 
 Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par exemple :
 
@@ -343,10 +380,11 @@ Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par e
 
 
 \subsection{Affichage et fonctionnalité}
-\label{sec:orga04fbb7}
+\label{sec:orgb96e69d}
 
-\subsubsection{Affichage}
-\label{sec:orgb90d9de}
+\begin{enumerate}
+\item Affichage
+\label{sec:orgef1d22a}
 
 Pour effectuer l'affichage d'une fenêtre SDL, nous devons passer par une boucle \emph{while}.
 
@@ -367,8 +405,8 @@ Puis, nous avons aussi un cas de débogage. En effet, si l'on n'est pas entré d
 
 
 
-\subsubsection{Fonctionnalités :}
-\label{sec:orgc9abc89}
+\item Fonctionnalités :
+\label{sec:orgc4502d9}
 
 Divers fonctionnalités sont présentes :
 Vous pouvez afficher la fenêtre grâce à la touche "g". Vous pouvez désormais voir la liste des points, les courbes représentant les différentes méthodes d'approximation, ainsi que la liste de points à droite.
@@ -379,11 +417,12 @@ Le curseur aura alors une position (x et y) qui sera automatiquement ajouté dan
 
 D'autre part, vous pouvez zoomer et dézoomer grâce à la molette de la souris.
 
-Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions en appuyant sur leur nom. 
+Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions en appuyant sur leur nom.
+\end{enumerate}
 
 
 \subsection{Fin de SDL}
-\label{sec:org61c6735}
+\label{sec:orga3f22d4}
 
 La fonction \emph{end-sdl} nous permet de fermet la fenêtre SDL proprement, ainsi que faire les opérations nécessaires pour vider la mémoire qui a besoin d'être libéré.
 
@@ -393,7 +432,7 @@ La fonction \emph{end-sdl} nous permet de fermet la fenêtre SDL proprement, ain
 
 
 \section{Conclusion}
-\label{sec:org7c249da}
+\label{sec:orge6a9472}
 
 Maintenant, on vous souhaite bonne chance.
 \end{document}
