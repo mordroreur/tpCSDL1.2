@@ -123,7 +123,11 @@ int BouclePrincipaleDuJeu(){
 	case 1: DrawMenu(win);break;
 	case 2: DrawPlateau(win); break;
 	case 4: DrawPlateau(win); DrawGameOver(win); break;
+	case 6: DrawPlateau(win); DrawSavedOver(win); break;
 	case 8: DrawPlateau(win); break;
+	case 10: DrawPlateau(win); break;
+	case 12: DrawPlateau(win); break;
+	case 16: DrawSelectReplay(win); break;
 	default: break;//EtapeActuelleDujeu = 0;break;
 	}
 
@@ -301,10 +305,10 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 
   default:
     
-    if(key->keysym.sym == win->mouvsup[0] && win->mouvsup[0] != '-'){key->keysym.sym = 'g';
-      }else if(key->keysym.sym == win->mouvsup[1] && win->mouvsup[1] != '-'){key->keysym.sym = 'h';
-      }else if(key->keysym.sym == win->mouvsup[2] && win->mouvsup[2] != '-'){key->keysym.sym = 'd';
-      }else if(key->keysym.sym == win->mouvsup[3] && win->mouvsup[3] != '-'){key->keysym.sym = 'b';}
+    if((key->keysym.sym == win->mouvsup[0] && win->mouvsup[0] != '-') || key->keysym.sym == SDLK_LEFT){key->keysym.sym = 'g';
+    }else if((key->keysym.sym == win->mouvsup[1] && win->mouvsup[1] != '-') || key->keysym.sym == SDLK_UP){key->keysym.sym = 'h';
+    }else if((key->keysym.sym == win->mouvsup[2] && win->mouvsup[2] != '-') || key->keysym.sym == SDLK_RIGHT){key->keysym.sym = 'd';
+    }else if((key->keysym.sym == win->mouvsup[3] && win->mouvsup[3] != '-') || key->keysym.sym == SDLK_DOWN){key->keysym.sym = 'b';}
       // si c est une entree de deplacement
     if(win->EtapeActuelleDujeu == 2 && (key->keysym.sym == 'd' || key->keysym.sym == 'h' || key->keysym.sym == 'g' || key->keysym.sym == 'b')){
 	int depNum = (key->keysym.sym == 'b')?1:(key->keysym.sym == 'g')?2:(key->keysym.sym == 'h')?3:4;
@@ -337,7 +341,12 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 	  // si GameOver est toujours a 1 alors le joueur a perdu
 	  if(GameOver){
 	    // il va donc a l ecran 4
-	    win->EtapeActuelleDujeu = 1;
+	    win->EtapeActuelleDujeu = 4;
+	    if(win->plateau.max < 2048){
+	      win->endedLoseGame++;
+	    }else{
+	      win->endedGamesWin++;
+	    }
 	  }
 	}
       }
@@ -395,7 +404,7 @@ void *BouclePrincipaleDesTicks(void *arg){
       }
       //printf("%d %d\n", renderer->w, renderer->h);
 
-      if(win->EtapeActuelleDujeu == 8 && win->timeBegin < getTime()-win->time){
+      if((win->EtapeActuelleDujeu == 8 || win->EtapeActuelleDujeu == 10) && win->timeBegin < getTime()-win->time){
 	int nb = 0;
 	char r;
 	char str[100];
@@ -462,9 +471,27 @@ void *BouclePrincipaleDesTicks(void *arg){
 	  }
 	
 	}else if(nb == 15){
-	  
-	  win->EtapeActuelleDujeu = 2;
-       
+	  int GameOver = 1;
+	  //pour les quatre deplacement
+	  for(int i = 1;i < 5; i++){
+	    if(CanDep(win->plateau, i)){
+	      // si le joueur peu bouger on change cette variable
+	      GameOver = 0;
+	      break;
+	    }
+	  }
+	  // si GameOver est toujours a 1 alors le joueur a perdu
+	  if(GameOver){
+	    // il va donc a l ecran 4
+	    if(win->EtapeActuelleDujeu == 8){
+	      win->EtapeActuelleDujeu = 4;
+	    }else{
+	      win->EtapeActuelleDujeu = 6;
+	    }
+	    
+	  }else{
+	    win->EtapeActuelleDujeu = 2;
+	  }
 	}
 
       }
@@ -554,7 +581,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    
 		    win->EtapeActuelleDujeu = 2;
 
-		  }else if(mousX > win->TailleX/10 && mousX < win->TailleX/10 * 2 && mousY > win->TailleY/10 && mousY < win->TailleY/10 * 2 ){
+		  }else if(mousX > win->TailleX/10 && mousX < win->TailleX/10 * 2 && mousY > win->TailleY/10 && mousY < win->TailleY/10 * 2 && win->isSave){
 		    char r;
 		    char str[100];
 		    char append[100];
@@ -669,11 +696,13 @@ void *BouclePrincipaleDesTicks(void *arg){
 		  }else if(mousX > 0 && mousX < win->TailleX/10 && mousY > win->TailleY - win->TailleY/10 && mousY < win->TailleY ){
 		    win->returnValue = 2;
 		    win->EtapeActuelleDujeu = 0;
+		  }else if(mousX >  win->TailleX/4 && mousX < win->TailleX/4 * 2 && mousY > win->TailleY/5 * 3 && mousY < win->TailleY/4 + win->TailleY/5 * 3 ){
+		    win->EtapeActuelleDujeu = 16;
 		  }
 		}else if(win->EtapeActuelleDujeu == 4){
 
 
-		  if(mousX > win->TailleX/100 && mousX < win->TailleX/10 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+		  if(mousX > win->TailleX/100 && mousX < win->TailleX/10 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2){
 		    char tmp[100];
 		    sprintf(tmp, "%s%d", SAVE_REPLAY, win->nbReplay);
 		    copiFile(SAVE_NAME, tmp);
@@ -685,32 +714,8 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    if(remove(SAVE_NAME) != 0){
 		      printf("Il y a un probleme inattendu...\n");
 		    }
-		    if(win->plateau.tailleX != -1){
-		      if(win->oldTer != NULL){
-			for(int i = 0; i < win->plateau.tailleY; i++){
-			  if(win->oldTer[i] != NULL){
-			    free(win->oldTer[i]);
-			  }
-			}
-			free(win->oldTer);
-		      }
-
-		      if(win->DepCase != NULL){
-			for(int i = 0; i < win->plateau.tailleY; i++){
-			  if(win->DepCase[i] != NULL){
-			    free(win->DepCase[i]);
-			  }
-			}
-			free(win->DepCase);
-		      }
-		    }
-		    LibereTer(&win->plateau);
+		    win->EtapeActuelleDujeu = 6;
 		    
-		    if(win->plateau.max < 2048){
-		      win->endedLoseGame++;
-		    }else{
-		      win->endedGamesWin++;
-		    }
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
 		  }else if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
 		    win->EtapeActuelleDujeu = 1;
@@ -738,12 +743,162 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    }
 		    LibereTer(&win->plateau);
 		    
-		   if(win->plateau.max < 2048){
-		      win->endedLoseGame++;
-		    }else{
-		      win->endedGamesWin++;
-		    }
+		   
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
+		    
+		  }
+
+		  
+		}else if(win->EtapeActuelleDujeu == 6){
+
+		  if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+		    win->EtapeActuelleDujeu = 1;
+		    if(remove(SAVE_NAME) != 0){
+		      printf("Il y a un probleme inattendu...\n");
+		    }
+		    if(win->plateau.tailleX != -1){
+		      if(win->oldTer != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->oldTer[i] != NULL){
+			    free(win->oldTer[i]);
+			  }
+			}
+			free(win->oldTer);
+		      }
+
+		      if(win->DepCase != NULL){
+			for(int i = 0; i < win->plateau.tailleY; i++){
+			  if(win->DepCase[i] != NULL){
+			    free(win->DepCase[i]);
+			  }
+			}
+			free(win->DepCase);
+		      }
+		    }
+		    LibereTer(&win->plateau);
+		    
+		   
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
+		    
+		  }
+		  
+		}else if(win->EtapeActuelleDujeu == 16){
+
+		  for(int i = 0; i < win->nbReplay; i++){
+
+		    if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/2 && mousY > win->TailleY/(win->nbReplay + 2) * (i+1) && mousY < win->TailleY/(win->nbReplay + 2) * (i+1) + win->TailleY/(win->nbReplay + 3)){
+
+		      char r;
+		      char str[100];
+		      char append[100];
+		      int tX = 4;
+		      int tY = 4;
+		      char nom[100];
+		      sprintf(nom, "%s%d", SAVE_REPLAY, i);
+		      save = fopen(nom, "r");
+		      if(save == NULL){
+			printf("C'est assez cocasse... Un fichier ne devrais pas disparaitre...\n");
+			exit(0);
+		      }
+		    
+		      win->EtapeActuelleDujeu = 10;
+		      // Lectuer de la ligne d'entete 
+		      while((r = getc(save)) != '\n'){
+			strcpy(append, "");
+			sprintf(append, "%c", r);
+			strcat(str, append);
+		      }  
+		      //analyse de la premiere ligne pour recuperer la taille
+		      if(str[0] == 'N'){
+			sscanf(str, "N %d %d", &tX, &tY);
+		      }
+		    
+		      // initialisation du plateau
+		      //creation du tableau
+		      win->plateau.tab = (int ** )malloc(sizeof(int *) * tY);
+		      if(win->plateau.tab == NULL){
+			win->EtapeActuelleDujeu = 0;
+		      }else{
+			for(int i = 0; i < tY; i++){
+			  win->plateau.tab[i] = (int *)malloc(sizeof(int) * tX);
+			  if(win->plateau.tab[i] == NULL){
+			    for(int j = 0; j < i; i++){
+			      free(win->plateau.tab[j]);
+			    }
+			    free(win->plateau.tab);
+			    win->EtapeActuelleDujeu = 0;
+			  }
+			}
+		      }
+		      // On met que toute les cases sont vides
+		      for(int i = 0; i < tY; i++){
+			for(int j = 0; j < tX; j++){
+			  win->plateau.tab[i][j] = -1;
+			} 
+		      }
+		      // initialisation des autres variables
+		      win->plateau.max = 2;
+		      win->plateau.score = 0;
+		      win->plateau.vide = tX*tY;
+		      win->plateau.tailleX = tX;
+		      win->plateau.tailleY = tY;
+
+		      if(win->plateau.tailleX == -1){
+			win->EtapeActuelleDujeu = 0;
+		      }
+		      win->depEnCours = 0;
+		      win->timeBegin = getTime() - win->time;
+
+		      win->oldTer = (int ** )malloc(sizeof(int *) * tY);
+		      if(win->oldTer == NULL){
+			win->EtapeActuelleDujeu = 0;
+		      }else{
+			for(int i = 0; i < tY; i++){
+			  win->oldTer[i] = (int *)malloc(sizeof(int) * tX);
+			  if(win->oldTer[i] == NULL){
+			    for(int j = 0; j < i; i++){
+			      free(win->oldTer[j]);
+			    }
+			    free(win->oldTer);
+			    win->EtapeActuelleDujeu = 0;
+			  }
+			}
+		      }
+		      // On met que toute les cases sont vides
+		      if(win->oldTer != NULL){
+			for(int i = 0; i < tY; i++){
+			  for(int j = 0; j < tX; j++){
+			    win->oldTer[i][j] = -1;
+			  }
+			}
+		      }
+		      win->DepCase = (int ** )malloc(sizeof(int *) * tY);
+		      if(win->DepCase == NULL){
+			win->EtapeActuelleDujeu = 0;
+		      }else{
+			for(int i = 0; i < tY; i++){
+			  win->DepCase[i] = (int *)malloc(sizeof(int) * tX);
+			  if(win->DepCase[i] == NULL){
+			    for(int j = 0; j < i; i++){
+			      free(win->DepCase[j]);
+			    }
+			    free(win->DepCase);
+			    win->EtapeActuelleDujeu = 0;
+			  }
+			}
+		      }
+		      if(win->DepCase != NULL){
+			// On met que toute les cases sont vides
+			for(int i = 0; i < tY; i++){
+			  for(int j = 0; j < tX; j++){
+			    win->DepCase[i][j] = -1;
+			  } 
+			}
+		      
+		      }
+		    
+		      
+		    }
 		    
 		  }
 
@@ -829,7 +984,7 @@ void DrawPlateau(screen *win){
 
 	  gameRect.x = win->TailleX/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleX) * 4))*j + 0.02*maxi;
 	  gameRect.y = win->TailleY/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleY) * 4))*i + 0.02*maxi;
-	  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 255, 255.0/11*log2(win->plateau.tab[i][j])/log2(2), 0));
+	  SDL_FillRect(win->renderer, &gameRect, getColor(win->plateau.tab[i][j], win));
 	  
 	  char nb[50];
 	  sprintf(nb, "%d", win->plateau.tab[i][j]);
@@ -871,7 +1026,7 @@ void DrawPlateau(screen *win){
 	  gameRect.x = win->TailleX/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleX) * 4))*j + 0.02*maxi + (gameRect.w+0.03*maxi)*Xnext*win->DepCase[i][j] * (float)(getTime()-win->timeBegin)/win->time ;
 	  gameRect.y = win->TailleY/2.0 - 3.0*maxi/8 + (3.0*maxi/((win->plateau.tailleY) * 4))*i + 0.02*maxi + (gameRect.h+0.03*maxi)*Ynext*win->DepCase[i][j] * (float)(getTime()-win->timeBegin)/win->time;
 	  
-	  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 255, 255.0/11*log2(win->oldTer[i][j])/log2(2), 0));
+	  SDL_FillRect(win->renderer, &gameRect, getColor(win->oldTer[i][j], win));
 	  
 	  char nb[50];
 	  sprintf(nb, "%d", win->oldTer[i][j]);
@@ -947,6 +1102,18 @@ void DrawMenu(screen *win){
   }else{
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 210, 210, 255));
   }
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/5 * 3;
+  gameRect.w = win->TailleX/4;
+  gameRect.h = win->TailleY/4;
+
+  if(mousX >  win->TailleX/4 && mousX < win->TailleX/4 * 2 && mousY > win->TailleY/5 * 3 && mousY < win->TailleY/4 + win->TailleY/5 * 3 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
   
 }
 
@@ -997,6 +1164,52 @@ void DrawGameOver(screen *win){
   DrawString("replay", 6, 49, 6, 'c', 255, 255, 255, *win);
   DrawString("?", 6, 55, 6, 'c', 255, 255, 255, *win);
 
+
+  gameRect.x = win->TailleX - win->TailleX/100 - win->TailleX/10;
+  gameRect.y = win->TailleY/4;
+  gameRect.w = win->TailleX/10 - win->TailleX/100;
+  gameRect.h = win->TailleY/2;
+
+  if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+
+
+  DrawString("menu", 94, 49, 6, 'c', 255, 255, 255, *win);
+}
+
+
+void DrawSavedOver(screen *win){
+
+
+
+  int mousX;
+  int mousY;
+  SDL_Rect gameRect;
+  int maxi = MIN(win->TailleX, win->TailleY);
+
+  
+  SDL_GetMouseState(&mousX, &mousY);
+
+  gameRect.x = win->TailleX/2 - 3*maxi/8;
+  gameRect.y = win->TailleY/2 - 3*maxi/8;
+  gameRect.w = 3.0*maxi/4 + 0.01*maxi;
+  gameRect.h = 3.0*maxi/4 + 0.01*maxi;
+  SDL_Surface *surf = SDL_CreateRGBSurface(0, gameRect.w, gameRect.h, 32, 150, 150, 150, 150);
+  SDL_FillRect(surf, NULL, 0x0000000F);
+  SDL_BlitSurface(surf, NULL, win->renderer, &gameRect);
+
+  SDL_FreeSurface(surf);
+
+
+  if(win->plateau.max < 2048){
+    DrawString("Game Over", 50, 50, 15, 'c', 255, 255, 255, *win);
+  }else{
+    DrawString("Well Done", 50, 50, 15, 'c', 255, 255, 255, *win);
+  }
+  
 
   gameRect.x = win->TailleX - win->TailleX/100 - win->TailleX/10;
   gameRect.y = win->TailleY/4;
@@ -1117,4 +1330,58 @@ void recupeDep(screen *win){
   // on libere la memoire
   free(isfusX);
   free(isfusY);  
+}
+
+
+
+
+
+void DrawSelectReplay(screen *win){
+  SDL_FillRect(win->renderer, NULL, SDL_MapRGB(win->renderer->format, 255, 255, 255));
+  int mousX = 0;
+  int mousY = 0;
+  
+  SDL_Rect gameRect;
+
+  SDL_GetMouseState(&mousX, &mousY);
+
+  for(int i = 0; i < win->nbReplay; i++){
+    gameRect.x = win->TailleX/4;
+    gameRect.y = win->TailleY/(win->nbReplay + 2) * (i+1);
+    gameRect.w = win->TailleX/2;
+    gameRect.h = win->TailleY/(win->nbReplay + 3);
+
+    if(mousX > gameRect.x && mousX < gameRect.x+gameRect.w && mousY > gameRect.y && mousY < gameRect.y + gameRect.h ){
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+    }else{
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+    }
+  }
+  
+}
+
+
+Uint32 getColor(int value, screen *win){
+
+  switch(value){
+  case 0:return SDL_MapRGB(win->renderer->format, 0, 0, 0);
+  case 2:return SDL_MapRGB(win->renderer->format, 255, 0, 0);
+  case 4:return SDL_MapRGB(win->renderer->format, 255, 25, 0);
+  case 8:return SDL_MapRGB(win->renderer->format, 255, 50, 0);
+  case 16:return SDL_MapRGB(win->renderer->format, 255, 75, 0);
+  case 32:return SDL_MapRGB(win->renderer->format, 255, 101, 0);
+  case 64:return SDL_MapRGB(win->renderer->format, 255, 126, 0);
+  case 128:return SDL_MapRGB(win->renderer->format, 255, 152, 0);
+  case 256:return SDL_MapRGB(win->renderer->format, 255, 177, 0);
+  case 512:return SDL_MapRGB(win->renderer->format, 255, 203, 0);
+  case 1024:return SDL_MapRGB(win->renderer->format, 255, 228, 0);
+  case 2048:return SDL_MapRGB(win->renderer->format, 255, 255, 0);
+  case 4096:return SDL_MapRGB(win->renderer->format, 0, 0, 255);
+  case 8192:return SDL_MapRGB(win->renderer->format, 51, 51, 255);
+  case 16384:return SDL_MapRGB(win->renderer->format, 102, 102, 255);
+  case 32768:return SDL_MapRGB(win->renderer->format, 153, 153, 255);
+  case 65536:return SDL_MapRGB(win->renderer->format, 204, 204, 255);
+  default :return SDL_MapRGB(win->renderer->format, 255/(log2(value-131072)/log2(2)), 255/(log2(value-131072)/log2(2)), 255/(log2(value-131072)/log2(2)));
+  }
+  
 }

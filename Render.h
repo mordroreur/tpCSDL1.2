@@ -6,6 +6,7 @@
 #include "FonctionJeu.h"
 
 #include "SDL.h"
+#include "SDL_stdinc.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -22,9 +23,12 @@ void end_sdl(char ok, char const * msg, screen *s);
 void keyUp(SDL_KeyboardEvent *key, screen *win);
 void *BouclePrincipaleDesTicks(void *arg);
 
+void DrawSelectReplay(screen *win);
 void DrawPlateau(screen *win);
 void DrawGameOver(screen *win);
+void DrawSavedOver(screen *win);
 void DrawMenu(screen *win);
 void recupeDep(screen *win);
+Uint32 getColor(int value, screen *win);
 
 #endif /* _RENDER_HEADER */
