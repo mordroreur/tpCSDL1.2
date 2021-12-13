@@ -133,6 +133,26 @@ int BouclePrincipaleDuJeu(){
 	case 25: DrawParam(win); DrawGetTouch(win); break;
 	case 26: DrawParam(win); DrawGetTouch(win); break;
 	case 27: DrawParam(win); DrawGetTouch(win); break;
+	case 50: DrawParam(win);break;
+	case 51: DrawParam(win); DrawGetTouch(win); break;
+	case 52: DrawParam(win); DrawGetTouch(win); break;
+	case 53: DrawParam(win); DrawGetTouch(win); break;
+	case 54: DrawParam(win); DrawGetTouch(win); break;
+	case 60: DrawParam(win);break;
+	case 61: DrawParam(win); DrawGetTouch(win); break;
+	case 62: DrawParam(win); DrawGetTouch(win); break;
+	case 63: DrawParam(win); DrawGetTouch(win); break;
+	case 64: DrawParam(win); DrawGetTouch(win); break;
+	case 70: DrawParam(win);break;
+	case 71: DrawParam(win); DrawGetTouch(win); break;
+	case 72: DrawParam(win); DrawGetTouch(win); break;
+	case 73: DrawParam(win); DrawGetTouch(win); break;
+	case 74: DrawParam(win); DrawGetTouch(win); break;
+	case 80: DrawParam(win);break;
+	case 81: DrawParam(win); DrawGetTouch(win); break;
+	case 82: DrawParam(win); DrawGetTouch(win); break;
+	case 83: DrawParam(win); DrawGetTouch(win); break;
+	case 84: DrawParam(win); DrawGetTouch(win); break;
 	default: break;//EtapeActuelleDujeu = 0;break;
 	}
 
@@ -261,7 +281,7 @@ screen *create_Win(int x, int y, int fullscreen) {
     s->otherY = y;
   }
   /* Mise d'un titre a la fenetre. */
-  SDL_WM_SetCaption("THIS IS A F****** WINDOWS",NULL) ;
+  SDL_WM_SetCaption("2048",NULL) ;
 
 
 
@@ -287,7 +307,7 @@ screen *create_Win(int x, int y, int fullscreen) {
 void keyUp(SDL_KeyboardEvent *key, screen *win){
   //printf("%d\n", key->keysym.sym);
   switch(key->keysym.sym){
-  case SDLK_ESCAPE:win->EtapeActuelleDujeu = 0;break;
+  case SDLK_ESCAPE:if(win->EtapeActuelleDujeu == 23){win->EtapeActuelleDujeu = 1;}else {win->EtapeActuelleDujeu = 0;}break;
   case SDLK_F11 :
     resizingTime = SDL_GetTicks();
     int x = win->otherX;
@@ -355,19 +375,19 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 	  }
 	}
       }
-    }else if(win->EtapeActuelleDujeu == 24 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+    }else if((win->EtapeActuelleDujeu == 24 || win->EtapeActuelleDujeu == 51 || win->EtapeActuelleDujeu == 61 || win->EtapeActuelleDujeu == 71 || win->EtapeActuelleDujeu == 81) && key->keysym.sym != ' ' && key->keysym.sym != '-'){
       win->EtapeActuelleDujeu--;
       win->mouvsup[0] = key->keysym.sym;
       writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
-    }else if(win->EtapeActuelleDujeu == 25 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+    }else if((win->EtapeActuelleDujeu == 25 || win->EtapeActuelleDujeu == 52 || win->EtapeActuelleDujeu == 62 || win->EtapeActuelleDujeu == 72 || win->EtapeActuelleDujeu == 82) && key->keysym.sym != ' ' && key->keysym.sym != '-'){
       win->EtapeActuelleDujeu-= 2;
       win->mouvsup[1] = key->keysym.sym;
       writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
-    }else if(win->EtapeActuelleDujeu == 26 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+    }else if((win->EtapeActuelleDujeu == 26 || win->EtapeActuelleDujeu == 53 || win->EtapeActuelleDujeu == 63 || win->EtapeActuelleDujeu == 73 || win->EtapeActuelleDujeu == 83) && key->keysym.sym != ' ' && key->keysym.sym != '-'){
       win->EtapeActuelleDujeu-=3;
       win->mouvsup[2] = key->keysym.sym;
       writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
-    }else if(win->EtapeActuelleDujeu == 27 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+    }else if((win->EtapeActuelleDujeu == 27 || win->EtapeActuelleDujeu == 54 || win->EtapeActuelleDujeu == 64 || win->EtapeActuelleDujeu == 74 || win->EtapeActuelleDujeu == 84) && key->keysym.sym != ' ' && key->keysym.sym != '-'){
       win->EtapeActuelleDujeu-=4;
       win->mouvsup[3] = key->keysym.sym;
       writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
@@ -926,7 +946,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		  }
 
 		  
-		}else if(win->EtapeActuelleDujeu == 23){
+		}else if(win->EtapeActuelleDujeu == 23){ // TODO : 50, 60, 70, 80
 		  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 2 && mousY <  win->TailleY/11 * 2 + win->TailleY/12 ){
 		    win->EtapeActuelleDujeu += 1;
 		  }else if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 3 && mousY <  win->TailleY/11 * 3 + win->TailleY/12 ){
@@ -946,6 +966,29 @@ void *BouclePrincipaleDesTicks(void *arg){
 
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
 
+		  }else if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/6 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
+		    if(win->EtapeActuelleDujeu == 23){
+		      win->EtapeActuelleDujeu = 1;
+		    }else{
+		      win->EtapeActuelleDujeu = 0;
+		    }
+		    
+		  }
+		}else if(win->EtapeActuelleDujeu == 2){
+		  if(mousX > win->TailleX/100.0 * 93 && mousX < win->TailleX/100.0 * 93 + win->TailleY/100.0 * 10 && mousY > win->TailleY/100.0 * 3 && mousY < win->TailleY/100.0 * 3 + win->TailleY/100.0 * 10 ){
+		    win->EtapeActuelleDujeu = 50;
+		  }
+		}else if(win->EtapeActuelleDujeu == 8){
+		  if(mousX > win->TailleX/100.0 * 93 && mousX < win->TailleX/100.0 * 93 + win->TailleY/100.0 * 10 && mousY > win->TailleY/100.0 * 3 && mousY < win->TailleY/100.0 * 3 + win->TailleY/100.0 * 10 ){
+		    win->EtapeActuelleDujeu = 60;
+		  }
+		}else if(win->EtapeActuelleDujeu == 10){
+		  if(mousX > win->TailleX/100.0 * 93 && mousX < win->TailleX/100.0 * 93 + win->TailleY/100.0 * 10 && mousY > win->TailleY/100.0 * 3 && mousY < win->TailleY/100.0 * 3 + win->TailleY/100.0 * 10 ){
+		    win->EtapeActuelleDujeu = 70;
+		  }
+		}else if(win->EtapeActuelleDujeu == 12){
+		  if(mousX > win->TailleX/100.0 * 93 && mousX < win->TailleX/100.0 * 93 + win->TailleY/100.0 * 10 && mousY > win->TailleY/100.0 * 3 && mousY < win->TailleY/100.0 * 3 + win->TailleY/100.0 * 10 ){
+		    win->EtapeActuelleDujeu = 80;
 		  }
 		}
 	      } else if (event.button.button == SDL_BUTTON_RIGHT) {
@@ -989,8 +1032,17 @@ extern TTF_Font *RobotoFont;
 
 void DrawPlateau(screen *win){
 
+  
   SDL_FillRect(win->renderer, NULL, SDL_MapRGB(win->renderer->format, 255, 255, 255));
 
+  int mousX;
+  int mousY;
+  SDL_GetMouseState(&mousX, &mousY);
+  
+  
+    DrawImage(0, 93, 3, 0, 10, 'n', 0, 0, 0, 0, *win); 
+  
+  
   int maxi = MIN(win->TailleX, win->TailleY);
   
   SDL_Rect gameRect;
@@ -1455,13 +1507,9 @@ void DrawParam(screen *win){
 
   SDL_GetMouseState(&mousX, &mousY);
 
-  /*
-  gameRect.x = win->TailleX/2 - 3*maxi/8;
-  gameRect.y = win->TailleY/2 - 3*maxi/8;
-  gameRect.w = 3*maxi/4; TODO : Boutton retour / Exit / ...
-  gameRect.h = 3*maxi/4;
-  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 150, 150, 150));
-  */
+  
+  
+  
 
   gameRect.x = win->TailleX/4;
   gameRect.y = win->TailleY/11 * 2;
@@ -1773,7 +1821,45 @@ void DrawParam(screen *win){
 
   SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 220, 200, 0));
   
+
+
+
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 *9;
+  gameRect.w = win->TailleX/6; //TODO : Boutton retour / Exit / ...
+  gameRect.h = win->TailleY/12;
+
+  if(win->EtapeActuelleDujeu == 23){
+    sprintf(string, "Retour");
+  }else{
+    sprintf(string, "EXIT");
+  }
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
   
+  if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/6 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/4.0 + (((surfaceMessage->w * res))/2);
+  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
   
 }
 

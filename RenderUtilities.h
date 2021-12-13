@@ -5,6 +5,7 @@
 #include "FonctionJeu.h"
 
 #include "SDL.h"
+#include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_rotozoom.h>
 #include <time.h>

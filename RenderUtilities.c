@@ -93,7 +93,7 @@ void *InitImage(void *CeciEstUneVariableVide){
   RobotoFont = TTF_OpenFont("Res/Font/Roboto-Black.ttf", 50);
 
 
-
+  fileImage[0] = IMG_Load("Res/Image/param.png");PixelXnb[0] = 50; PixelYnb[0] = 50;XImagenb[0] = 1; YImagenb[0] = 1; ImYoffset[0] = 0; ImXoffset[0] = 0; TotalImagenb[0] = 1; 
 
   
 
@@ -160,7 +160,7 @@ void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char cen
     imageVoulu = (etatPremier + ((int)((SDL_GetTicks()/((float)1000*TimebeforeNext)))%TotalImagenb[imagenb]))%TotalImagenb[imagenb];
   }
 
-  
+ 
 
   
   if(TotalImagenb[imagenb] != 1){
@@ -185,6 +185,7 @@ void DrawImage(int imagenb, float x, float y, float sizeX, float sizeY, char cen
     resy = -resy;
     resx = -resx;
   }
+
   SDL_Surface *tmp = rotozoomSurfaceXY(fileImage[imagenb], 0.0, resx, resy, 0);
   SDL_BlitSurface(tmp, &keepImage, W.renderer, &Image_rect);
   SDL_FreeSurface(tmp);
