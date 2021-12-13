@@ -20,7 +20,7 @@ int BouclePrincipaleDuJeu(){
   int LastTickCount = 0;
 
 
-  int DEBUG = 1;
+  int DEBUG = 0;
 
   int hightscore;
   int endedGamesWin;
@@ -128,6 +128,7 @@ int BouclePrincipaleDuJeu(){
 	case 10: DrawPlateau(win); break;
 	case 12: DrawPlateau(win); break;
 	case 16: DrawSelectReplay(win); break;
+	case 23: DrawParam(win);break;
 	default: break;//EtapeActuelleDujeu = 0;break;
 	}
 
@@ -698,6 +699,8 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    win->EtapeActuelleDujeu = 0;
 		  }else if(mousX >  win->TailleX/4 && mousX < win->TailleX/4 * 2 && mousY > win->TailleY/5 * 3 && mousY < win->TailleY/4 + win->TailleY/5 * 3 ){
 		    win->EtapeActuelleDujeu = 16;
+		  }else if(mousX > win->TailleX/8 * 5 && mousX < win->TailleX/8 * 7 && mousY > win->TailleY/4 && mousY < win->TailleY/4 * 2 ){
+		    win->EtapeActuelleDujeu = 23;
 		  }
 		}else if(win->EtapeActuelleDujeu == 4){
 
@@ -1080,6 +1083,18 @@ void DrawMenu(screen *win){
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
   }
 
+
+  gameRect.x = win->TailleX/8 * 5;
+  gameRect.y = win->TailleY/4;
+  gameRect.w = win->TailleX/4;
+  gameRect.h = win->TailleY/4;
+
+  if(mousX > win->TailleX/8 * 5 && mousX < win->TailleX/8 * 7 && mousY > win->TailleY/4 && mousY < win->TailleY/4 * 2 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+
   gameRect.x = win->TailleX/10;
   gameRect.y = win->TailleY/10;
   gameRect.w = win->TailleX/10;
@@ -1383,5 +1398,81 @@ Uint32 getColor(int value, screen *win){
   case 65536:return SDL_MapRGB(win->renderer->format, 204, 204, 255);
   default :return SDL_MapRGB(win->renderer->format, 255/(log2(value-131072)/log2(2)), 255/(log2(value-131072)/log2(2)), 255/(log2(value-131072)/log2(2)));
   }
+  
+}
+
+
+void DrawParam(screen *win){
+
+
+
+  SDL_FillRect(win->renderer, NULL, SDL_MapRGB(win->renderer->format, 255, 255, 255));
+  int mousX = 0;
+  int mousY = 0;
+  
+  SDL_Rect gameRect;
+
+  SDL_GetMouseState(&mousX, &mousY);
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/9 * 2;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/9;
+
+
+  SDL_Color Color = {255, 0, 255};
+  
+
+  SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, "touche b :", Color);
+	
+  float res;
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  SDL_Surface *tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/9 * 2;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/9;
+  char string[100];
+  
+  if(win->mouvsup[0] == '-'){
+    sprintf(string, "NONE");
+  }else{
+    sprintf(string, "%c", win->mouvsup[0]);
+  }
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - surfaceMessage->w*res;
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
   
 }
