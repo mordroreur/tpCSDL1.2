@@ -129,6 +129,10 @@ int BouclePrincipaleDuJeu(){
 	case 12: DrawPlateau(win); break;
 	case 16: DrawSelectReplay(win); break;
 	case 23: DrawParam(win);break;
+	case 24: DrawParam(win); DrawGetTouch(win); break;
+	case 25: DrawParam(win); DrawGetTouch(win); break;
+	case 26: DrawParam(win); DrawGetTouch(win); break;
+	case 27: DrawParam(win); DrawGetTouch(win); break;
 	default: break;//EtapeActuelleDujeu = 0;break;
 	}
 
@@ -305,13 +309,13 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
     win->TailleY = y;
 
   default:
-    
-    if((key->keysym.sym == win->mouvsup[0] && win->mouvsup[0] != '-') || key->keysym.sym == SDLK_LEFT){key->keysym.sym = 'g';
-    }else if((key->keysym.sym == win->mouvsup[1] && win->mouvsup[1] != '-') || key->keysym.sym == SDLK_UP){key->keysym.sym = 'h';
-    }else if((key->keysym.sym == win->mouvsup[2] && win->mouvsup[2] != '-') || key->keysym.sym == SDLK_RIGHT){key->keysym.sym = 'd';
-    }else if((key->keysym.sym == win->mouvsup[3] && win->mouvsup[3] != '-') || key->keysym.sym == SDLK_DOWN){key->keysym.sym = 'b';}
+    if(win->EtapeActuelleDujeu == 2){
+      if((key->keysym.sym == win->mouvsup[0] && win->mouvsup[0] != '-') || key->keysym.sym == SDLK_LEFT){key->keysym.sym = 'g';
+      }else if((key->keysym.sym == win->mouvsup[1] && win->mouvsup[1] != '-') || key->keysym.sym == SDLK_UP){key->keysym.sym = 'h';
+      }else if((key->keysym.sym == win->mouvsup[2] && win->mouvsup[2] != '-') || key->keysym.sym == SDLK_RIGHT){key->keysym.sym = 'd';
+      }else if((key->keysym.sym == win->mouvsup[3] && win->mouvsup[3] != '-') || key->keysym.sym == SDLK_DOWN){key->keysym.sym = 'b';}
       // si c est une entree de deplacement
-    if(win->EtapeActuelleDujeu == 2 && (key->keysym.sym == 'd' || key->keysym.sym == 'h' || key->keysym.sym == 'g' || key->keysym.sym == 'b')){
+      if(win->EtapeActuelleDujeu == 2 && (key->keysym.sym == 'd' || key->keysym.sym == 'h' || key->keysym.sym == 'g' || key->keysym.sym == 'b')){
 	int depNum = (key->keysym.sym == 'b')?1:(key->keysym.sym == 'g')?2:(key->keysym.sym == 'h')?3:4;
 	// si le joueur peu se deplacer dans la direction qu il a choisi
 	if(CanDep(win->plateau, depNum)){
@@ -327,7 +331,7 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 	  win->timeBegin = getTime();
 	  
 	  
-	    //on fais apparaitre un 2 a 75 pourcent de chance, un 4 sinon
+	  //on fais apparaitre un 2 a 75 pourcent de chance, un 4 sinon
 	  SetRandomCase(&win->plateau, (rand()%100 < 90)?2:4);
 	  // on cosidere que le joueur ne peu pas bouger
 	  int GameOver = 1;
@@ -351,7 +355,23 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 	  }
 	}
       }
-    
+    }else if(win->EtapeActuelleDujeu == 24 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+      win->EtapeActuelleDujeu--;
+      win->mouvsup[0] = key->keysym.sym;
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if(win->EtapeActuelleDujeu == 25 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+      win->EtapeActuelleDujeu-= 2;
+      win->mouvsup[1] = key->keysym.sym;
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if(win->EtapeActuelleDujeu == 26 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+      win->EtapeActuelleDujeu-=3;
+      win->mouvsup[2] = key->keysym.sym;
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if(win->EtapeActuelleDujeu == 27 && key->keysym.sym != ' ' && key->keysym.sym != '-'){
+      win->EtapeActuelleDujeu-=4;
+      win->mouvsup[3] = key->keysym.sym;
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }
     break;
   }
 }
@@ -906,6 +926,27 @@ void *BouclePrincipaleDesTicks(void *arg){
 		  }
 
 		  
+		}else if(win->EtapeActuelleDujeu == 23){
+		  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 2 && mousY <  win->TailleY/11 * 2 + win->TailleY/12 ){
+		    win->EtapeActuelleDujeu += 1;
+		  }else if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 3 && mousY <  win->TailleY/11 * 3 + win->TailleY/12 ){
+		    win->EtapeActuelleDujeu += 2;
+		  }else if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 4 && mousY <  win->TailleY/11 * 4 + win->TailleY/12 ){
+		    win->EtapeActuelleDujeu += 3;
+		  }else if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 5 && mousY <  win->TailleY/11 * 5 + win->TailleY/12 ){
+		    win->EtapeActuelleDujeu += 4;
+		    
+		  }else if(mousX > win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 6 && mousY <  win->TailleY/11 * 6 + win->TailleY/12){
+		    
+		    win->time = (int)(((mousX-win->TailleX/100.0)-(win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0))/(win->TailleX/60.0)*1000000);
+		    if(win->time < 0){
+		      win->time = 0;
+		    }
+
+
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+
+		  }
 		}
 	      } else if (event.button.button == SDL_BUTTON_RIGHT) {
 	
@@ -1414,16 +1455,24 @@ void DrawParam(screen *win){
 
   SDL_GetMouseState(&mousX, &mousY);
 
+  /*
+  gameRect.x = win->TailleX/2 - 3*maxi/8;
+  gameRect.y = win->TailleY/2 - 3*maxi/8;
+  gameRect.w = 3*maxi/4; TODO : Boutton retour / Exit / ...
+  gameRect.h = 3*maxi/4;
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 150, 150, 150));
+  */
+
   gameRect.x = win->TailleX/4;
-  gameRect.y = win->TailleY/9 * 2;
+  gameRect.y = win->TailleY/11 * 2;
   gameRect.w = win->TailleX/2;
-  gameRect.h = win->TailleY/9;
+  gameRect.h = win->TailleY/12;
 
 
   SDL_Color Color = {255, 0, 255};
   
 
-  SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, "touche b :", Color);
+  SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, "Gauche : g :", Color);
 	
   float res;
   if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
@@ -1446,9 +1495,9 @@ void DrawParam(screen *win){
 
 
   gameRect.x = win->TailleX/4;
-  gameRect.y = win->TailleY/9 * 2;
+  gameRect.y = win->TailleY/11 * 2;
   gameRect.w = win->TailleX/2;
-  gameRect.h = win->TailleY/9;
+  gameRect.h = win->TailleY/12;
   char string[100];
   
   if(win->mouvsup[0] == '-'){
@@ -1465,14 +1514,280 @@ void DrawParam(screen *win){
     gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
   }
 
+  gameRect.w = win->TailleX/6;
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;
+  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 2 && mousY <  win->TailleY/11 * 2 + win->TailleY/12 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 - (((surfaceMessage->w * res) - win->TailleX/6.0)/2);
+  
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+
+
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 3;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, "Monter : h :", Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
   gameRect.w = surfaceMessage->w*res;
-  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - surfaceMessage->w*res;
-  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));	  
+  gameRect.x = win->TailleX/4;
+  	  
   tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
 	
   SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
 	
   SDL_FreeSurface(tmp);
   SDL_FreeSurface(surfaceMessage);
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 3;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  
+  
+  if(win->mouvsup[1] == '-'){
+    sprintf(string, "NONE");
+  }else{
+    sprintf(string, "%c", win->mouvsup[1]);
+  }
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = win->TailleX/6;
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;
+  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 3 && mousY <  win->TailleY/11 * 3 + win->TailleY/12 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 - (((surfaceMessage->w * res) - win->TailleX/6.0)/2);
+  
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 4;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, "Droite : d :", Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 4;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  
+  
+  if(win->mouvsup[2] == '-'){
+    sprintf(string, "NONE");
+  }else{
+    sprintf(string, "%c", win->mouvsup[2]);
+  }
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = win->TailleX/6;
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;
+  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 4 && mousY <  win->TailleY/11 * 4 + win->TailleY/12 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 - (((surfaceMessage->w * res) - win->TailleX/6.0)/2);
+  
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 5;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, "Descendre : b :", Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 5;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  
+  
+  if(win->mouvsup[3] == '-'){
+    sprintf(string, "NONE");
+  }else{
+    sprintf(string, "%c", win->mouvsup[3]);
+  }
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = win->TailleX/6;
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;
+  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 5 && mousY <  win->TailleY/11 * 5 + win->TailleY/12 ){
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+  }else{
+    SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+  }
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 - (((surfaceMessage->w * res) - win->TailleX/6.0)/2);
+  
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+
+
+
+
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 6;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  sprintf(string, "Time : %2.2fs", win->time/1000000.0);
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+  
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;;
+  gameRect.y = win->TailleY/11 * 6 + win->TailleY/24 - win->TailleY/100;
+  gameRect.w = win->TailleX/6;
+  gameRect.h = win->TailleY/50;
+  
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 255, 215, 0));
+  
+  
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 + (win->TailleX/60.0)*win->time/1000000.0;
+  gameRect.y = win->TailleY/11 * 6 + win->TailleY/24 - win->TailleY/48;
+  gameRect.w = win->TailleX/50;
+  gameRect.h = win->TailleY/24;
+
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 220, 200, 0));
+  
+  
+  
+}
+
+
+void DrawGetTouch(screen *win){
+  
+  SDL_Surface *surf = SDL_CreateRGBSurface(0, win->TailleX, win->TailleY, 32, 150, 150, 150, 150);
+  SDL_FillRect(surf, NULL, 0x0000000F);
+  SDL_BlitSurface(surf, NULL, win->renderer, NULL);
+
+  SDL_FreeSurface(surf);
+
+  DrawString("Appuyez sur la touche", 50, 45, 10, 'c', 0, 0, 0, *win);
+  DrawString("que vous voulez utiliser", 50, 55, 10, 'c', 0, 0, 0, *win);
+  
   
 }

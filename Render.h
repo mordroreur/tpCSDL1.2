@@ -31,6 +31,7 @@ void DrawMenu(screen *win);
 void recupeDep(screen *win);
 Uint32 getColor(int value, screen *win);
 void DrawParam(screen *win);
+void DrawGetTouch(screen *win);
 
 
 #endif /* _RENDER_HEADER */
