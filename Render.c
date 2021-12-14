@@ -1,11 +1,16 @@
 #include "Render.h"
 #include "FonctionJeu.h"
 #include "RenderUtilities.h"
+#include "SDL.h"
+#include "SDL_mixer.h"
+#include "SDL_timer.h"
 #include "SDL_video.h"
 
 static int tickCount = 0;
 static int resizingTime = 0;
 
+Mix_Music *music;
+Mix_Chunk *deplacementSon;
 
 int BouclePrincipaleDuJeu(){
 
@@ -76,6 +81,9 @@ int BouclePrincipaleDuJeu(){
   win->music = music;
   win->returnValue = 0;
   win->time = time;
+
+  Mix_VolumeMusic(MIX_MAX_VOLUME / 100 * music);
+  Mix_Volume(0, MIX_MAX_VOLUME/100 * sound);
 
   FILE *save = fopen(SAVE_NAME, "r");
   if(save != NULL){
@@ -209,6 +217,13 @@ int BouclePrincipaleDuJeu(){
 void end_sdl(char ok, char const * msg, screen *s) {
   char msg_formated[255];
 
+  Mix_HaltMusic();
+    Mix_HaltChannel(-1);
+
+    Mix_FreeMusic(music);
+    Mix_FreeChunk(deplacementSon);
+
+    Mix_CloseAudio();
   
   freeImageMalloc();
   
@@ -240,7 +255,7 @@ screen *create_Win(int x, int y, int fullscreen) {
   s->EtapeActuelleDujeu = 1;
   
   /* Initialisation de la SDL  + gestion de l'échec possible */
-  if (SDL_Init(SDL_INIT_VIDEO) != 0)
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
     end_sdl(0, "ERROR SDL INIT", s);
 
   /* Recuperation de la 'meilleur' taille de fenetre-> */
@@ -283,20 +298,29 @@ screen *create_Win(int x, int y, int fullscreen) {
   /* Mise d'un titre a la fenetre. */
   SDL_WM_SetCaption("2048",NULL) ;
 
-
-
-
-
   
+  Mix_OpenAudio(MIX_DEFAULT_FREQUENCY,MIX_DEFAULT_FORMAT,2,1024);
 
-  
 
+  music = Mix_LoadMUS("Res/Sond/Globe.wav");
+  assert(music);
+  Mix_PlayMusic(music,-1);
+
+
+  deplacementSon = Mix_LoadWAV("Res/Sond/swoo.wav");
+  assert(deplacementSon);
   
   /* Recuperation de la taille de la fenetre. */
   info = SDL_GetVideoInfo();
   s->TailleX = info->current_w;
   s->TailleY = info->current_h;
 
+
+  Mix_AllocateChannels(1);
+
+  
+
+  
   
   
   return s;
@@ -304,10 +328,50 @@ screen *create_Win(int x, int y, int fullscreen) {
 }
 
 
+
+
+
 void keyUp(SDL_KeyboardEvent *key, screen *win){
   //printf("%d\n", key->keysym.sym);
   switch(key->keysym.sym){
-  case SDLK_ESCAPE:if(win->EtapeActuelleDujeu == 23){win->EtapeActuelleDujeu = 1;}else {win->EtapeActuelleDujeu = 0;}break;
+  case SDLK_ESCAPE:
+    if(win->EtapeActuelleDujeu == 23){win->EtapeActuelleDujeu = 1;
+    }else if((win->EtapeActuelleDujeu == 24 || win->EtapeActuelleDujeu == 51 || win->EtapeActuelleDujeu == 61 || win->EtapeActuelleDujeu == 71 || win->EtapeActuelleDujeu == 81) ){
+      win->EtapeActuelleDujeu--;
+      win->mouvsup[0] = '-';
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if((win->EtapeActuelleDujeu == 25 || win->EtapeActuelleDujeu == 52 || win->EtapeActuelleDujeu == 62 || win->EtapeActuelleDujeu == 72 || win->EtapeActuelleDujeu == 82) ){
+      win->EtapeActuelleDujeu-= 2;
+      win->mouvsup[1] = '-';
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if((win->EtapeActuelleDujeu == 26 || win->EtapeActuelleDujeu == 53 || win->EtapeActuelleDujeu == 63 || win->EtapeActuelleDujeu == 73 || win->EtapeActuelleDujeu == 83) ){
+      win->EtapeActuelleDujeu-=3;
+      win->mouvsup[2] = '-';
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+    }else if((win->EtapeActuelleDujeu == 27 || win->EtapeActuelleDujeu == 54 || win->EtapeActuelleDujeu == 64 || win->EtapeActuelleDujeu == 74 || win->EtapeActuelleDujeu == 84) ){
+      win->EtapeActuelleDujeu-=4;
+      win->mouvsup[3] = '-';
+      writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);  
+    }else if(win->EtapeActuelleDujeu == 50){
+      win->EtapeActuelleDujeu = 2;
+    }else if(win->EtapeActuelleDujeu == 60){
+      win->EtapeActuelleDujeu = 8;
+    }else if(win->EtapeActuelleDujeu == 70){
+      win->EtapeActuelleDujeu = 10;
+    }else if(win->EtapeActuelleDujeu == 80){
+      win->EtapeActuelleDujeu = 12;
+    }else if(win->EtapeActuelleDujeu == 2){
+      win->EtapeActuelleDujeu = 50;
+    }else if(win->EtapeActuelleDujeu == 8){
+      win->EtapeActuelleDujeu = 60;
+    }else if(win->EtapeActuelleDujeu == 10){
+      win->EtapeActuelleDujeu = 70;
+    }else if(win->EtapeActuelleDujeu == 12){
+      win->EtapeActuelleDujeu = 80;
+    }else if(win->EtapeActuelleDujeu == 16){
+      win->EtapeActuelleDujeu = 1;
+      
+    }else {win->EtapeActuelleDujeu = 0;}break;
   case SDLK_F11 :
     resizingTime = SDL_GetTicks();
     int x = win->otherX;
@@ -785,7 +849,8 @@ void *BouclePrincipaleDesTicks(void *arg){
 		      }
 		    }
 		    LibereTer(&win->plateau);
-		    
+
+		    win->isSave = 0;
 		   
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
 		    
@@ -820,13 +885,18 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    }
 		    LibereTer(&win->plateau);
 		    
-		   
+		    win->isSave = 0;
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
 		    
 		  }
 		  
 		}else if(win->EtapeActuelleDujeu == 16){
 
+		  if(mousX > win->TailleX/10 && mousX < win->TailleX/10 * 2  && mousY > win->TailleY/10 && mousY < win->TailleY/10 *2 ){
+		    win->EtapeActuelleDujeu = 1;
+		  }
+
+		  
 		  for(int i = 0; i < win->nbReplay; i++){
 
 		    if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/2 && mousY > win->TailleY/(win->nbReplay + 2) * (i+1) && mousY < win->TailleY/(win->nbReplay + 2) * (i+1) + win->TailleY/(win->nbReplay + 3)){
@@ -946,7 +1016,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		  }
 
 		  
-		}else if(win->EtapeActuelleDujeu == 23){ // TODO : 50, 60, 70, 80
+		}else if(win->EtapeActuelleDujeu == 23 || win->EtapeActuelleDujeu == 50 || win->EtapeActuelleDujeu == 60 || win->EtapeActuelleDujeu == 70 || win->EtapeActuelleDujeu == 80){ 
 		  if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 2 && mousY <  win->TailleY/11 * 2 + win->TailleY/12 ){
 		    win->EtapeActuelleDujeu += 1;
 		  }else if(mousX > win->TailleX/4 + win->TailleX/2 - win->TailleX/6 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 3 && mousY <  win->TailleY/11 * 3 + win->TailleY/12 ){
@@ -966,13 +1036,52 @@ void *BouclePrincipaleDesTicks(void *arg){
 
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
 
-		  }else if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/6 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
+
+		  }else if(mousX > win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 7 && mousY <  win->TailleY/11 * 7 + win->TailleY/12){
+
+
+		    win->music = (int)(((mousX-win->TailleX/100.0)-(win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0))/(win->TailleX/650.0));
+		    if(win->music < 0){
+		      win->music = 0;
+		    }else if(win->music > 100){
+		      win->music = 100;
+		    }
+		    Mix_VolumeMusic(MIX_MAX_VOLUME / 100 * win->music);
+
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+		    
+		  }else if(mousX > win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 && mousX < win->TailleX/4 + win->TailleX/2 && mousY >  win->TailleY/11 * 8 && mousY <  win->TailleY/11 * 8 + win->TailleY/12){
+		    win->sound = (int)(((mousX-win->TailleX/100.0)-(win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0))/(win->TailleX/650.0));
+		    if(win->sound < 0){
+		      win->sound = 0;
+		    }else if(win->sound > 100){
+		      win->sound = 100;
+		    }
+
+		    Mix_Volume(0, MIX_MAX_VOLUME/100 * win->sound);
+
+
+		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
+		  }else if(mousX > win->TailleX/5.0 && mousX < win->TailleX/5.0 + win->TailleX/6.0 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
 		    if(win->EtapeActuelleDujeu == 23){
 		      win->EtapeActuelleDujeu = 1;
 		    }else{
 		      win->EtapeActuelleDujeu = 0;
 		    }
 		    
+		  }else if(mousX > win->TailleX/8.0*5 && mousX < win->TailleX/8.0*5 + win->TailleX/6.0 && mousY > win->TailleY/11.0*9 && mousY < win->TailleY/11.0 *9 + win->TailleY/12.0){
+		    if(win->EtapeActuelleDujeu == 50){
+		      win->EtapeActuelleDujeu = 2;
+		    }else if(win->EtapeActuelleDujeu == 60){
+		      win->EtapeActuelleDujeu = 8;
+		    }else if(win->EtapeActuelleDujeu == 70){
+		      win->EtapeActuelleDujeu = 10;
+		    }else if(win->EtapeActuelleDujeu == 80){
+		      win->EtapeActuelleDujeu = 12;
+		    } 
+
+
+
 		  }
 		}else if(win->EtapeActuelleDujeu == 2){
 		  if(mousX > win->TailleX/100.0 * 93 && mousX < win->TailleX/100.0 * 93 + win->TailleY/100.0 * 10 && mousY > win->TailleY/100.0 * 3 && mousY < win->TailleY/100.0 * 3 + win->TailleY/100.0 * 10 ){
@@ -1341,6 +1450,8 @@ void DrawSavedOver(screen *win){
 
 
 void recupeDep(screen *win){
+  Mix_PlayChannel(0, deplacementSon, 0);
+  SDL_Delay(10);
   for(int i = 0; i < win->plateau.tailleY; i++){
     for(int j = 0; j < win->plateau.tailleX; j++){
       win->oldTer[i][j] = win->plateau.tab[i][j];
@@ -1453,6 +1564,17 @@ void DrawSelectReplay(screen *win){
 
   SDL_GetMouseState(&mousX, &mousY);
 
+  gameRect.x = win->TailleX/10;
+  gameRect.y = win->TailleY/10;
+  gameRect.w = win->TailleX/10;
+  gameRect.h = win->TailleY/10;
+
+  if(mousX > win->TailleX/10 && mousX < win->TailleX/10 * 2  && mousY > win->TailleY/10 && mousY < win->TailleY/10 *2 ){
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+    }else{
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+    }
+  
   for(int i = 0; i < win->nbReplay; i++){
     gameRect.x = win->TailleX/4;
     gameRect.y = win->TailleY/(win->nbReplay + 2) * (i+1);
@@ -1517,7 +1639,7 @@ void DrawParam(screen *win){
   gameRect.h = win->TailleY/12;
 
 
-  SDL_Color Color = {255, 0, 255};
+  SDL_Color Color = {153, 153, 153};
   
 
   SDL_Surface* surfaceMessage = TTF_RenderText_Solid(RobotoFont, "Gauche : g :", Color);
@@ -1820,15 +1942,104 @@ void DrawParam(screen *win){
   gameRect.h = win->TailleY/24;
 
   SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 220, 200, 0));
-  
 
+
+
+
+  
+  gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 7;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  sprintf(string, "Music : %d%%", win->music);
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+  
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;;
+  gameRect.y = win->TailleY/11 * 7 + win->TailleY/24 - win->TailleY/100;
+  gameRect.w = win->TailleX/6;
+  gameRect.h = win->TailleY/50;
+  
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 255, 215, 0));
+  
+  
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 + (win->TailleX/600.0)*win->music;
+  gameRect.y = win->TailleY/11 * 7 + win->TailleY/24 - win->TailleY/48;
+  gameRect.w = win->TailleX/50;
+  gameRect.h = win->TailleY/24;
+
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 220, 200, 0));
 
 
 
 
   gameRect.x = win->TailleX/4;
+  gameRect.y = win->TailleY/11 * 8;
+  gameRect.w = win->TailleX/2;
+  gameRect.h = win->TailleY/12;
+  sprintf(string, "Sond : %d%%", win->sound);
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
+  }
+
+  gameRect.w = surfaceMessage->w*res;
+  gameRect.x = win->TailleX/4;
+  	  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+	
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+
+  
+  gameRect.x = win->TailleX/4 + win->TailleX/2 - win->TailleX/6;;
+  gameRect.y = win->TailleY/11 * 8 + win->TailleY/24 - win->TailleY/100;
+  gameRect.w = win->TailleX/6;
+  gameRect.h = win->TailleY/50;
+  
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 255, 215, 0));
+  
+  
+  gameRect.x = win->TailleX/4.0 + win->TailleX/2.0 - win->TailleX/6.0 + (win->TailleX/600.0)*win->sound;
+  gameRect.y = win->TailleY/11 * 8 + win->TailleY/24 - win->TailleY/48;
+  gameRect.w = win->TailleX/50;
+  gameRect.h = win->TailleY/24;
+
+  SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 220, 200, 0));
+
+
+
+
+
+
+  gameRect.x = win->TailleX/5.0;
   gameRect.y = win->TailleY/11 *9;
-  gameRect.w = win->TailleX/6; //TODO : Boutton retour / Exit / ...
+  gameRect.w = win->TailleX/6.0; 
   gameRect.h = win->TailleY/12;
 
   if(win->EtapeActuelleDujeu == 23){
@@ -1839,13 +2050,12 @@ void DrawParam(screen *win){
   surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
   if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
     res = (float)(gameRect.w)/surfaceMessage->w;
-    gameRect.y += gameRect.h/2.0 - surfaceMessage->h*res/2; 
   }else{
     res = (float)(gameRect.h)/surfaceMessage->h;
-    gameRect.x += gameRect.w/2.0 - surfaceMessage->w*res/2; 
   }
-  
-  if(mousX > win->TailleX/4 && mousX < win->TailleX/4 + win->TailleX/6 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
+
+
+  if(mousX > win->TailleX/5.0 && mousX < win->TailleX/5.0 + win->TailleX/6.0 && mousY > win->TailleY/11 *9 && mousY < win->TailleY/11 *9 + win->TailleY/12){
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
   }else{
     SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
@@ -1853,13 +2063,49 @@ void DrawParam(screen *win){
 
 
   gameRect.w = surfaceMessage->w * res;
-  gameRect.x = win->TailleX/4.0 + (((surfaceMessage->w * res))/2);
+  gameRect.x = win->TailleX/5.0 + ((win->TailleX/6.0 - (surfaceMessage->w * res))/2);
   
   tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
   SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
 	
   SDL_FreeSurface(tmp);
   SDL_FreeSurface(surfaceMessage);
+
+
+
+  
+  if(win->EtapeActuelleDujeu != 23){
+    gameRect.x = win->TailleX/8*5;
+    gameRect.y = win->TailleY/11 *9;
+    gameRect.w = win->TailleX/6; 
+    gameRect.h = win->TailleY/12;
+
+  
+    sprintf(string, "Retour");
+  
+    surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+    if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+      res = (float)(gameRect.w)/surfaceMessage->w;
+    }else{
+      res = (float)(gameRect.h)/surfaceMessage->h;
+    }
+  
+    if(mousX > win->TailleX/8.0*5 && mousX < win->TailleX/8.0*5 + win->TailleX/6.0 && mousY > win->TailleY/11.0*9 && mousY < win->TailleY/11.0 *9 + win->TailleY/12.0){
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 100, 100, 100));
+    }else{
+      SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
+    }
+
+
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/8.0*5 + ((win->TailleX/6.0 - (surfaceMessage->w * res))/2);
+  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+  }
   
 }
 
@@ -1877,3 +2123,4 @@ void DrawGetTouch(screen *win){
   
   
 }
+

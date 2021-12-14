@@ -7,6 +7,8 @@
 
 #include "SDL.h"
 #include "SDL_stdinc.h"
+#include <SDL/SDL_mixer.h>
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -32,6 +34,10 @@ void recupeDep(screen *win);
 Uint32 getColor(int value, screen *win);
 void DrawParam(screen *win);
 void DrawGetTouch(screen *win);
+
+
+
+
 
 
 #endif /* _RENDER_HEADER */

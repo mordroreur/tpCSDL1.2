@@ -1,5 +1,5 @@
 CC=gcc
-LDFLAG=$(shell sdl-config --cflags --libs) -lpthread -D_REENTRANT -lSDL_ttf -lSDL_image -lSDL_gfx -lm
+LDFLAG=$(shell sdl-config --cflags --libs) -lpthread -D_REENTRANT -lSDL_ttf -lSDL_image -lSDL_gfx -lm -lSDL_mixer
 CFLAG=-Wall $(shell sdl-config --cflags --libs) 
 EXEC=jeu
 SRC=$(wildcard *.c)
