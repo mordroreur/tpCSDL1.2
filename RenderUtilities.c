@@ -74,7 +74,7 @@ void freeImageMalloc(){
 }
 
 void *InitImage(void *CeciEstUneVariableVide){
-  int nbImage = 10;
+  int nbImage = 3;
   fileImage = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * nbImage);
   PixelXnb = (int *)malloc(sizeof(int) * nbImage);
   PixelYnb = (int *)malloc(sizeof(int) * nbImage);
@@ -93,8 +93,9 @@ void *InitImage(void *CeciEstUneVariableVide){
   RobotoFont = TTF_OpenFont("Res/Font/Roboto-Black.ttf", 50);
 
 
-  fileImage[0] = IMG_Load("Res/Image/param.png");PixelXnb[0] = 50; PixelYnb[0] = 50;XImagenb[0] = 1; YImagenb[0] = 1; ImYoffset[0] = 0; ImXoffset[0] = 0; TotalImagenb[0] = 1; 
-
+  fileImage[0] = IMG_Load("Res/Image/param.png");PixelXnb[0] = 50; PixelYnb[0] = 50;XImagenb[0] = 1; YImagenb[0] = 1; ImYoffset[0] = 0; ImXoffset[0] = 0; TotalImagenb[0] = 1;
+  fileImage[1] = IMG_Load("Res/Image/terminale2048.png");PixelXnb[1] = 100; PixelYnb[1] = 100;XImagenb[1] = 1; YImagenb[1] = 7; ImYoffset[1] = 0; ImXoffset[1] = 0; TotalImagenb[1] = 7; 
+  fileImage[2] = IMG_Load("Res/Image/button2048.png");PixelXnb[2] = 100; PixelYnb[2] = 36;XImagenb[2] = 1; YImagenb[2] = 15; ImYoffset[2] = 0; ImXoffset[2] = 0; TotalImagenb[2] = 15; 
   
 
   return NULL;
