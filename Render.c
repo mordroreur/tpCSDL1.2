@@ -438,6 +438,9 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
 	    }else{
 	      win->endedGamesWin++;
 	    }
+	    if(win->plateau.score > win->hightscore){
+	      win->hightscore = win->plateau.score;
+	    }
 	  }
 	}
       }
