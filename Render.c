@@ -546,7 +546,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 	  int videVue = -1;
 	  //pour toute les cases
 	  for(int i = 0; i < win->plateau.tailleY; i++){
-	    for(int j = 0; j < win->plateau.tailleY; j++){
+	    for(int j = 0; j < win->plateau.tailleX; j++){
 	      // si la case est vide
 	      if(win->plateau.tab[i][j] == -1){
 		// Une case de plus ou on peu mettre
@@ -806,7 +806,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    win->EtapeActuelleDujeu = 16;
 		  }else if(mousX > win->TailleX/9*5  && mousX < win->TailleX/9 * 8 && mousY > win->TailleY/10 * 1 && mousY < win->TailleY/10 * 3 ){
 		    win->EtapeActuelleDujeu = 23;
-		  }else if(mousX > win->TailleX/9*5  && mousX < win->TailleX/9 * 8 && mousY > win->TailleY/10 * 7 && mousY < win->TailleY/10 * 9 ){
+		  }else if(mousX > win->TailleX/9*3  && mousX < win->TailleX/9 * 6 && mousY > win->TailleY/10 * 7 && mousY < win->TailleY/10 * 9 ){
 			win->EtapeActuelleDujeu = 0;
 		      }
 		}else if(win->EtapeActuelleDujeu == 4){
@@ -817,10 +817,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    sprintf(tmp, "%s%d", SAVE_REPLAY, win->nbReplay);
 		    copiFile(SAVE_NAME, tmp);
 		    win->nbReplay++;
-		    if(remove(SAVE_NAME) != 0){
-		      printf("Il y a un probleme inattendu...\n");
-		    }
-		    win->EtapeActuelleDujeu = 1;
+		    
 		    if(remove(SAVE_NAME) != 0){
 		      printf("Il y a un probleme inattendu...\n");
 		    }
@@ -829,9 +826,9 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
 		  }else if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
 		    win->EtapeActuelleDujeu = 1;
-		    if(remove(SAVE_NAME) != 0){
-		      printf("Il y a un probleme inattendu...\n");
-		    }
+		    remove(SAVE_NAME);
+		    
+		    
 		    if(win->plateau.tailleX != -1){
 		      if(win->oldTer != NULL){
 			for(int i = 0; i < win->plateau.tailleY; i++){
@@ -864,9 +861,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 
 		  if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
 		    win->EtapeActuelleDujeu = 1;
-		    if(remove(SAVE_NAME) != 0){
-		      printf("Il y a un probleme inattendu...\n");
-		    }
+		    remove(SAVE_NAME);
 		    if(win->plateau.tailleX != -1){
 		      if(win->oldTer != NULL){
 			for(int i = 0; i < win->plateau.tailleY; i++){
@@ -1443,7 +1438,7 @@ void DrawMenu(screen *win){
     }
 
 
-    if(mousX > win->TailleX/9*5  && mousX < win->TailleX/9 * 8 && mousY > win->TailleY/10 * 7 && mousY < win->TailleY/10 * 9 ){
+    if(mousX > win->TailleX/9*3  && mousX < win->TailleX/9 * 6 && mousY > win->TailleY/10 * 7 && mousY < win->TailleY/10 * 9 ){
       if(QuitStape == 11){
 	QuitStape++;
       }else if(QuitStape < 11){
@@ -1639,12 +1634,12 @@ DrawImage(2, 100/9.0 * 5, 40, 100/3.0, 100/5.0, 'n', ReplayStape, 0, 0, 0, *win)
   SDL_FreeSurface(surfaceMessage);
 
 
-  gameRect.x = win->TailleX/9 * 5;
+  gameRect.x = win->TailleX/9 * 3;
   gameRect.y = win->TailleY/10 * 7;
   gameRect.w = win->TailleX/3;
   gameRect.h = win->TailleY/5;
 
-DrawImage(2, 100/9.0 * 5, 70, 100/3.0, 100/5.0, 'n', QuitStape, 0, 0, 0, *win);
+DrawImage(2, 100/9.0 * 3, 70, 100/3.0, 100/5.0, 'n', QuitStape, 0, 0, 0, *win);
 
 
   sprintf(string, "Quit");
@@ -1659,7 +1654,7 @@ DrawImage(2, 100/9.0 * 5, 70, 100/3.0, 100/5.0, 'n', QuitStape, 0, 0, 0, *win);
   gameRect.h = surfaceMessage->h * res;
   gameRect.y = win->TailleY/10.0*7 + ((win->TailleY/5.0 - (surfaceMessage->h * res))/2);
   gameRect.w = surfaceMessage->w * res;
-  gameRect.x = win->TailleX/9.0*5 + ((win->TailleX/3.0 - (surfaceMessage->w * res))/2);
+  gameRect.x = win->TailleX/9.0*3 + ((win->TailleX/3.0 - (surfaceMessage->w * res))/2);
   
   tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
   SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
@@ -1897,6 +1892,12 @@ void DrawSelectReplay(screen *win){
   SDL_FillRect(win->renderer, NULL, SDL_MapRGB(win->renderer->format, 255, 255, 255));
   int mousX = 0;
   int mousY = 0;
+
+  char string[100];
+  SDL_Surface *surfaceMessage;
+  float res;
+  SDL_Color Color = {100, 100, 100};
+  SDL_Surface *tmp;
   
   SDL_Rect gameRect;
 
@@ -1912,6 +1913,29 @@ void DrawSelectReplay(screen *win){
     }else{
       SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
     }
+
+
+
+  sprintf(string, "<--");
+  
+  surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+  if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+    res = (float)(gameRect.w)/surfaceMessage->w;
+  }else{
+    res = (float)(gameRect.h)/surfaceMessage->h;
+  }
+
+  gameRect.h = surfaceMessage->h * res;
+  gameRect.y = win->TailleY/10.0 + ((win->TailleY/10.0 - (surfaceMessage->h * res))/2);
+  gameRect.w = surfaceMessage->w * res;
+  gameRect.x = win->TailleX/10.0 + ((win->TailleX/10.0 - (surfaceMessage->w * res))/2);
+  
+  tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+  SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+  SDL_FreeSurface(tmp);
+  SDL_FreeSurface(surfaceMessage);
+  
   
   for(int i = 0; i < win->nbReplay; i++){
     gameRect.x = win->TailleX/4;
@@ -1924,6 +1948,28 @@ void DrawSelectReplay(screen *win){
     }else{
       SDL_FillRect(win->renderer, &gameRect, SDL_MapRGB(win->renderer->format, 0, 0, 0));
     }
+
+    sprintf(string, "Replay %d", i+1);
+  
+    surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
+    if((float)(gameRect.w)/surfaceMessage->w < (float)(gameRect.h)/surfaceMessage->h){
+      res = (float)(gameRect.w)/surfaceMessage->w;
+    }else{
+      res = (float)(gameRect.h)/surfaceMessage->h;
+    }
+
+    gameRect.h = surfaceMessage->h * res;
+    gameRect.y = win->TailleY/(win->nbReplay + 2.0) * (i+1)+ ((win->TailleY/(win->nbReplay + 3.0) - (surfaceMessage->h * res))/2);
+    gameRect.w = surfaceMessage->w * res;
+    gameRect.x = win->TailleX/4.0 + ((win->TailleX/2.0 - (surfaceMessage->w * res))/2);
+  
+    tmp = rotozoomSurface(surfaceMessage, 0.0, res, 0);
+    SDL_BlitSurface(tmp, NULL, win->renderer, &gameRect);
+	
+    SDL_FreeSurface(tmp);
+    SDL_FreeSurface(surfaceMessage);
+
+    
   }
   
 }

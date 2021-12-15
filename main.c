@@ -129,7 +129,7 @@ int main(){
 	break;
 	
       case 's' :
-	if(save){
+	if(isSave){
 	  plateau = ReadEnCoursSave(0, SAVE_NAME);
 	  if(plateau.tailleX == -1){
 	    printf("Il y a eu un problème d'allocation de la mémoire. Le jeu ne peu continuer dans ces conditions.\n");
@@ -161,7 +161,7 @@ int main(){
 	break;
 
       case 'n':
-	if(save){
+	if(isSave){
 	  while(temporary < 0){
 	    printf("Combien de temps en secondes sur chaque étape du replay voulez vous ? ");
 	    scanf("%f", &temporary); while ((getchar()) != '\n');
