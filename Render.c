@@ -375,6 +375,7 @@ void keyUp(SDL_KeyboardEvent *key, screen *win){
     }else {win->EtapeActuelleDujeu = 0;}break;
   case SDLK_F11 :
     resizingTime = SDL_GetTicks();
+    SDL_Delay(20);
     int x = win->otherX;
     int y = win->otherY;
     win->otherX = win->TailleX;
@@ -1896,7 +1897,7 @@ void DrawSelectReplay(screen *win){
   char string[100];
   SDL_Surface *surfaceMessage;
   float res;
-  SDL_Color Color = {100, 100, 100};
+  SDL_Color Color = {200, 100, 100};
   SDL_Surface *tmp;
   
   SDL_Rect gameRect;
