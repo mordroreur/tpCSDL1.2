@@ -825,6 +825,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    if(remove(SAVE_NAME) != 0){
 		      printf("Il y a un probleme inattendu...\n");
 		    }
+		    win->isSave = 0;
 		    win->EtapeActuelleDujeu = 6;
 		    
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time);
@@ -865,7 +866,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 
 		  if(mousX > win->TailleX - win->TailleX/100 - win->TailleX/10 && mousX < win->TailleX - win->TailleX/100 && mousY > win->TailleY/4 && mousY < win->TailleY/4 + win->TailleY/2 ){
 		    win->EtapeActuelleDujeu = 1;
-		    remove(SAVE_NAME);
+		    
 		    if(win->plateau.tailleX != -1){
 		      if(win->oldTer != NULL){
 			for(int i = 0; i < win->plateau.tailleY; i++){
@@ -887,7 +888,7 @@ void *BouclePrincipaleDesTicks(void *arg){
 		    }
 		    LibereTer(&win->plateau);
 		    
-		    win->isSave = 0;
+		    
 		    writesaveFile(win->hightscore, win->endedGamesWin, win->endedLoseGame, win->mouvsup, win->nbReplay, (win->fullscreen)?win->otherX:win->TailleX,  (win->fullscreen)?win->otherY:win->TailleY, win->fullscreen, win->sound, win->music, win->time); 
 		    
 		  }
@@ -1151,7 +1152,14 @@ void DrawPlateau(screen *win){
   SDL_GetMouseState(&mousX, &mousY);
   
   
-    DrawImage(0, 93, 3, 0, 10, 'n', 0, 0, 0, 0, *win); 
+  DrawImage(0, 93, 3, 0, 10, 'n', 0, 0, 0, 0, *win); 
+  char string[100];
+
+  sprintf(string, "Score : %d", win->plateau.score);
+  DrawString(string, 25, 2, 5, 'n', 110, 110, 110, *win);
+
+  sprintf(string, "Hight score : %d", win->hightscore);
+  DrawString(string, 75, 2, 5, 'e', 110, 110, 110, *win);
   
   
   int maxi = MIN(win->TailleX, win->TailleY);
@@ -1481,8 +1489,6 @@ void DrawMenu(screen *win){
   }
 
 
-
-  // TODO  if(win->isSave){
 
   
   gameRect.x = win->TailleX/9;
