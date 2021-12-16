@@ -1,4 +1,3 @@
-
 * Config latex                                                       :ignore:
 
 #+LANGUAGE:french
@@ -14,6 +13,8 @@
 
 
 #+Latex_header:\usepackage{lastpage} %les latex header ici
+#+Latex_header:\usepackage{MnSymbol,wasysym} %les smileys
+
 
 
 
@@ -45,14 +46,14 @@ Tout d'abord, le jeu peut fusionner plusieurs cases en même temps, sur différe
 | 0 | 0 | 0 | 0 |
 | 0 | 0 | 0 | 0 |
 
-Si le joueur fusionne à gauche, nous devrons fusionner les deux ET les 4 présents sur la première ligne.
+Si le joueur fusionne à gauche, nous devrons fusionner les 2 ET les 4 présents sur la première ligne.
 
 De plus, lorsque l'on doit fusionner plusieurs cases, nous devons mettre les résultats de la fusion “collés” dans la direction voulue.
 Nous devons donc gérer ce cas en plusieurs étapes.
 
 ** Différentes taille
 
-Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille.
+Nous souhaitons faire plusieurs tailles de 2048, nous voulons donc avoir la possibilité de changer la taille de la grille, en laissant le choix à l'utilisateur de choisir, pourquoi pas, une taille 100x100 ou une taille 2x5.
 
 ** Gestion des sauvegardes
 
@@ -66,7 +67,7 @@ Nous ne mettrons pas l'intégralité du code des différentes résolutions, mais
 
 ** Introduction à la structure Terrain/ter 
 
-Nous avons choisis d'utiliser une structure pour notre Terrain pour pouvoir manipuler notre grille aisément.
+Nous avons choisis d'utiliser une structure pour pouvoir manipuler notre grille aisément, cette structure s'appelant /Terrain/.
 
 #+begin_src C
   
@@ -89,11 +90,12 @@ Elle est composé de divers éléments, mais seulement d'entiers :
 2. max, qui sera l'entier présent dans la grille maximal. Permet de gérer le cas de “victoire” si l'on fait 2048.
 3. tailleX, qui sera le nombre de colonne
 4. tailleY, qui sera le nombre de ligne
-5. vide, qui sera le nombre de case vide du tableau
+5. vide, qui sera le nombre de case vide du tableau (utile pour plus tard)
 6. score, qui sera le score du Terrain en cours
 
 
 Toutes ces éléments sont présents pour simplifier le nombre de paramètre pris par les divers fonctions suivantes.
+Dans la suite de ce document, et ainsi que dans le code, /Terrain/ sera abrégé en /ter/
    
 
 
@@ -106,7 +108,7 @@ Toutes ces éléments sont présents pour simplifier le nombre de paramètre pri
 ter InitVide(int n, int y);
 #+end_src
 
-Cette fonction prend deux entier et renvoie un ter de la taille de /n/ et de /y/.
+Cette fonction prend deux entiers et renvoie un ter de la taille de /n/ et de /y/.
 Elle nous permet de créer notre grille proprement.
 
 *** afficheTer
@@ -123,7 +125,8 @@ afficheTer nous permet, comme son nom l'indique, d'afficher le ter donné en par
 int SetRandomCase(ter *T, int n);
 #+end_src
 
-SetRandomCase permet d'initialiser une case =vide= à une certain valeur. Elle prend en paramètre un entier, qui détermine l'emplacement de la case. Petit particularité : le nombre de case /n/ ne s'incrémente pas si la case est déjà rempli. C'est donc après /n/ case vide que l'on initialise la case numéro /n/ + *nombre de case déjà remplie* à une valeur 2 ou 4.
+SetRandomCase permet d'initialiser une case =vide= à une certaine valeur. Elle prend en paramètre un entier, qui détermine la valeur de la case (2 ou 4). \\
+Pour placer la case, nous prenons un nombre aléatoire dans le nombre de case vide(qu'on a décrit dans la structure /Terrain/). Puis, nous parcourons le tableau pour trouver l'emplacement de cette case. Petit particularité : le nombre de case /x/ parcouru ne s'incrémente pas si la case est déjà rempli. C'est donc après /x/ case vide que l'on initialise la case numéro /x/ + *nombre de case déjà remplie* à une valeur 2 ou 4.
 
 *** CaseMouve
 
@@ -132,8 +135,9 @@ void CaseMouve(ter *T, int depNum);
 #+end_src
 
 Cette fonction est sûrement une des plus importante. En effet, elle prend en paramètre un pointeur sur un terrain ainsi qu'un déplacement. 
-Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans [[file:FonctionJeu.c][Fonction.c]].
-Dépend de la fonction [[*CanDep][CanDep]] pour vérifier si le joueur peut se déplacer ou à perdu.
+Par manque de place sur ce rapport, nous ne pouvons la décrire entièrement. En revanche, le code de cette fonction est particulièrement bien détaillé et est disponible dans [[file:FonctionJeu.c][Fonction.c]].\\
+Pour expliquer simplement le fonctionnement de cette fonction, nous utilisons une double boucle /for/ qui permet de parcourir l'ensemble de la grille dans différentes direction en fonction de /depNum/, qui est la direction choisie. Dans le cas d'une fusion, on vient stocker la position de la case fusionnée afin de ne pas la refusionner (voir [[*Problèmes potentiels identifiés au départ][gestion des problèmes au début du document]]).
+\\Dépend de la fonction [[*CanDep][CanDep]] pour vérifier si le joueur peut se déplacer ou à perdu.
 
 *** CanDep
 
@@ -141,20 +145,20 @@ Dépend de la fonction [[*CanDep][CanDep]] pour vérifier si le joueur peut se d
 int CanDep(ter T, int depNum);
 #+end_src
 
-Également essentielle, cette fonction permet de savoir si le
+Également essentielle, cette fonction permet de savoir si un déplacement dans la direction choisi est possible sur le ter passé en paramètre.
 
 Nous avons géré le game over comme ceci ([[file:main.c][dans le main.c]]) :
 #+begin_src C
-for(int i = 1;i < 5; i++){
-	      if(CanDep(plateau, i)){
-		// si le joueur peu bouger on change cette variable
-		GameOver = 0;
-		break;
-	      }
-	    }
+  for(int i = 1;i < 5; i++){
+    if(CanDep(plateau, i)){
+      // si le joueur peu bouger on change cette variable
+      GameOver = 0;
+      break;
+    }
+   }
 #+end_src
 
-Nous testons donc tous les coup grâce à cette fonction à chaque fois après le coup du joueur. Si le joueur peut faire un déplacement, alors /CanDep/ retournera 1, ce qui mettra la variable /GameOver/ à 0, le joueur n'a pas perdu. Dans le cas contraire, /GameOver/ restera à 1 et le joueur aura donc perdu.
+Nous testons donc tous les coup grâce à cette fonction à chaque fois après le coup du joueur. Si le jeu détecte que le joueur pourra faire un déplacement, alors /CanDep/ retournera 1, ce qui mettra la variable /GameOver/ à 0, le joueur n'aura donc pas perdu. Dans le cas contraire, /GameOver/ restera à 1 et le joueur aura donc perdu, car il ne pourra pas faire de mouvement au prochain coup.
 
 *** LibereTer
 
@@ -186,34 +190,34 @@ Cette fonction permet de prendre deux chaînes de caractères qui sont les noms 
 
 
 #+begin_src C
-void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay);
+void writesaveFile(int hightscore, int endedGamesWin, int endedLoseGame, char mouvsup[4], int nbReplay, int SreenSizeX, int SreenSizeY, int isFullscreen, int sound, int music, int time);
 #+end_src
 
-Enfin, cette dernière fonction nous permet de sauvegarder la partie dans un fichier de sauvegarde, en prenant paramètres nécessitant une sauvegarde pour recharger la partie. Plus
-de détail dans la suite de ce document ([[*Gestion des sauvegardes][ici]])
+Enfin, cette dernière fonction nous permet de sauvegarder les options / information du joueur dans un fichier que nous pouvons récupérer, en prenant en paramètres divers éléments. Plus
+de détail dans la suite de ce document ([[*Gestion des sauvegardes][ici]]).
 
-** TODO Explication du fonctionnement du jeu de base
+** Explication du fonctionnement du jeu de base
 
 Les fonctions étant définis dans /FonctionJeu.c/, le jeu en lui même est entièrement présent dans le /main.c/.
 
 *** Cas du switch :ignore:
 
-Notre programme est basé sur un switch, qui nous laisse 6 choix (dont 1 de fermeture)
+Notre programme est basé sur un switch, qui nous laisse 6 choix (dont 1 de fermeture) :
 
 1. Le premier cas est lors de l'arrivé dans le jeu. Il renvoie systématiquement à :
-2. Notre menu, qui est le cas numéro 2. C'est ici que le joueur décide si il veut lancer une nouvelle partie, voir un replay, etc. On peut distinguer 3 cas majeurs :
+2. Notre menu, qui est le cas numéro 2. C'est ici que le joueur décide si il veut lancer une nouvelle partie, voir un replay, etc. On peut distinguer 4 cas majeurs :
    - Lancement d'un jeu
    - Voir un replay
+   - Modifier les options
    - Quitter le jeu
-3. Subséquemment, le cas 3 nous permet de gérer les déplacement du joueur ainsi que l’affichage du jeu
-4. Ensuite, le quatrième cas permet de gérer lorsque que le joueur à fini la partie. Affiche si il a gagné ou perdu (score </> à 2048), ainsi que son meilleur score.
+3. Subséquemment, le cas 3 nous permet de gérer les déplacement du joueur ainsi que l’affichage du jeu.
+4. Ensuite, le quatrième cas permet de gérer lorsque que le joueur à fini la partie. Affiche si il a gagné ou perdu (score inférieur/supérieur à 2048), ainsi que son meilleur score.
 5. Le cas 5 est le cas où l'initialisation du terrain s'est mal passé. On va alors au cas -1.
-6. Le cas 6 est dédié à la modification des paramètre du jeu (tel que les touches par exemple)
-7. Enfin, le cas -1, qui est réservé pour arrêter le jeu et le fermer proprement
+6. Le cas 6 est dédié à la modification des paramètres du jeu (tel que les touches par exemple).
+7. le septième cas, nous affichons la fenêtre graphique.
+8. Enfin, le cas -1 est réservé pour arrêter le jeu et le fermer proprement.
 
-*** TODO Gestion des fusions                                       :noexport:
 
-Pour gérer les 
  
 ** Présentation des nouvelles fonctionnalités
 
@@ -224,7 +228,8 @@ Pour gérer les
 
 
 
-Un fichier de sauvegarde est présenter de cette manière :
+Un fichier de sauvegarde est présenté de cette manière :
+
 Unelettre Unchiffre Unautrechiffre
 Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre Unelettre Unchiffre Unautrechiffre [...]
 
@@ -235,19 +240,19 @@ n 2 3 n 2 4 h 2 3 b 2 2 g 2 4 g
 #+end_example
 
 Tout d'abord, les trois premiers éléments :
-1. Sert à déterminer le “type” de la sauvegarde.
-2. Les deux nombres suivant permette d'avoir la taille du terrain
+1. Sert à déterminer le “type” de la sauvegarde (une seule présente lors du rendu).
+2. Les deux nombres suivant permettent d'avoir la taille du terrain.
 
 Puis, les autres sont simplement la partie enregistrer.
 Comment me direz vous ?
-Et bien, la lettre donne la direction (g gauche, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le [[*Récupération de la sauvegarde (avec \[\[*ReadEnCoursSave\]\[ReadEnCoursSave\]\])][principe suivant]].
+Et bien, la lettre donne la direction (g gauche, d droite, etc, n rien (c'est le moment où l'on ajoute à une case vide le chiffe 2 ou 4)), le deuxième nombre donne la valeur obtenue lors de la génération aléatoire, et le dernier donne l'emplacement où ce nombre est apparu en suivant le [[*SetRandomCase][principe décrit dans SetRandomCase]].
 
 
 **** La sauvegarde en elle-même
 
 La gestion des sauvegardes est particulière.
 En effet, lorsque le joueur joue un coup, nous enregistrons, selon la méthode décrite [[*Présentation du fichier de sauvegarde][ici]], les différents éléments nécessaires à la sauvegarde.
-C'est-à-dire qu'à chaque fois que le joueur effectue un coup, nous récupérons les éléments nécessaires pour pouvoir simuler cette partie.
+C'est-à-dire qu'à chaque fois que le joueur effectue un coup, nous récupérons les éléments nécessaires pour pouvoir simuler sa partie pour plus tard.
 
 **** Récupération de la sauvegarde (avec [[*ReadEnCoursSave][ReadEnCoursSave]])
 
@@ -263,14 +268,14 @@ FILE *save = fopen(SAVE_NAME, "r");
 
 où SAVE_NAME est une macro qui est le nom du fichier de la sauvegarde (non modifiable par le joueur).
 
-De plus, cette fonction permet de recréer un exactement le même terrain de la sauvegarde avec, on l'avoue, un petit subterfuge :
+De plus, cette fonction permet de recréer exactement le même terrain de la sauvegarde avec, on l'avoue, un petit subterfuge :
 
 
 
 ***** Replay automatique
 
-Lors de l'appel de la fonction, nous créons d'abord le terrain avec le tableau de la bonne dimension. Nous lisons donc la première ligne.
-Puis, nous parcourons la deuxième. Nous stockons dans une chaîne de caractère un seul et unique coup. Nous avons donc besoin de stocker une lettre et 2 nombre.
+Lors de l'appel de la fonction, nous créons d'abord le terrain avec le tableau de la bonne dimension. Nous lisons donc la première ligne du fichier des options.
+Puis, nous parcourons la deuxième lignes. Nous stockons dans une chaîne de caractère un seul et unique coup. Nous avons donc besoin de stocker une lettre et 2 nombre.
 Le fichier de sauvegarde ressemblant à ceci :
 
 #+begin_example
@@ -278,54 +283,55 @@ N unnombre unautre
 n 2 31 n 2 4 h 2 3 b 2 22 g 2 4 g 
 #+end_example
 
-nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous avons 31 et 22 qui ne marcherait pas) pour séparer deux coup. Quand ce nombre d'espace atteint 3, nous somme donc en présence du coup suivant.
+nous devons compter le nombre d'espace, et non le nombre de caractère (ici nous avons 31 et 22 qui ne marcherait pas) pour séparer deux coups. Quand ce nombre d'espace atteint 3, nous somme donc en présence du coup suivant.
+\\
+Enfin, pour jouer le replay, nous avons juste à "relancer" le jeu, mais au lieu de demander au joueur de jouer, nous mettons les différents coups récupérer précédemment pour faire le fameux replay. De plus, pour continuer une partie, nous ne faisons que faire un replay instantané de la partie précédemment chargée.
 
-
-*** Possibilité de mapper les touches de déplacement
 
 *** Fichier paramètre
 
-Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments
+Le fichier paramètre s'appelle Parametres, et posséde plusieurs éléments :
 
 
-
-	  usleep((int)(1000000*time));
-	  // on effectue le deplacement deja effectue par le joueur
-	  CaseMouve(&T, depNum);
-
-stocker le nombre de case vide, et
-
-
-un fichier moddifiable
-Param_Name
+#+begin_example
 
 High score
-Nb de victoire
-Nb de défaite
-les nouvelles touches*4
-nb de replay (pour le nom du fichier des replays au fur et à mesure)
+Nombre de victoire
+Nombre de défaite
+Les nouvelles touches  x  4
+Nombre de replay (pour le nom du fichier des replays au fur et à mesure)
+La taille de l'écran graphique en X
+La taille de l'écran graphique en Y
+Fullscreen (0 = non et 1 = oui)
+Volume du son lors des mouvements
+Volume de la musique
+Variable qui détermine la vitesse de jeu (TIME dans les paramètres SDL)
 
 
-*** Replays
+#+end_example
+
+*** Possibilité de mapper les touches de déplacement
+
+Comme on peut le voir dans la partie précédente, le joueur peut lier ses touches de déplacements avec d'autres touches du clavier.
 
 
+* La partie SDL
 
-* TODO La partie SDL
-
-Le code qui nous permet de gérer la fenêtre SDL est disponible [[file:render.c][ici]].
+Le code qui nous permet de gérer la fenêtre SDL est disponible [[file:render.c][ici]], et ne sera pas entièrement expliqué (limité par les 5 pages).
 
 ** Début
 
 Pour démarrer SDL, nous devons initialiser de nombreuses variables, comme par exemple :
 
-- La variable /Stape/, qui nous permet de fermer SDL si elle est égale à 0,
-- /size/, qui va nous permettre de gérer la taille de l'écran,
+- La variable /etapeactuelledujeu/, qui nous permet de fermer SDL si elle est égale à 0,
+- /TailleX et TailleY/, qui vont nous permettre de gérer la taille de l'écran,
 - des variables permettant de garder un nombre d'image par seconde (fps) constant et agréable
 - des variables permettant de détecter où le curseur de la souris se trouve sur l'écran
 - les varibles permettant de dessiner le graphique
 - etc. 
 
 
+Tout ceci est stocké dans une structure de type /screen/.
 
 
 ** Affichage et fonctionnalité
@@ -342,25 +348,39 @@ Puis, nous distinguerons trois cas grâce à un /if/ (et /else if/).
 
 Puis, nous avons aussi un cas de débogage. En effet, si l'on n'est pas entré dans le while depuis une seconde ou plus, il peut y avoir un problème. On recommence alors une seconde "propre", en mettant certaines variables à 0.
 
+*** Les différentes fonctionnalités présentes
+
+**** Le bouton console
+
+Lorsque vous cliquez sur le bouton en bas à gauche, le jeu bascule avec l'interface console, ce qui permet au joueur de "choisir" s'il veut jouer avec SDL ou non.
+
+**** F11
+
+La touche F11 nous permet de mettre en plein écran, et d'avoir ainsi un petit effet sympas !
+
+**** Taille de la fenêtre
+
+La taille de la fenêtre est complètement géré par les variables /TailleX et TailleY/ qui, lorsque l'utilisateur change la taille de la fenêtre, se mettent à jour en temps réel.
 
 
 
+**** Animations des cases 
+
+
+Pour faire cette animation, nous récupérons dans chaque cas de bloc le nombre de déplacement qu'il doit faire, puis, nous divisons ce déplacement par le temps choisi par l'utilisateur.
 
 
 
+**** Animation menu
 
-*** Fonctionnalités :
+Toutes les 0.15 seconde, on actualise toutes les images des boutons. Pour cela, il y a plusieurs cas :
+1. Si l'utilisateur à la souris sur le bouton, nous affichons les images correspondant à la descente de 3 blocs
+2. Sinon, soit nous terminons le mouvement d'un 2 en cours, soit, si aucun déplacement n'est en cours, il y a une probabilité de 1/30 de faire commencer un mouvement de deux sur le côté.
 
-Divers fonctionnalités sont présentes :
-Vous pouvez afficher la fenêtre grâce à la touche "g". Vous pouvez désormais voir la liste des points, les courbes représentant les différentes méthodes d'approximation, ainsi que la liste de points à droite.
 
-De plus, si jamais vous voulez rajouter des points à la liste, cette fonctionnalité est disponible grâce au bouton gauche de la souris. Le bouton droit aura pour effet de supprimer le point sélectionné.
+**** Les barres dans les options
 
-Le curseur aura alors une position (x et y) qui sera automatiquement ajouté dans la liste des points. Les courbes ainsi que les polynômes vont s'adapter automatiquement !
-
-D'autre part, vous pouvez zoomer et dézoomer grâce à la molette de la souris.
-
-Enfin, vous pouvez activer ou désactiver les différentes courbes des fonctions en appuyant sur leur nom. 
+Pour ceci, nous avons utilisé une petite astuce : la "barre" est en fait un bouton, qui, lorsque l'utilisateur clique dessus, enverra la position de la souris au programme. Suite à cela, la valeur de la variable correspondante est calculée avec un produit en croix. Enfin, nous modifions la position du rectangle qui joue le rôle de curseur sur l'écran.
 
 
 ** Fin de SDL
@@ -374,4 +394,7 @@ La fonction /end-sdl/ nous permet de fermet la fenêtre SDL proprement, ainsi qu
 
 * Conclusion 
 
-Maintenant, on vous souhaite bonne chance.
+En guise de conclusion, nous vous souhaitons de bien vous amusez avec notre 2048 \smiley.
+
+
+
