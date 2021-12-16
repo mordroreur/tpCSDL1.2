@@ -1294,6 +1294,8 @@ void DrawMenu(screen *win){
   SDL_Color Color = {100, 100, 100};
   SDL_Surface *tmp;
   
+
+  
   
   SDL_GetMouseState(&mousX, &mousY);
 
@@ -1644,8 +1646,7 @@ DrawImage(2, 100/9.0 * 5, 40, 100/3.0, 100/5.0, 'n', ReplayStape, 0, 0, 0, *win)
   gameRect.h = win->TailleY/5;
 
 DrawImage(2, 100/9.0 * 3, 70, 100/3.0, 100/5.0, 'n', QuitStape, 0, 0, 0, *win);
-
-
+ 
   sprintf(string, "Quit");
   
   surfaceMessage = TTF_RenderText_Solid(RobotoFont, string, Color);
@@ -1668,6 +1669,10 @@ DrawImage(2, 100/9.0 * 3, 70, 100/3.0, 100/5.0, 'n', QuitStape, 0, 0, 0, *win);
   
 
   DrawImage(1, 0, 101, 10, 13, 'w', termStape, 0, 0, 0, *win);
+
+  DrawString("Payard Clement", 100, 95, 3, 's', 110, 110, 110, *win);
+  DrawString("Laurencot Mathieu", 100, 100, 3, 's', 110, 110, 110, *win);
+  
   
 }
 
